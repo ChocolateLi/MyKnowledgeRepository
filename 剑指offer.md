@@ -16,3 +16,4 @@
 [链表中倒数最后k个结点](https://blog.csdn.net/weixin_42870497/article/details/118823424)<br>
 [反转链表](https://blog.csdn.net/weixin_42870497/article/details/118862615)<br>
 [合并两个有序链表](https://blog.csdn.net/weixin_42870497/article/details/118884466)<br>
+[树的子结构](https://blog.csdn.net/weixin_42870497/article/details/118913714?spm=1001.2014.3001.5501)<br>
