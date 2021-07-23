@@ -63,3 +63,7 @@ start()方法才是启动线程的方法，如果调用run()方法，其实跟�
 ## 6.如何处理不可中断的线程？
 
 很遗憾，并没有通用的方法。如果不支持响应中断，那么只能用特定的方法唤起，没有万能的方法。（PS：线程阻塞是由于调用了wait()、sleep()或join()方法，设置中断，抛出InteruptException异常来唤醒阻塞的该线程）
+
+## 7.线程有几种状态？生命周期是怎样的？
+
+![线程的6种状态](https://github.com/ChocolateLi/MyKnowledge/blob/main/picture/%E7%BA%BF%E7%A8%8B%E7%9A%846%E4%B8%AA%E7%8A%B6%E6%80%81.png)
