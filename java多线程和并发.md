@@ -67,3 +67,263 @@ start()方法才是启动线程的方法，如果调用run()方法，其实跟�
 ## 7.线程有几种状态？生命周期是怎样的？
 
 ![线程的6种状态](https://github.com/ChocolateLi/MyKnowledge/blob/main/picture/%E7%BA%BF%E7%A8%8B%E7%9A%846%E4%B8%AA%E7%8A%B6%E6%80%81.png)
+
+## 8.使用两个线程交替打印0~100奇偶数
+
+1.使用synchronized方法
+
+```
+package com.Thread.threadcoreknowledge.threadobjectcommonmethod;
+
+/**
+ * 描述：使用synchronized方法来回交替打印奇偶数
+ */
+public class WaitNotifyPrintOddEvenSyn {
+
+    private static int count = 0;
+    private static Object lock = new Object();
+
+    public static void main(String[] args) {
+        Thread even_thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (count<=100){
+                    synchronized (lock){
+                        if((count & 1)==0){
+                            System.out.println(Thread.currentThread().getName()+":"+count);
+                            count++;
+                        }
+                    }
+                }
+            }
+        },"偶数");
+        Thread odd_thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (count<100){
+                    synchronized (lock){
+                        if((count & 1)==1){
+                            System.out.println(Thread.currentThread().getName()+":"+count);
+                            count++;
+                        }
+                    }
+                }
+            }
+        },"奇数");
+
+        even_thread.start();
+        odd_thread.start();
+    }
+
+}
+
+```
+
+2.使用wait()和notify()方法
+
+```
+package com.Thread.threadcoreknowledge.threadobjectcommonmethod;
+
+/**
+ * 描述：使用wait和notify来回交替打印奇偶数
+ */
+public class WaitNotifyPrintOddEveWait {
+
+    private static int count = 0;
+    private static Object lock = new Object();
+
+    static class Odd_Even_Thread implements Runnable{
+
+        @Override
+        public void run() {
+            synchronized (lock){
+                while (count<=100){
+                    System.out.println(Thread.currentThread().getName()+":"+count++);
+                    lock.notify();
+                    //如果任务还没结束，就让出当前这把锁
+                    if(count<=100){
+                        try {
+                            lock.wait();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        Odd_Even_Thread odd_even_thread = new Odd_Even_Thread();
+        Thread t1 = new Thread(odd_even_thread,"偶数");
+        Thread t2 = new Thread(odd_even_thread,"奇数");
+        t1.start();
+        t2.start();
+
+    }
+
+}
+
+```
+
+## 9.使用wait实现生产者消费者模式
+
+```
+package com.Thread.threadcoreknowledge.threadobjectcommonmethod;
+
+import java.util.Date;
+import java.util.LinkedList;
+
+/**
+ * 描述：生产者消费者模式，不能使用阻塞队列
+ */
+public class ProducerComsumerMode {
+
+    public static void main(String[] args) {
+        EvenStorage storage = new EvenStorage();
+        Producer producer = new Producer(storage);
+        Comsumer comsumer = new Comsumer(storage);
+        Thread produce_thread = new Thread(producer);
+        Thread comsumer_thread = new Thread(comsumer);
+        produce_thread.start();
+        comsumer_thread.start();
+    }
+}
+
+class EvenStorage{
+    private int maxSize;
+    private LinkedList<Date> storage;
+
+    public EvenStorage() {
+        maxSize = 10;
+        storage = new LinkedList<>();
+    }
+
+    public synchronized void put(){
+        while (storage.size()==maxSize){
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        storage.add(new Date());
+        System.out.println("仓库里有"+storage.size()+"件产品");
+        notify();
+    }
+
+    public synchronized void take(){
+        while (storage.size()==0){
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        System.out.println("拿到了"+storage.poll()+"，仓库现在还剩"+storage.size()+"件产品");
+        notify();
+    }
+}
+
+class Producer implements Runnable{
+
+    public EvenStorage storage;
+
+    public Producer(EvenStorage storage) {
+        this.storage = storage;
+    }
+
+    @Override
+    public void run() {
+        for (int i = 0; i < 100; i++) {
+            storage.put();
+        }
+    }
+}
+
+class Comsumer implements Runnable{
+
+    private EvenStorage storage;
+
+    public Comsumer(EvenStorage storage) {
+        this.storage = storage;
+    }
+
+    @Override
+    public void run() {
+        for (int i = 0; i < 100; i++) {
+
+            storage.take();
+        }
+    }
+}
+
+```
+
+生产者消费者模式是通过一个容器来解决生产者和消费者强耦合问题。生产者和消费者之间不直接通信，而是通过阻塞队列进行通信。生产者生产好数据之后放进阻塞队列里，消费者从阻塞队列里取数据消费。阻塞队列相当于一个缓冲区，平衡了生产者和消费者的处理能力。
+
+## 10.为什么wait必须在同步代码块使用？
+
+主要是为让通信变得可靠。通过同步代码可以保证notify()方法永远不会在wait()方法之前调用
+
+
+
+## 11.为什么通信的方法wait()、notify()、notifyAll()定义在Object类中？而sleep()方法定义在Thread类中？（难点）
+
+这个问题比较难回答，那我就说说我的理解吧！wait()、notify()、notifyAll()是属于锁级别的操作，而锁呢是属于某一个对象的而不是属于线程。所以把它们定义在Object类中，这样Java中的每一个类都有线程通信的基本方法。
+
+
+
+## 12.wait方法属于Object对象的，那么调用Thread.wait()会怎么样？
+
+当Thread类当成普通的类来使用，和Object类是没什么区别。但是，使用Thread.wait方法之后，线程退出的时候会自动调用notify()方法，这就会导致自己设计的唤醒流程受到干扰，所以是不推荐用Thread.wait方法的。
+
+
+
+## 13.如何选择使用notify()还是notifyAll()？
+
+Object.notify()可能会导致信号丢失的正确性问题，Object.notifyAll()虽然效率不高（把不需要唤醒的线程给唤醒了），但它能保证信号不丢失的问题。所以实现通知的比较保守的方式是使用notifyAll()以保证正确性。
+
+当然如果能证明以下两个条件，是可以用notify()方法来替代notifyAll()方法。1、一次通知至多唤醒一个线程 2、相应的对象上等待的线程是同质等待线程。所谓的同质等待线程是使用同一个保护条件。比如说同一个Runable接口创建的多个实例，或者同一个继承Thread类的子类new出来的多个实例
+
+
+## 14.wait和sleep的异同？
+
+相同点：
+
+1. wait和sleep都会使线程阻塞，对应的线程状态是Waiting或者是Time_Waiting
+2. 他们都可以相应中断Thread.interrupt()
+
+不同点：
+
+1. wait定义在Object类中，sleep定义在Thread类中
+2. wait方法必须在同步代码块中执行，而sleep不需要
+3. 在同步代码块中wait会主动释放锁，而sleep不会
+4. sleep短暂休眠后会自动退出阻塞，而wait方法如果没设置时间的话，需要被其他线程唤醒或者中断来退出阻塞
+
+## 15.join期间，线程处于什么状态？
+
+join期间，线程处于Waitng状态，为什么不是Time_Waiting，因为join期间无法预料实际等待时间。
+
+
+## 16.yield和sleep的区别？
+
+yield主动释放自己的cpu时间片，此时的线程仍然处于就绪状态，随时可以被cpu调度。sleep期间，线程处于阻塞状态，线程调度器不会去调用该线程。
+
+
+## 17.守护线程和普通线程的区别
+
+没有什么区别，唯一不同的就是 JVM 的离开。如果用户线程全部退出运行，而还有守护线程还在运行，JVM还是会退出。因为没有了“被守护者”，所以也就没有被运行的必要了。
+
+
+## 18.是否需要给线程设置为守护线程？
+
+我们不应该把自己的线程设置为守护线程，因为设置守护线程是很危险的。比如我们访问数据库时，这时候所有的用户线程都退出了运行，那我们的线程也就中断。
+
+
+## 19.为什么程序设计不应该依赖于线程优先级？
+
+优先级是由线程调度器来决定的，依赖于操作系统。每个操作系统的优先级别不一样，优先级高的不一定比优先级低的先运行，也有可能导致线程饥饿的情况。
+
+
