@@ -80,13 +80,29 @@
 
 ## 动态规划
 
+[跳台阶](https://blog.csdn.net/weixin_42870497/article/details/118640925)<br>
+
+[跳台阶扩展问题](https://blog.csdn.net/weixin_42870497/article/details/118659371)<br>
+
+[矩形覆盖](https://blog.csdn.net/weixin_42870497/article/details/118709489)<br>
+
 
 
 ## 斐波那契数列
 
+[斐波那契数列](https://blog.csdn.net/weixin_42870497/article/details/118615312)<br>
+
+[跳台阶](https://blog.csdn.net/weixin_42870497/article/details/118640925)<br>
+
+[矩形覆盖](https://blog.csdn.net/weixin_42870497/article/details/118709489)<br>
+
 
 
 ## 位运算、数学运算
+
+[二进制中1的个数](https://blog.csdn.net/weixin_42870497/article/details/118710534)<br>
+
+[数值的整数次方](https://blog.csdn.net/weixin_42870497/article/details/118736946)<br>
 
 
 
