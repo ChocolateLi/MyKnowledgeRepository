@@ -72,7 +72,7 @@ start()方法才是启动线程的方法，如果调用run()方法，其实跟�
 
 1.使用synchronized方法
 
-```
+```java
 package com.Thread.threadcoreknowledge.threadobjectcommonmethod;
 
 /**
@@ -121,7 +121,7 @@ public class WaitNotifyPrintOddEvenSyn {
 
 2.使用wait()和notify()方法
 
-```
+```java
 package com.Thread.threadcoreknowledge.threadobjectcommonmethod;
 
 /**
@@ -168,7 +168,7 @@ public class WaitNotifyPrintOddEveWait {
 
 ## 9.使用wait实现生产者消费者模式
 
-```
+```java
 package com.Thread.threadcoreknowledge.threadobjectcommonmethod;
 
 import java.util.Date;
