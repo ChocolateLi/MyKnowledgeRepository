@@ -32,17 +32,31 @@
 
 [从尾到头打印链表](https://blog.csdn.net/weixin_42870497/article/details/118444490)<br>
 
+[链表中倒数最后k个结点](https://blog.csdn.net/weixin_42870497/article/details/118823424)<br>
+
+[反转链表](https://blog.csdn.net/weixin_42870497/article/details/118862615)<br>
+
 
 
 ## 树
 
 [重建二叉树](https://blog.csdn.net/weixin_42870497/article/details/118466839)<br>
 
+[树的子结构](https://blog.csdn.net/weixin_42870497/article/details/118913714?spm=1001.2014.3001.5501)<br>
+
+[二叉树的镜像](https://blog.csdn.net/weixin_42870497/article/details/118943176?spm=1001.2014.3001.5501)<br>
+
+[从上到下打印二叉树](https://blog.csdn.net/weixin_42870497/article/details/119083229)<br>
+
+[二叉搜索树后序遍历序列](https://blog.csdn.net/weixin_42870497/article/details/119118354)<br>
+
 
 
 ## 栈、队列
 
 [用两个栈实现队列](https://blog.csdn.net/weixin_42870497/article/details/118519467)<br>
+
+[包含min函数的栈](https://blog.csdn.net/weixin_42870497/article/details/119037890?spm=1001.2014.3001.5501)<br>
 
 
 
@@ -54,9 +68,13 @@
 
 ## 排序
 
+[合并两个有序链表](https://blog.csdn.net/weixin_42870497/article/details/118884466)<br>
+
 
 
 ## 双指针
+
+[调整数组顺序使奇数位于偶数前面](https://blog.csdn.net/weixin_42870497/article/details/118769048)<br>
 
 
 
@@ -109,6 +127,8 @@
 ## 其他
 
 [二维数组的查找](https://blog.csdn.net/weixin_42870497/article/details/118095138)<br>
+
+[顺时针打印矩阵](https://blog.csdn.net/weixin_42870497/article/details/119007664?spm=1001.2014.3001.5501)<br>
 
 
 
