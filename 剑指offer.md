@@ -26,6 +26,8 @@
 
 [二叉搜索树后序遍历序列](https://blog.csdn.net/weixin_42870497/article/details/119118354)<br>
 
+[二叉树中和为某一值的路径](https://blog.csdn.net/weixin_42870497/article/details/119152432)<br>
+
 
 
 ## 链表
@@ -49,6 +51,8 @@
 [从上到下打印二叉树](https://blog.csdn.net/weixin_42870497/article/details/119083229)<br>
 
 [二叉搜索树后序遍历序列](https://blog.csdn.net/weixin_42870497/article/details/119118354)<br>
+
+[二叉树中和为某一值的路径](https://blog.csdn.net/weixin_42870497/article/details/119152432)<br>
 
 
 
@@ -89,6 +93,8 @@
 
 
 ## DFS
+
+[二叉树中和为某一值的路径](https://blog.csdn.net/weixin_42870497/article/details/119152432)<br>
 
 
 
