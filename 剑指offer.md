@@ -28,6 +28,22 @@
 
 [二叉树中和为某一值的路径](https://blog.csdn.net/weixin_42870497/article/details/119152432)<br>
 
+[复杂链表的复制](https://blog.csdn.net/weixin_42870497/article/details/119189134)<br>
+
+[二叉搜索树与双向链表](https://blog.csdn.net/weixin_42870497/article/details/119255992)<br>
+
+[字符串排列](https://blog.csdn.net/weixin_42870497/article/details/119421686)<br>
+
+[数组中次数超过一半的数字](https://blog.csdn.net/weixin_42870497/article/details/119463058)<br>
+
+[最小的k个数](https://blog.csdn.net/weixin_42870497/article/details/119492887)<br>
+
+[连续子数组的最大和](https://blog.csdn.net/weixin_42870497/article/details/119520609)<br>
+
+[整数中1出现的次数](https://blog.csdn.net/weixin_42870497/article/details/119577828)<br>
+
+
+
 
 
 ## 链表
@@ -37,6 +53,8 @@
 [链表中倒数最后k个结点](https://blog.csdn.net/weixin_42870497/article/details/118823424)<br>
 
 [反转链表](https://blog.csdn.net/weixin_42870497/article/details/118862615)<br>
+
+[复杂链表的复制](https://blog.csdn.net/weixin_42870497/article/details/119189134)<br>
 
 
 
@@ -54,6 +72,8 @@
 
 [二叉树中和为某一值的路径](https://blog.csdn.net/weixin_42870497/article/details/119152432)<br>
 
+[二叉搜索树与双向链表](https://blog.csdn.net/weixin_42870497/article/details/119255992)<br>
+
 
 
 ## 栈、队列
@@ -68,11 +88,21 @@
 
 [替换空格](https://blog.csdn.net/weixin_42870497/article/details/118118110)<br>
 
+[字符串排列](https://blog.csdn.net/weixin_42870497/article/details/119421686)<br>
+
+
+
 
 
 ## 排序
 
 [合并两个有序链表](https://blog.csdn.net/weixin_42870497/article/details/118884466)<br>
+
+[数组中次数超过一半的数字](https://blog.csdn.net/weixin_42870497/article/details/119463058)<br>
+
+[最小的k个数](https://blog.csdn.net/weixin_42870497/article/details/119492887)<br>
+
+
 
 
 
@@ -95,6 +125,8 @@
 ## DFS
 
 [二叉树中和为某一值的路径](https://blog.csdn.net/weixin_42870497/article/details/119152432)<br>
+
+[字符串排列](https://blog.csdn.net/weixin_42870497/article/details/119421686)<br>
 
 
 
@@ -127,6 +159,8 @@
 [二进制中1的个数](https://blog.csdn.net/weixin_42870497/article/details/118710534)<br>
 
 [数值的整数次方](https://blog.csdn.net/weixin_42870497/article/details/118736946)<br>
+
+[整数中1出现的次数](https://blog.csdn.net/weixin_42870497/article/details/119577828)<br>
 
 
 

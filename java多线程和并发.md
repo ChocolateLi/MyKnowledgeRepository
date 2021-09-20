@@ -4,7 +4,7 @@
 
 1. 从不同的角度来看有不同的答案。比如说有继承Thread类、实现Runnable接口、实现Callable接口、线程池来创建
 
-2. 但是典型的创建方法就有种继承Thread类和实现Runnable接口
+2. 但是典型的创建方法就只有继承Thread类和实现Runnable接口
 
 3. 点开Thread类源码发现，其实Thread类继承了Runnable接口，看Thread类的run()方法，本质都是一样的
 
@@ -293,7 +293,7 @@ Object.notify()可能会导致信号丢失的正确性问题，Object.notifyAll(
 相同点：
 
 1. wait和sleep都会使线程阻塞，对应的线程状态是Waiting或者是Time_Waiting
-2. 他们都可以相应中断Thread.interrupt()
+2. 他们都可以响应中断Thread.interrupt()
 
 不同点：
 
