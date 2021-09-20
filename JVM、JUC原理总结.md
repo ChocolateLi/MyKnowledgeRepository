@@ -149,7 +149,7 @@ java堆可以细分为：新生代和老年代
 
 ### 4、如何判断对象是否存活
 
-**1、应用计数算法**
+**1、引用计数算法**
 
 为对象添加一个引用计数器，每当有一个地方引用它，计数器加1；当引用失效，计数器减1。计数为0时，对象可回收。
 
@@ -255,7 +255,7 @@ CAP理论是指在分布式系统中，一致性、可用性、分区容错性�
 
 #### 5、什么是分布式事务？
 
-分布式事务是指事务的参与者、支持事务的服务器、资源服务器以及事务管理器分别位于不同的分布式系统的不同节点上。
+分布式事务是指事务的参与者、支持事务的服务器、资源服务器以及事务管理器分别位于分布式系统的不同节点上。
 
 简单地说就是一次大的操作由不同的小操作组成，这些小的操作分布在不同的服务器上，分布式事务需要保证这些小的操作要么全部成功，要么全部失败。
 
@@ -263,17 +263,118 @@ CAP理论是指在分布式系统中，一致性、可用性、分区容错性�
 
 
 
-#### 6、线程池工作原理
+#### 6、线程池
+
+##### 为什么使用线程池
+
+池化技术的主要思想是减少每次获取资源的消耗，提高对资源的利用率。
+
+##### 线程池实现原理
+
+一个线程集合workset和一个阻塞队列workqueue，当用户向线程池提交一个任务时（也就是线程），线程池会先将任务放到workqueue中，workset中的线程会不断地从workqueue中获取任务然后执行。当workqueue中没有任务的时候，worker就会阻塞，直到队列中有了任务就取出来继续执行。
+
+![线程池实现原理](D:\github\MyKnowledgeRepository\picture\线程池实现原理.png)
 
 
 
-#### 7、线程池分类（java实现线程池的四种方式）
+##### 线程池几个主要参数
+
+```java
+public ThreadPoolExecutor(int corePoolSize,
+                          int maximumPoolSize,
+                          long keepAliveTime,
+                          TimeUnit unit,
+                          BlockingQueue<Runnable> workQueue,
+                          ThreadFactory threadFactory,
+                          RejectedExecutionHandler handler)
+
+```
+
+**corePoolSize**：规定线程池有几个核心线程在运行
+
+**maximumPoolSize**：当WorkQueue满时，不能添加任务时，这个参数才生效。规定线程池最多只能有几个线程在执行
+
+**keepAliveTime**：超过corePoolSize大小的那些线程的生存时间，如果这些线程长时间没有执行任务并且超过keepAliveTime设定的时间，就会消亡。
+
+**unit**：keepAliveTime参数的时间单位
+
+**workQueue**：存放任务的队列
+
+**threadFactory**：创建线程的工厂
+
+**handler**：当workQueue已满，并且线程池已经达到maximumPoolSize，执行拒绝策略
+
+ 
+
+##### 线程池工作流程
+
+用户提交一个任务，线程池执行如下流程：
+
+1. 判断核心线程池是否已满，如果未满，创建一个核心线程执行该任务。
+2. 如果核心线程已满，将任务加入到队列中。
+3. 如果队列已满，判断线程池是否已满，如果未满就创建非核心线程执行任务。
+4. 如果线程池已满，采用拒绝策略。
+
+![线程池工作流程](D:\github\MyKnowledgeRepository\picture\线程池工作流程.png)
 
 
 
-#### 8、线程池的状态
 
 
+##### 线程池种类（java自带哪几种线程池）
+
+- newSingleThreadExecutor。创建唯一的工作线程执行任务。单工作线程最大的特点是可保证顺序地执行各个任务。
+- newFixedThreadPool。创建指定线程数的线程池。该线程池节省了创建线程时的开销，但是当线程池没有可运行任务时，它不会释放工作线程，还会占用一定的系统资源
+- newCachedThreadPool。创建一个可缓存线程池。它可灵活地回收空闲线程，若无可回收，则创建新线程。它的特点是可灵活的往线程池中添加线程。
+- newScheduleThreadPool。该线程池可以指定延迟多少时间执行或者周期性执行
+
+
+
+##### 线程池的状态
+
+**Running**
+
+线程池处于running状态时，能够接收新的任务，并且对已添加的任务进行处理
+
+线程池初始状态为running状态
+
+
+
+**ShutDown**
+
+线程池处于shutdown状态时，不接收新的任务，但能处理已添加的任务
+
+调用shutdown接口，线程池由running -> shutdown
+
+
+
+**Stop**
+
+线程池处于stop状态，不接收新任务，不处理已添加的任务，并且会中断正在处理的任务
+
+调用shutdownnow接口，线程池 由running或shutdown -> stop
+
+
+
+**Tidying**
+
+当所有的任务已终止，线程池会变为tidying状态
+
+当线程池处于shutdown状态，阻塞队列为空，并且线程池中执行的任务也为空，就会由shutdown -> tidying
+
+当线程池处于stop状态，线程池中执行的任务为空，就会由stop -> tidying
+
+
+
+**Terminated**
+
+线程池彻底终止
+
+线程池处于tidying状态，执行完terminated()方法之后，就会由tidying -> terminated
+
+
+
+![线程池状态](D:\github\MyKnowledgeRepository\picture\线程池状态.png)
 
 
 
