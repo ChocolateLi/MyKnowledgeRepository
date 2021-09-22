@@ -12,7 +12,7 @@ StringBuilder没有这个修饰，所以是线程不安全的
 
 在单线程环境下，StringBuilder更快，因为它不需要加锁。
 
-多线程环境下StringBuilder更安全
+多线程环境下StringBuffer更安全
 
 ### 2、final、finally、finalized区别
 
@@ -32,7 +32,7 @@ StringBuilder没有这个修饰，所以是线程不安全的
 
 通常放在try...catch...后面构造最终执行代码块，意味着不管程序是正常执行还是发生异常，该代码块都会执行。
 
-可以讲释放外部资源的代码块放在finally中
+可以将释放外部资源的代码块放在finally中
 
 
 
@@ -65,7 +65,7 @@ public boolean equals(Object obj) {
 
 #### static关键字的作用
 
-static的作用是方便在没有创建对象时调用方法和变量，优化程序性能
+static的作用是方便在没有创建对象时通过类调用方法和变量，优化程序性能
 
 #### static和final的区别
 
@@ -129,6 +129,12 @@ hashmap初始容量为16，当它达到阈值时，阈值=最大容量*负载因
 
 
 
+为什么总是2的n次方呢？
+
+可能是方便计算，让数据更加均匀，减少碰撞。
+
+
+
 ### 4、put过程
 
 首先调用key所在类的hashcode，计算出hash值，计算出数组下标，并在数组中找到位置。
@@ -168,7 +174,6 @@ HashMap允许插入键为null的键值对，因为null无法调用hashcode()方�
 1. hashmap是线程不安全的，hashtable是线程安全的
 2. hashmap可以插入null值，hashtable不行
 3. hashtable初始值为11，每次扩容时扩容为原来的2n+1；hashmap初始值为16,每次扩容为2倍
-4. 
 
 ### 8、CorrentHashMap和HashTable的区别
 
@@ -186,7 +191,7 @@ correnthashmap采用分段锁机制，每一把锁只锁容器的一部分数据
 
 synchonized解决了多线程访问共享资源造成的数据紊乱，该关键字修饰的方法或者代码块只能允许一个线程访问。
 
-CAS就是比较并交换。它的思想很简单，有三个参数，一个当前内存值V，一个旧的预期值A，一个更新的值B，档当前仅当旧的预期值A和当前内存值V相等时，将内存值修改为B，否则什么都不做。
+CAS就是比较并交换。它的思想很简单，有三个参数，一个当前内存值V，一个旧的预期值A，一个更新的值B，当且仅当旧的预期值A和当前内存值V相等时，将内存值修改为B，否则什么都不做。
 
 
 

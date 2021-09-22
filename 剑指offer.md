@@ -42,6 +42,12 @@
 
 [整数中1出现的次数](https://blog.csdn.net/weixin_42870497/article/details/119577828)<br>
 
+[把数组排成最小的数](https://blog.csdn.net/weixin_42870497/article/details/119579038)<br>
+
+[丑数](https://blog.csdn.net/weixin_42870497/article/details/119601070)<br>
+
+[第一个只出现一次的字符](https://blog.csdn.net/weixin_42870497/article/details/119652024)<br>
+
 
 
 
@@ -90,7 +96,7 @@
 
 [字符串排列](https://blog.csdn.net/weixin_42870497/article/details/119421686)<br>
 
-
+[第一个只出现一次的字符](https://blog.csdn.net/weixin_42870497/article/details/119652024)<br>
 
 
 
@@ -101,6 +107,8 @@
 [数组中次数超过一半的数字](https://blog.csdn.net/weixin_42870497/article/details/119463058)<br>
 
 [最小的k个数](https://blog.csdn.net/weixin_42870497/article/details/119492887)<br>
+
+[把数组排成最小的数](https://blog.csdn.net/weixin_42870497/article/details/119579038)<br>
 
 
 
@@ -154,6 +162,12 @@
 
 
 
+## 哈希
+
+[第一个只出现一次的字符](https://blog.csdn.net/weixin_42870497/article/details/119652024)<br>
+
+
+
 ## 位运算、数学运算
 
 [二进制中1的个数](https://blog.csdn.net/weixin_42870497/article/details/118710534)<br>
@@ -161,6 +175,8 @@
 [数值的整数次方](https://blog.csdn.net/weixin_42870497/article/details/118736946)<br>
 
 [整数中1出现的次数](https://blog.csdn.net/weixin_42870497/article/details/119577828)<br>
+
+[丑数](https://blog.csdn.net/weixin_42870497/article/details/119601070)<br>
 
 
 
