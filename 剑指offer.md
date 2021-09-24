@@ -90,6 +90,10 @@
 
 [二叉搜索树中的第k个节点](https://blog.csdn.net/weixin_42870497/article/details/119965419)<br>
 
+[机器人的运动范围](https://blog.csdn.net/weixin_42870497/article/details/120090082)<br>
+
+[剪绳子](https://blog.csdn.net/weixin_42870497/article/details/120090366)<br>
+
 [数据流中的中位数](https://blog.csdn.net/weixin_42870497/article/details/119985397)<br>
 
 [滑动窗口中的最大值](https://blog.csdn.net/weixin_42870497/article/details/119998474)<br>
@@ -146,10 +150,6 @@
 
 [二叉搜索树中的第k个节点](https://blog.csdn.net/weixin_42870497/article/details/119965419)<br>
 
-[机器人的运动范围](https://blog.csdn.net/weixin_42870497/article/details/120090082)<br>
-
-[剪绳子](https://blog.csdn.net/weixin_42870497/article/details/120090366)<br>
-
 
 
 
@@ -162,15 +162,13 @@
 
 [滑动窗口中的最大值](https://blog.csdn.net/weixin_42870497/article/details/119998474)<br>
 
+[从尾到头打印链表](https://blog.csdn.net/weixin_42870497/article/details/118444490)<br>
+
 
 
 ## 字符串
 
 [替换空格](https://blog.csdn.net/weixin_42870497/article/details/118118110)<br>
-
-[字符串排列](https://blog.csdn.net/weixin_42870497/article/details/119421686)<br>
-
-[第一个只出现一次的字符](https://blog.csdn.net/weixin_42870497/article/details/119652024)<br>
 
 [左旋转字符串](https://blog.csdn.net/weixin_42870497/article/details/119826334)<br>
 
@@ -200,6 +198,16 @@
 
 [翻转单词序列](https://blog.csdn.net/weixin_42870497/article/details/119826529)<br>
 
+[链表中倒数最后k个结点](https://blog.csdn.net/weixin_42870497/article/details/118823424)<br>
+
+[两个链表的第一个公共节点](https://blog.csdn.net/weixin_42870497/article/details/119682620)<br>
+
+[环形链表的入口结点](https://blog.csdn.net/weixin_42870497/article/details/119893655)<br>
+
+
+
+小结：一般左右指针解决数组问题，快慢指针解决链表问题
+
 
 
 ## 二分查找
@@ -207,6 +215,8 @@
 [旋转数组中的最小数字](https://blog.csdn.net/weixin_42870497/article/details/118582577)<br>
 
 [数组在升序数组中出现的次数](https://blog.csdn.net/weixin_42870497/article/details/119729219)<br>
+
+[二维数组的查找](https://blog.csdn.net/weixin_42870497/article/details/118095138)<br>
 
 
 
@@ -231,6 +241,10 @@
 ## BFS
 
 [序列化二叉树](https://blog.csdn.net/weixin_42870497/article/details/119964585)<br>
+
+[从上到下打印二叉树](https://blog.csdn.net/weixin_42870497/article/details/119083229)<br>
+
+[二叉树的深度](https://blog.csdn.net/weixin_42870497/article/details/119741866)<br>
 
 
 
@@ -268,6 +282,8 @@
 
 [数组中重复的数字](https://blog.csdn.net/weixin_42870497/article/details/119872278)<br>
 
+[复杂链表的复制](https://blog.csdn.net/weixin_42870497/article/details/119189134)<br>
+
 
 
 ## 堆
@@ -301,8 +317,6 @@
 
 
 ## 其他
-
-[二维数组的查找](https://blog.csdn.net/weixin_42870497/article/details/118095138)<br>
 
 [顺时针打印矩阵](https://blog.csdn.net/weixin_42870497/article/details/119007664?spm=1001.2014.3001.5501)<br>
 
