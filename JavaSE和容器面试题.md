@@ -105,13 +105,15 @@ static方法不能被覆盖，因为方法覆盖是基于运行时动态绑定�
 
 ## 容器
 
-### 1、HashMap原理
+### HashMap
+
+#### 1、HashMap原理
 
 hashmap是数组和链表的结合体，数组每个元素存储的是链表的头节点，往hashmap里面放键值对的时候，先计算出key的hashcode，再计算出在数组的下标，如果该下标对应的链表为空，则添加成功。如果不为空，则遍历链表是否有相同的key，有就把value替换，如果没有，则添加到链表中。（jdk1.7是添加到链表头节点，jdk1.8是链表尾节点）
 
 
 
-### 2、hashcode和数组下表的计算
+#### 2、hashcode和数组下表的计算
 
 hashcode的计算：先用key.hashcode()计算出hash，然后hash>>>16（右移16位），然后高16位异或低16位，即 hash = key.hashcode() ^ key.hashcode()>>>16
 
@@ -121,7 +123,7 @@ hashcode的计算：先用key.hashcode()计算出hash，然后hash>>>16（右移
 
 
 
-### 3、hashmap的扩容机制
+#### 3、hashmap的扩容机制
 
 hashmap初始容量为16，当它达到阈值时，阈值=最大容量*负载因子，每次扩容两倍，总是2的n次方
 
@@ -135,7 +137,7 @@ hashmap初始容量为16，当它达到阈值时，阈值=最大容量*负载因
 
 
 
-### 4、put过程
+#### 4、put过程
 
 首先调用key所在类的hashcode，计算出hash值，计算出数组下标，并在数组中找到位置。
 
@@ -151,7 +153,7 @@ HashMap允许插入键为null的键值对，因为null无法调用hashcode()方�
 
 
 
-### 5、jdk1.7和jdk1.8 hashmap的不同
+#### 5、jdk1.7和jdk1.8 hashmap的不同
 
 1. jdk1.7：数组 + 链表	jdk1.8：数组+链表+红黑树。当链表的元素大于8 并且当前数组大于64时，才会转换为红黑树。
 2. jdk1.7底层数组是Entry[]，jdk1.8是Node[]
@@ -159,7 +161,7 @@ HashMap允许插入键为null的键值对，因为null无法调用hashcode()方�
 
 
 
-### 6、hashmap为什么是线程不安全的
+#### 6、hashmap为什么是线程不安全的
 
 在并发情况下扩容和rehash的时候会造成环形链表，造成死循环。jdk1.8解决了这个问题，但是在多线程环境下，还是不太建议使用hashmap，因为可能存在数据丢失问题。
 
@@ -169,13 +171,13 @@ HashMap允许插入键为null的键值对，因为null无法调用hashcode()方�
 
 
 
-### 7、HashMap和HashTable的区别
+#### 7、HashMap和HashTable的区别
 
 1. hashmap是线程不安全的，hashtable是线程安全的
 2. hashmap可以插入null值，hashtable不行
 3. hashtable初始值为11，每次扩容时扩容为原来的2n+1；hashmap初始值为16,每次扩容为2倍
 
-### 8、CorrentHashMap和HashTable的区别
+#### 8、CorrentHashMap和HashTable的区别
 
 它们的主要区别在于实现线程安全的方式不同。
 
@@ -201,27 +203,9 @@ CAS操作的就是乐观锁
 
 
 
-### 9、ArrayList和Vector的区别
-
-ArrayList是线程不安全的，Vector是线程安全的
 
 
-
-### 10、ArrayList和LinkedList的区别
-
-ArrayList底层是数组结构，支持随机访问，查找的时间复杂度为O(1)。但它插入和删除效率不高，时间复杂度为O(n)
-
-LinkedList底层结构是双向链表，它不支持随机访问，查找的时间复杂度为O(n)。但他插入和删除的效率高。
-
-
-
-ArrayList适用于查找多，插入和删除少的场景。
-
-LinkedList适用于查找少，插入和删除多的场景。
-
-
-
-### 11、红黑树
+#### 9、红黑树
 
 它是自平衡的二叉树
 
@@ -248,6 +232,36 @@ LinkedList适用于查找少，插入和删除多的场景。
 红黑树放弃了完全平衡，追求大致平衡，与平衡二叉树复杂度相差不大的情况下，保证每次插入最多3次旋转达到平衡，实现更为简单。
 
 二叉平衡树追求绝对的平衡，条件比较苛刻，实现比较麻烦，每次插入新的节点需要旋转的次数未知。
+
+
+
+### List
+
+#### 1、ArrayList和Vector的区别
+
+ArrayList是线程不安全的，Vector是线程安全的
+
+
+
+#### 2、ArrayList和LinkedList的区别
+
+ArrayList底层是数组结构，支持随机访问，查找的时间复杂度为O(1)。但它插入和删除效率不高，时间复杂度为O(n)
+
+LinkedList底层结构是双向链表，它不支持随机访问，查找的时间复杂度为O(n)。但他插入和删除的效率高。
+
+
+
+ArrayList适用于查找多，插入和删除少的场景。
+
+LinkedList适用于查找少，插入和删除多的场景。
+
+
+
+#### 3、ArrayList的扩容机制
+
+添加元素时使用 ensureCapacityInternal() 方法来保证容量足够，如果不够时，需要使用 grow() 方法进行扩容，新容量的大小为 旧容量的 1.5 倍。
+
+扩容操作需要调用 Arrays.copyOf() 把原数组整个复制到新数组中，这个操作代价很高，因此最好在创建 ArrayList 对象时就指定大概的容量大小，减少扩容操作的次数
 
 
 
