@@ -8,7 +8,7 @@
 
 解题思路：
 
-1. 遍历一遍数组，先把所有数存进hashmap中
+1. 遍历一遍数组，先把所有数存进hashmap中。以空间换时间
 2. 再遍历一遍数组，在hashmap中查找target-nums[i]的值是否存在，若存在，返回i和map.get(target-nums[i])
 
 实现代码：
