@@ -33,6 +33,8 @@ class Solution {
 
 
 
+## 链表
+
 ### 2、两数相加
 
 **题目链接**：[两数相加](https://leetcode-cn.com/problems/add-two-numbers/)
@@ -108,4 +110,48 @@ class Solution {
     }
 }
 ```
+
+
+
+## 滑动窗口
+
+### 3、无重复字符的最长子串
+
+**题目链接：** [无重复字符的最长子串](https://leetcode-cn.com/problems/longest-substring-without-repeating-characters/)
+
+**解题思路：** 使用滑动窗口操作
+
+**实现代码：** 
+
+```java
+class Solution {
+    public int lengthOfLongestSubstring(String s) {
+        
+        int left = 0;
+        int right = 0;
+        int res = 0;
+        HashMap<Character,Integer> window = new HashMap<>();
+        //增大窗口
+        while (right < s.length()) {
+            //更新数据
+            char c = s.charAt(right);
+            window.put(c,window.getOrDefault(c,0)+1);
+            right++;
+            //缩小窗口
+            while(window.get(c)>1){              
+                //更新数据
+                char c1 = s.charAt(left);
+                window.put(c1,window.get(c1)-1);
+                left++;
+            }
+             //更新结果
+            res = Math.max(right-left,res);
+        }
+        
+        return res;
+    }
+}
+```
+
+
 
