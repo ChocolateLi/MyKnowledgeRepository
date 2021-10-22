@@ -1,10 +1,10 @@
-# 实习知识记录
+# JD_Internship_Knowledge_record
 
 ## 数据仓库
 
 ### 数据仓库位置
 
-![数据仓库位置](/Users/chenli75/Desktop/MyFile/picture/数据仓库位置.png)
+![数据仓库位置](/Users/chenli75/Desktop/MyFile/github/MyKnowledgeRepository/internship_picture/数据仓库位置.png)
 
 ### 数据仓库分层架构
 
@@ -12,27 +12,27 @@
 
 为什么数据仓库要分层设计？利于回溯查询。比如在上层应用中缺少某个维度的数据，就可以回溯到最原始的数据层进行提取。
 
-![分层架构](/Users/chenli75/Desktop/MyFile/picture/分层架构.png)
+![分层架构](/Users/chenli75/Desktop/MyFile/github/MyKnowledgeRepository/internship_picture/分层架构.png)
 
 
 
 **分层说明**
 
-BDM（缓冲数据层）：源业务系统的快照、会保留一段时间。一个BDM对应业务系统的一个表或者一个日志文件。
+BDM（缓冲数据层）：源业务系统的快照、会保留一段时间。一个BDM对应业务系统的一个表或者一个日志文件。处理成 dt(日期) dh(小时) data(json格式数据)。以dt和ht为分区
 
-FDM（基础数据层）：原封不动地从日志文件过来，处理成 dt(日期) dh(小时) data(json格式数据)
+FDM（基础数据层）：从BDM层中提取出基础的字段信息，以dt为分区。
 
-GDM（通用数据层）：将数据进行标准话，即将FDM层的非结构数据（json）转化成结构化数据。其中每一列代表一个纬度
+GDM（通用数据层）：更详细的字段信息，扩展FDM层的数据维度，是一个宽表。其中每一列代表一个纬度
 
-ADM（聚合数据层）：对GDM中的表做聚合，即进行join，聚合后的数据代表一个指标，或者度量
+ADM（聚合数据层）：对GDM中的表做聚合，即进行join，聚合后的每一列数据代表一个指标，或者度量
 
-![分层说明](/Users/chenli75/Desktop/MyFile/picture/分层说明.png)
+![分层说明](/Users/chenli75/Desktop/MyFile/github/MyKnowledgeRepository/internship_picture/分层说明.png)
 
 
 
 ### 数据仓库设计流程
 
-![数据仓库设计流程](/Users/chenli75/Desktop/MyFile/picture/数据仓库设计流程.png)
+![数据仓库设计流程](/Users/chenli75/Desktop/MyFile/github/MyKnowledgeRepository/internship_picture/数据仓库设计流程.png)
 
 
 
@@ -58,7 +58,7 @@ dt:数据所在的时间分区，记录数据从ACTIVE转移到EXPIRED的日期�
 
 标黄为变更前数据，标红为变更后数据
 
-![拉链表](/Users/chenli75/Desktop/MyFile/picture/拉链表.png)
+![拉链表](/Users/chenli75/Desktop/MyFile/github/MyKnowledgeRepository/internship_picture/拉链表.png)
 
 查询问题：如还原2020-06-02的历史快照，使用end_time> ‘2020-06-02’ and start_time<= ‘2020-06-02’ 查询，end_time过滤2020-06-02之前的旧数据，start_time过滤2020-06-02之后的新数据。 
 
@@ -66,13 +66,13 @@ sysdate(-1)表示昨天的日期
 
 拉链表查询方式：
 
-![拉链表查询方式](/Users/chenli75/Desktop/MyFile/picture/拉链表查询方式.png)
+![拉链表查询方式](/Users/chenli75/Desktop/MyFile/github/MyKnowledgeRepository/internship_picture/拉链表查询方式.png)
 
 
 
 流水表
 
-![流水表](/Users/chenli75/Desktop/MyFile/picture/流水表示意图.png)
+![流水表](/Users/chenli75/Desktop/MyFile/github/MyKnowledgeRepository/internship_picture/流水表示意图.png)
 
 
 
@@ -92,21 +92,21 @@ GDM层的表数据是一个宽表，就是字段比较多的数据库表。宽�
 
 增量表：记录更新周期内的数据，即在原表的基础上新增本周期内产生的数据。比如按天更新的流量表，每次更新只新增一天内产生的新数据。注意，每次新产生的数据是以最新分区增加到表中，原先数据依然存在表中。
 
-![增量表](/Users/chenli75/Desktop/MyFile/picture/增量表.png)
+![增量表](/Users/chenli75/Desktop/MyFile/github/MyKnowledgeRepository/internship_picture/增量表.png)
 
-![增量表2](/Users/chenli75/Desktop/MyFile/picture/增量表2.png)
+![增量表2](/Users/chenli75/Desktop/MyFile/github/MyKnowledgeRepository/internship_picture/增量表2.png)
 
 全量表：每次记录都会记录全量数据。包括原全量数据和本次新增数据。注意，全量表中每个分区内都是截至分区时间的全量数据，原先分区的数据依然存在于表中，只是每次更新会在最新分区内再更新一遍全量数据。
 
-![全量表](/Users/chenli75/Desktop/MyFile/picture/全量表.png)
+![全量表](/Users/chenli75/Desktop/MyFile/github/MyKnowledgeRepository/internship_picture/全量表.png)
 
-![全量表2](/Users/chenli75/Desktop/MyFile/picture/全量表2.png)
+![全量表2](/Users/chenli75/Desktop/MyFile/github/MyKnowledgeRepository/internship_picture/全量表2.png)
 
 
 
 ### 用户主题模型设计
 
-![用户主题模型设计](/Users/chenli75/Desktop/MyFile/picture/用户主题模型设计.png)
+![用户主题模型设计](/Users/chenli75/Desktop/MyFile/github/MyKnowledgeRepository/internship_picture/用户主题模型设计.png)
 
 
 
@@ -251,7 +251,7 @@ spark.rdd.compress
 
 set hive. exec.dynamic.partition =true.   开启hive动态分区表
 
-set hive.exec.dynamic.partition..mode = nonstrict.   开启允许所有分区都是动态的，否则必须要有静态分区才能用
+set hive.exec.dynamic.partition.mode = nonstrict.   开启允许所有分区都是动态的，否则必须要有静态分区才能用
 
 #### Hive SQL
 
@@ -265,7 +265,7 @@ NVL2(表达式1，表达式2，表达式3）：如果表达式1为空，返回�
 
 例如：这是原始数据表
 
-![原始数据表](/Users/chenli75/Desktop/MyFile/picture/lag()前原始数据表.png)
+![原始数据表](/Users/chenli75/Desktop/MyFile/github/MyKnowledgeRepository/internship_picture/lag()前原始数据表.png)
 
 获取当前记录的ID以及下一条记录的ID
 
@@ -278,7 +278,7 @@ order by t.id asc
 
 ```
 
-![lead()函数数据](/Users/chenli75/Desktop/MyFile/picture/lead()函数数据.png)
+![lead()函数数据](/Users/chenli75/Desktop/MyFile/github/MyKnowledgeRepository/internship_picture/lead()函数数据.png)
 
 获取当前记录的ID以及上一条记录的ID
 
@@ -291,7 +291,7 @@ order by t.id asc
 
 ```
 
-![lag()函数数据](/Users/chenli75/Desktop/MyFile/picture/lag()函数数据.png)
+![lag()函数数据](/Users/chenli75/Desktop/MyFile/github/MyKnowledgeRepository/internship_picture/lag()函数数据.png)
 
 获取号码牌号码相同，获取当前记录的ID以及下一条记录的ID（使用partition by）
 
@@ -304,7 +304,7 @@ from tb_test t
 
 ```
 
-![lead()partition by](/Users/chenli75/Desktop/MyFile/picture/lead()partition by数据.png)
+![lead()partition by](/Users/chenli75/Desktop/MyFile/github/MyKnowledgeRepository/internship_picture/lead()partition by数据.png)
 
 insert into 与 insert overwriter的异同
 
@@ -336,13 +336,7 @@ rlike是正则，正则写法和java一样。'\'需要使用'\\'
 
 ## 埋点
 
-先从 click_id,click_type,click_typle查看数据，先从点击事件，查看有多少个埋点
 
-再从page_id，页面上查看数据，有哪些页面有埋点，埋点个数
-
-再从build_version查看，先查看Max类型的
-
-需求：权益点击中跳转权益中心落地页的数量
 
 
 
@@ -375,6 +369,18 @@ Presto是在Hadoop上运行的分布式系统，也是采用大规模并行处�
 Presto是常驻任务，接受请求立即执行，全内存计算并行计算。
 
 Hive需要使用yarn做资源调度，查询前需要先申请资源，启动进程，并且中间结果会经过磁盘。
+
+
+
+## Scala
+
+### 字符串
+
+scala中使用"""创建多行字符串，这样的话，多行的字符前面都会有空格。可以在多行字符的末尾stripMargin，并且在第二行开始的每一行前面添加上｜。
+
+Scala 字符串中取变量的值，在变量字符前面加$，${}可以嵌入表达式。
+
+
 
 
 
