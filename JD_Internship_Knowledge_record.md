@@ -334,6 +334,90 @@ rlike是正则，正则写法和java一样。'\'需要使用'\\'
 
 
 
+union与union all
+
+union用于把来自多个select语句结果组合到一个结果集合中，语法为：
+
+```sql
+select  column,......from table1
+union [all]
+select  column,...... from table2
+```
+
+
+
+With table as :创建一个临时表，放在select 语句前面
+
+语法：
+
+```sql
+with temptable as(select ...)
+select ...
+```
+
+这个临时表只能用于查询，不能用于更新
+
+
+
+Get_json_object(string json_string,string path):用于解析json字符串，支持多层嵌套解析
+
+第一个参数是要解析的字符串
+
+第二个参数是要获取的key,第二个参数使用$表示json变量标识，然后用.或者[]读取对象或数组
+
+
+
+Case when then else end多条件判断
+
+```sql
+SELECT
+    STUDENT_NAME,
+    (CASE WHEN score < 60 THEN '不及格'
+        WHEN score >= 60 AND score < 80 THEN '及格'
+        WHEN score >= 80 THEN '优秀'
+        ELSE '异常' END) AS REMARK
+FROM
+    TABLE
+```
+
+
+
+count(常量)、count(*)、count(列名)的区别
+
+count(常量)、count(*)表示直接查询符合条件的数据库表的行数
+
+count(列名)表示查询符合条件的并且列的值不为null的行数
+
+count( * )和count(1)是实现上没有任何区别，效率一样，但还是推荐使用count(*)
+
+Count(列名)需要对字段进行非null判断，效率会低一些
+
+
+
+#### Java
+
+Calendar类
+
+作用：为操作日历字段提供一些方法
+
+构造方法：protected Calendar() :由于修饰符是protected，所以无法直接创建该对象。需要通过别的途径生成该对象。通过Calendar.getInstance()生成实例对象
+
+方法：
+
+setTime(Date date):使用给定的Date设置此日历的时间
+
+getTime():返回一个Date表示此日历的时间
+
+addTime():按照日历规则，给指定字段添加或减少时间
+
+
+
+String.format()字符串格式化
+
+
+
+
+
 ## 埋点
 
 
