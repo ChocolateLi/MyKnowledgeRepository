@@ -400,6 +400,10 @@ Count(列名)需要对字段进行非null判断，效率会低一些
 
 
 
+group by、order by后面跟数字指的是 select后面选择的列，1代表第一个列
+
+
+
 #### Java
 
 Calendar类
@@ -569,6 +573,18 @@ dt:数据所在的时间分区，记录数据从ACTIVE转移到EXPIRED的日期�
 ![维度表和事实表](/Users/chenli75/Desktop/MyFile/github/MyKnowledgeRepository/internship_picture/维度表和事实表.jpg)
 
 
+
+## 电商概念
+
+### SPU和SKU
+
+SPU(Standard Product Unit)，标准化产品单元，简称商品。
+
+SKU(Stack Keeping Unit)，库存单位，简称单品。
+
+比如iPhone 8为例，他是一个SPU，是一个商品。但它规格有很多种，比如颜色包含金色、黑色、白色这3种，内存包含32G、64G、128 G这3种，对应9种SKU(3*3)。比如”iPhone 8 白色 128G“，这是一个SKU，它具体到了一个实物。
+
+SPU和SkU是包含关系，一个SPU可以包含若干个SKU，SKU从属于SPU
 
 
 
