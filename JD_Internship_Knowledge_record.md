@@ -404,6 +404,12 @@ group by、order by后面跟数字指的是 select后面选择的列，1代表�
 
 
 
+truncate与drop，delete对比
+
+truncate的作用是清空表，只能作用于表。它会清空表中的所有行，但表结构及其约束
+
+
+
 #### Java
 
 Calendar类
