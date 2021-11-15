@@ -153,6 +153,141 @@ class Solution {
 }
 ```
 
+## 排序
+
+### 4、 寻找两个正序数组的中位数
+
+**题目链接**：[寻找两个正序数组的中位数](https://leetcode-cn.com/problems/median-of-two-sorted-arrays/)
+
+**解题思路**：
+
+1、使用归并排序，将两个数组合并。数组长度为奇数，则返回中间值。若是偶数，返回中间两个值除以2
+
+2、既然已经知道两个数组的长度，其实也可以不用合并数组。通过指针下标判断是否已经达到中间值。
+
+**实现代码**：
+
+```java
+class Solution {
+    public double findMedianSortedArrays(int[] nums1, int[] nums2) {
+        ArrayList<Integer> list = new ArrayList<>();
+        int length1 = nums1.length;
+        int length2 = nums2.length;
+        int p1 = 0;
+        int p2 = 0;
+        while(p1<length1 && p2<length2){
+            if(nums1[p1]<=nums2[p2]){
+                list.add(nums1[p1]);
+                p1++;
+            }else{
+                list.add(nums2[p2]);
+                p2++;
+            }
+        }
+        while(p1<length1){
+            list.add(nums1[p1]);
+            p1++;
+        }
+        while(p2<length2){
+            list.add(nums2[p2]);
+            p2++;
+        }
+        int size = list.size();
+        if((size&1)==1){
+            return (double)list.get(size/2);
+        }else{
+            return (list.get(size/2)+list.get(size/2 -1 ))/2.0;
+        }
+    }
+}
+```
+
+## 字符串
+
+### 5、最长回文子串
+
+**题目链接**：[最长回文子串](https://leetcode-cn.com/problems/longest-palindromic-substring/)
+
+**解题思路**：
+
+中心扩展法。把每一个字符都当作中心点去扩展，判断是否是回文子串。因为字符串长度为奇数和偶数是两种情况，所以干脆两者都一起判断，最后取最长的字符串。
+
+**代码实现**：
+
+```java
+class Solution {
+    public String longestPalindrome(String s) {
+        String res = "";
+        for(int i=0;i<s.length();i++){
+            //以s[i]为中心的最长回文子串
+            String s1 = palindrome(s,i,i);
+            //以s[i]和s[i+1]为中心的最长回文子串
+            String s2 = palindrome(s,i,i+1);
+            res = res.length()>s1.length()?res:s1;
+            res = res.length()>s2.length()?res:s2;
+        }
+        return res;
+    }
+
+    private String palindrome(String s,int left,int right){
+        //防止索引越界
+        while(left>=0 && right<=s.length()-1 && s.charAt(left)==s.charAt(right)){
+            left--;
+            right++;
+        }
+        //substring包头不包尾
+        return s.substring(left+1,right);
+    }
+}
+```
+
+## 动态规划
+
+### 10、正则表达式匹配
+
+题目链接：[正则表达式匹配](https://leetcode-cn.com/problems/regular-expression-matching/)
+
+解题思路：
+
+递归做法比动态规划容易理解。
+
+核心思路通过不断地剪去s和p的首部，直到某一个或者两个都被剪空，就可以得出答案。
+
+有 ‘*’ 和 没 ‘ * ‘ 两种情况进行讨论。
+
+其中有 ’ * ‘ 的又分两种情况，因为它可以匹配零次或者多次：
+
+1. p的第i个元素在s中出现零次：那就s不动，p剪去前面两个字母。如 s=“aac”，p=“b*aac”，把p前面的两个元素剪去
+2. p的第i个元素在s中出现一次或多次：比较s和p首元素是否相同，如果相同，p不动，s剪去首元素，继续递归。比如 s=“aabb”，p=“a*bb”，比较首元素相同，s 剪去首元素，即 s=“abb”，p不动，继续匹配
+
+没 ’ * ‘ 的情况是最简单的，这时候只需要扫描一遍s和p，从首部开始比较两元素是否相同，如果相同就剪去，比较下一个即可。
+
+```java
+//第i下标位置元素相同，'.'代表任何元素
+s.charAt(i) == p.charAt(i) || p.charAt(i)=='.'
+```
+
+代码实现：
+
+```java
+class Solution {
+    public boolean isMatch(String s, String p) {
+        if(p.length()==0){
+            return s.length()==0;
+        }
+        //判断首字符是否匹配。这里s.length可能为0的情况，但p.length不可能为0，因为p.length为0是递归出口
+        boolean firstIsMatch = (s.length()>0) && 		 (s.charAt(0)==p.charAt(0)||p.charAt(0)=='.');
+        //两种情况，p带'*'和不带'*'
+        if(p.length()>=2 && p.charAt(1)=='*'){
+            return isMatch(s,p.substring(2)) //匹配0次情况
+                || (firstIsMatch && isMatch(s.substring(1),p)); //匹配多次或者一次的情况
+        }else{
+            return firstIsMatch && isMatch(s.substring(1),p.substring(1));
+        }
+    }
+}
+```
+
 
 
 ## 双指针
