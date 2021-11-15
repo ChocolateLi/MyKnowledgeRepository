@@ -155,3 +155,33 @@ class Solution {
 
 
 
+## 双指针
+
+### 11、盛最多水的容器
+
+题目链接：[盛最多水的容器](https://leetcode-cn.com/problems/container-with-most-water/)
+
+解题思路：
+
+使用双指针，分别指向左右两端。容器的面积的长（right-left）* 宽（Math.min(height[left],height[right])）
+
+只有移动的较短的那个木板才会使得面积有变大的可能，移动较长的那个木板只会使面积变小。
+
+代码实现：
+
+```java
+class Solution {
+    public int maxArea(int[] height) {
+        int left = 0;
+        int right = height.length-1;
+        int res = 0;
+        while(left<right){
+            res = height[left]<=height[right]?
+                Math.max(res,(right-left) * height[left++]):
+                Math.max(res,(right-left) * height[right--]);
+        }
+        return res;
+    }
+}
+```
+
