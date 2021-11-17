@@ -366,3 +366,64 @@ class Solution {
 
 ```
 
+
+
+## 回溯法
+
+**算法模板**：[回溯框架](https://blog.csdn.net/weixin_42870497/article/details/119443910)
+
+### 17、电话号码的字母组合
+
+**题目链接**：[电话号码的字母组合](https://leetcode-cn.com/problems/letter-combinations-of-a-phone-number/)
+
+**解题思路**：
+
+应用回溯法的解题思路
+
+1. 先用HashMap初始化数字和字母的组合
+2. 使用回溯法开始深度遍历
+
+**代码实现**：
+
+```java
+class Solution {
+
+    HashMap<Character,String> map = new HashMap<>(){
+        {
+            put('2',"abc");
+            put('3',"def");
+            put('4',"ghi");
+            put('5',"jkl");
+            put('6',"mno");
+            put('7',"pqrs");
+            put('8',"tuv");
+            put('9',"wxyz");
+        }
+    };
+
+    List<String> list = new ArrayList<>();
+    public List<String> letterCombinations(String digits) {
+        if(digits.length()==0){
+            return list;
+        }
+        StringBuilder sb = new StringBuilder();
+        dfs(digits,sb,0);
+        return list;
+    }
+
+    private void dfs(String digits,StringBuilder sb,int index){
+        if(index==digits.length()){
+            list.add(sb.toString());
+            return;
+        }
+        char c = digits.charAt(index);
+        String str = map.get(c);
+        for(int i=0;i<str.length();i++){
+            sb.append(str.charAt(i));
+            dfs(digits,sb,index+1);
+            sb.deleteCharAt(sb.length()-1);
+        }
+    }
+}
+```
+
