@@ -410,6 +410,76 @@ truncate的作用是清空表，只能作用于表。它会清空表中的所有
 
 
 
+**日期函数**
+
+1、to_date:日期时间转日期函数
+
+```sql
+select to_date('2015-04-02 13:34:12');
+输出：2015-04-02
+```
+
+2、from_unixtime:转化unix时间戳到当前时区的时间格式
+
+```sql
+select from_unixtime(1323308943,’yyyy-MM-dd’);
+输出：2011-12-08
+```
+
+3、unix_timestamp:获取当前unix时间戳
+
+```sql
+select unix_timestamp();
+输出：1430816254
+select unix_timestamp('2015-04-30 13:51:20');
+输出：1430373080
+```
+
+4、year:返回日期中的年、 month:返回日期中的月份、 day:返回日期中的天、 hour:返回日期中的小时、 minute: 返回日期中的分钟、second:返回日期中的秒
+
+```sql
+select year('2015-04-02 11:32:12');
+输出：2015
+```
+
+5、datediff:返回开始日期减去结束日期的天数
+
+```sql
+select datediff('2015-04-09','2015-04-01');
+输出：8
+```
+
+6、date_sub:返回日期前n天的日期
+
+```sql
+select date_sub('2015-04-09',4);
+输出：2015-04-05
+```
+
+7、date_add:返回日期后n天的日期
+
+ ```sql
+ select date_add('2015-04-09',4);
+ 输出：2015-04-13
+ ```
+
+8、from_unixtime+ unix_timestamp Hive中yyyymmdd和yyyy-mm-dd日期之间的切换
+
+```sql
+思想：先转换成时间戳，再由时间戳转换为对应格式。
+--20171205转成2017-12-05 
+
+select from_unixtime(unix_timestamp('20171205','yyyymmdd'),'yyyy-mm-dd') from dual;
+
+--2017-12-05转成20171205
+
+select from_unixtime(unix_timestamp('2017-12-05','yyyy-mm-dd'),'yyyymmdd') from dual;
+```
+
+
+
+
+
 #### Java
 
 Calendar类
@@ -658,6 +728,8 @@ hive表开发完的一般测试过程：
 自我介绍：
 
 面试官你好，我叫 ** ，在 ** 公司实习大数据开发工程师，组内专注于 *** 技术，在实习期间，参与了 * 个项目开发，我擅长于 * * * 技术，对 * * *有深入研究，...
+
+
 
 
 
