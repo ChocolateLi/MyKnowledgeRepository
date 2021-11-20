@@ -292,6 +292,8 @@ class Solution {
 
 ## 双指针
 
+👍**双指针算法模板**：[双指针技巧框架](https://blog.csdn.net/weixin_42870497/article/details/119893198)
+
 ### 11、盛最多水的容器
 
 **题目链接**：[盛最多水的容器](https://leetcode-cn.com/problems/container-with-most-water/)
@@ -425,5 +427,68 @@ class Solution {
         }
     }
 }
+```
+
+
+
+## 链表
+
+👍**链表模式识别**：
+
+- 涉及链表特殊位置，使用快慢指针
+- 要删除链表节点，找到节点的前驱节点
+
+### 19、删除链表倒数第N个节点
+
+**题目链接**：[删除链表倒数第N个节点](https://leetcode-cn.com/problems/remove-nth-node-from-end-of-list/)
+
+**解题思路**：
+
+可以使用快慢指针。快指针和慢指针分别指向头节点，先让快指针移动n步，然后快慢指针一起移动。
+
+注意：如果快指针移动完了n步，此时快指针为空，说明头节点就是要删除的节点。
+
+**代码实现**：
+
+```Java
+
+/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ * int val;
+ * ListNode next;
+ * ListNode() {}
+ * ListNode(int val) { this.val = val; }
+ * ListNode(int val, ListNode next) { this.val = val; this.next = next; }
+ * }
+ */
+class Solution {
+    public ListNode removeNthFromEnd(ListNode head, int n) {
+        if (head == null) {
+            return null;
+        }
+        //快慢指针分别指向头节点
+        ListNode fast = head;
+        ListNode slow = head;
+        //快指针先移动n步
+        while (n > 0) {
+            fast = fast.next;
+            n--;
+        }
+        //如果此时快指针为空，说明头节点就是要删除的节点
+        if(fast==null){
+            return head.next;
+        }
+        //快慢指针同时移动
+        while(fast.next!=null){
+            fast = fast.next;
+            slow = slow.next;
+        }
+        //删除慢指针后继节点
+        slow.next = slow.next.next;
+        return head;
+    }
+}
+
 ```
 
