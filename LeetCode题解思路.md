@@ -492,3 +492,123 @@ class Solution {
 
 ```
 
+### 21、合并两个有序链表
+
+**题目链接**：[合并两个有序链表](https://leetcode-cn.com/problems/merge-two-sorted-lists/)
+
+**解题思路**：
+
+使用归并排序的思想。
+
+**代码实现**：
+
+迭代
+
+```java
+class Solution {
+    public ListNode mergeTwoLists(ListNode l1, ListNode l2) {
+        if (l1 == null) {
+            return l2;
+        }
+        if(l2==null){
+            return l1;
+        }
+        ListNode head = new ListNode();
+        ListNode p1 = head;
+        while(l1!=null && l2!=null){
+            if(l1.val <= l2.val){
+                p1.next = l1;
+                l1=l1.next;
+            }else{
+                p1.next = l2;
+                l2 = l2.next;
+            }
+            p1 = p1.next;
+        }
+       p1.next = l1==null?l2:l1;
+        return head.next;
+    }
+    
+}
+```
+
+递归
+
+```java
+class Solution {
+    public ListNode mergeTwoLists(ListNode l1, ListNode l2) {
+        if (l1 == null) {
+            return l2;
+        }
+        if(l2==null){
+            return l1;
+        }
+        if(l1.val<=l2.val){
+            l1.next = mergeTwoLists(l1.next,l2);
+            return l1;
+        }else{
+            l2.next = mergeTwoLists(l1,l2.next);
+            return l2;
+        }
+    }
+    
+}
+```
+
+
+
+
+
+## 栈
+
+### 20、有效的括号
+
+**题目链接**：[有效的括号](https://leetcode-cn.com/problems/valid-parentheses/)
+
+**解题思路**：
+
+1. 先使用hashmap存储括号匹配
+2. 使用栈，碰到左括号就入栈，碰到右括号就出栈与之匹配
+3. 最后返回栈是否为空
+
+**代码实现**：
+
+```java
+class Solution {
+    public boolean isValid(String s) {
+        //先用hashmap存储括号匹配问题
+        HashMap<Character, Character> map = new HashMap<>(){
+            {
+                put('(', ')');
+                put('[', ']');
+                put('{', '}');
+            }
+        };
+		//使用栈来存储括号
+        Stack<Character> stack = new Stack<>();
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            //说明是左括号，直接入栈
+            if(map.containsKey(c)){
+                stack.push(c);
+            }else{
+                //说明是右括号，弹出左括号跟他匹配
+                if(!stack.isEmpty()){
+                    char c1 = stack.pop();
+                    if(map.get(c1)!=c){
+                        return false;
+                    }
+                }else{
+                    return false;
+                }
+            }
+        }
+        return stack.isEmpty();
+
+    }
+    
+}
+```
+
+
+
