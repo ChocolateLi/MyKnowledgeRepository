@@ -1,6 +1,6 @@
 # LeetCode题解思路
 
-## 哈希表
+## 一、哈希表
 
 ### 1、两数之和
 
@@ -33,7 +33,12 @@ class Solution {
 
 
 
-## 链表
+## 二、链表
+
+👍**链表模式识别**：
+
+- 涉及链表特殊位置，使用快慢指针
+- 要删除链表节点，找到节点的前驱节点
 
 ### 2、两数相加
 
@@ -111,333 +116,6 @@ class Solution {
 }
 ```
 
-
-
-## 滑动窗口
-
-### 3、无重复字符的最长子串
-
-**题目链接：** [无重复字符的最长子串](https://leetcode-cn.com/problems/longest-substring-without-repeating-characters/)
-
-**解题思路：** 使用滑动窗口操作
-
-**实现代码：** 
-
-```java
-class Solution {
-    public int lengthOfLongestSubstring(String s) {
-        
-        int left = 0;
-        int right = 0;
-        int res = 0;
-        HashMap<Character,Integer> window = new HashMap<>();
-        //增大窗口
-        while (right < s.length()) {
-            //更新数据
-            char c = s.charAt(right);
-            window.put(c,window.getOrDefault(c,0)+1);
-            right++;
-            //缩小窗口
-            while(window.get(c)>1){              
-                //更新数据
-                char c1 = s.charAt(left);
-                window.put(c1,window.get(c1)-1);
-                left++;
-            }
-             //更新结果
-            res = Math.max(right-left,res);
-        }
-        
-        return res;
-    }
-}
-```
-
-## 排序
-
-### 4、 寻找两个正序数组的中位数
-
-**题目链接**：[寻找两个正序数组的中位数](https://leetcode-cn.com/problems/median-of-two-sorted-arrays/)
-
-**解题思路**：
-
-1、使用归并排序，将两个数组合并。数组长度为奇数，则返回中间值。若是偶数，返回中间两个值除以2
-
-2、既然已经知道两个数组的长度，其实也可以不用合并数组。通过指针下标判断是否已经达到中间值。
-
-**实现代码**：
-
-```java
-class Solution {
-    public double findMedianSortedArrays(int[] nums1, int[] nums2) {
-        ArrayList<Integer> list = new ArrayList<>();
-        int length1 = nums1.length;
-        int length2 = nums2.length;
-        int p1 = 0;
-        int p2 = 0;
-        while(p1<length1 && p2<length2){
-            if(nums1[p1]<=nums2[p2]){
-                list.add(nums1[p1]);
-                p1++;
-            }else{
-                list.add(nums2[p2]);
-                p2++;
-            }
-        }
-        while(p1<length1){
-            list.add(nums1[p1]);
-            p1++;
-        }
-        while(p2<length2){
-            list.add(nums2[p2]);
-            p2++;
-        }
-        int size = list.size();
-        if((size&1)==1){
-            return (double)list.get(size/2);
-        }else{
-            return (list.get(size/2)+list.get(size/2 -1 ))/2.0;
-        }
-    }
-}
-```
-
-## 字符串
-
-### 5、最长回文子串
-
-**题目链接**：[最长回文子串](https://leetcode-cn.com/problems/longest-palindromic-substring/)
-
-**解题思路**：
-
-中心扩展法。把每一个字符都当作中心点去扩展，判断是否是回文子串。因为字符串长度为奇数和偶数是两种情况，所以干脆两者都一起判断，最后取最长的字符串。
-
-**代码实现**：
-
-```java
-class Solution {
-    public String longestPalindrome(String s) {
-        String res = "";
-        for(int i=0;i<s.length();i++){
-            //以s[i]为中心的最长回文子串
-            String s1 = palindrome(s,i,i);
-            //以s[i]和s[i+1]为中心的最长回文子串
-            String s2 = palindrome(s,i,i+1);
-            res = res.length()>s1.length()?res:s1;
-            res = res.length()>s2.length()?res:s2;
-        }
-        return res;
-    }
-
-    private String palindrome(String s,int left,int right){
-        //防止索引越界
-        while(left>=0 && right<=s.length()-1 && s.charAt(left)==s.charAt(right)){
-            left--;
-            right++;
-        }
-        //substring包头不包尾
-        return s.substring(left+1,right);
-    }
-}
-```
-
-## 动态规划
-
-### 10、正则表达式匹配
-
-题目链接：[正则表达式匹配](https://leetcode-cn.com/problems/regular-expression-matching/)
-
-解题思路：
-
-递归做法比动态规划容易理解。
-
-核心思路通过不断地剪去s和p的首部，直到某一个或者两个都被剪空，就可以得出答案。
-
-有 ‘*’ 和 没 ‘ * ‘ 两种情况进行讨论。
-
-其中有 ’ * ‘ 的又分两种情况，因为它可以匹配零次或者多次：
-
-1. p的第i个元素在s中出现零次：那就s不动，p剪去前面两个字母。如 s=“aac”，p=“b*aac”，把p前面的两个元素剪去
-2. p的第i个元素在s中出现一次或多次：比较s和p首元素是否相同，如果相同，p不动，s剪去首元素，继续递归。比如 s=“aabb”，p=“a*bb”，比较首元素相同，s 剪去首元素，即 s=“abb”，p不动，继续匹配
-
-没 ’ * ‘ 的情况是最简单的，这时候只需要扫描一遍s和p，从首部开始比较两元素是否相同，如果相同就剪去，比较下一个即可。
-
-```java
-//第i下标位置元素相同，'.'代表任何元素
-s.charAt(i) == p.charAt(i) || p.charAt(i)=='.'
-```
-
-代码实现：
-
-```java
-class Solution {
-    public boolean isMatch(String s, String p) {
-        if(p.length()==0){
-            return s.length()==0;
-        }
-        //判断首字符是否匹配。这里s.length可能为0的情况，但p.length不可能为0，因为p.length为0是递归出口
-        boolean firstIsMatch = (s.length()>0) && 		 (s.charAt(0)==p.charAt(0)||p.charAt(0)=='.');
-        //两种情况，p带'*'和不带'*'
-        if(p.length()>=2 && p.charAt(1)=='*'){
-            return isMatch(s,p.substring(2)) //匹配0次情况
-                || (firstIsMatch && isMatch(s.substring(1),p)); //匹配多次或者一次的情况
-        }else{
-            return firstIsMatch && isMatch(s.substring(1),p.substring(1));
-        }
-    }
-}
-```
-
-
-
-## 双指针
-
-👍**双指针算法模板**：[双指针技巧框架](https://blog.csdn.net/weixin_42870497/article/details/119893198)
-
-### 11、盛最多水的容器
-
-**题目链接**：[盛最多水的容器](https://leetcode-cn.com/problems/container-with-most-water/)
-
-**解题思路**：
-
-使用双指针，分别指向左右两端。容器的面积的长（right-left）* 宽（Math.min(height[left],height[right])）
-
-只有移动的较短的那个木板才会使得面积有变大的可能，移动较长的那个木板只会使面积变小。
-
-**代码实现**：
-
-```java
-class Solution {
-    public int maxArea(int[] height) {
-        int left = 0;
-        int right = height.length-1;
-        int res = 0;
-        while(left<right){
-            res = height[left]<=height[right]?
-                Math.max(res,(right-left) * height[left++]):
-                Math.max(res,(right-left) * height[right--]);
-        }
-        return res;
-    }
-}
-```
-
-### 15、三数之和
-
-**题目链接**：[三数之和](https://leetcode-cn.com/problems/3sum/)
-
-**解题思路**：
-
-1. 首先对数组排序，然后遍历数组，固定num[i]，再使用左右指针指向num[i]后面两端
-2. 计算三个数的 sum是否为0，如果是则添加进结果集。
-3. 如果 nums[i]大于 0，则三数之和必然无法等于 0，结束循环
-4. 如果 nums[i] == nums[i-1]，则说明该数字重复，会导致结果重复，所以应该跳过
-5. 当 sum0 时，nums[L] == nums[L+1] 则会导致结果重复，应该跳过，L++
-6. 当 sum0 时，nums[R]== nums[R-1] 则会导致结果重复，应该跳过，R--
-
-**代码实现**：
-
-```java
-class Solution {
-    public static List<List<Integer>> threeSum(int[] nums) {
-        List<List<Integer>> ans = new ArrayList();
-        int len = nums.length;
-        if(nums == null || len < 3) return ans;
-        Arrays.sort(nums); // 排序
-        for (int i = 0; i < len ; i++) {
-            if(nums[i] > 0) break; // 如果当前数字大于0，则三数之和一定大于0，所以结束循环
-            if(i > 0 && nums[i] == nums[i-1]) continue; // 去重
-            int L = i+1;
-            int R = len-1;
-            while(L < R){
-                int sum = nums[i] + nums[L] + nums[R];
-                if(sum == 0){
-                    ans.add(Arrays.asList(nums[i],nums[L],nums[R]));
-                    while (L<R && nums[L] == nums[L+1]) L++; // 去重
-                    while (L<R && nums[R] == nums[R-1]) R--; // 去重
-                    L++;
-                    R--;
-                }
-                else if (sum < 0) L++;
-                else if (sum > 0) R--;
-            }
-        }        
-        return ans;
-    }
-}
-
-```
-
-
-
-## 回溯法
-
-**算法模板**：[回溯框架](https://blog.csdn.net/weixin_42870497/article/details/119443910)
-
-### 17、电话号码的字母组合
-
-**题目链接**：[电话号码的字母组合](https://leetcode-cn.com/problems/letter-combinations-of-a-phone-number/)
-
-**解题思路**：
-
-应用回溯法的解题思路
-
-1. 先用HashMap初始化数字和字母的组合
-2. 使用回溯法开始深度遍历
-
-**代码实现**：
-
-```java
-class Solution {
-
-    HashMap<Character,String> map = new HashMap<>(){
-        {
-            put('2',"abc");
-            put('3',"def");
-            put('4',"ghi");
-            put('5',"jkl");
-            put('6',"mno");
-            put('7',"pqrs");
-            put('8',"tuv");
-            put('9',"wxyz");
-        }
-    };
-
-    List<String> list = new ArrayList<>();
-    public List<String> letterCombinations(String digits) {
-        if(digits.length()==0){
-            return list;
-        }
-        StringBuilder sb = new StringBuilder();
-        dfs(digits,sb,0);
-        return list;
-    }
-
-    private void dfs(String digits,StringBuilder sb,int index){
-        if(index==digits.length()){
-            list.add(sb.toString());
-            return;
-        }
-        char c = digits.charAt(index);
-        String str = map.get(c);
-        for(int i=0;i<str.length();i++){
-            sb.append(str.charAt(i));
-            dfs(digits,sb,index+1);
-            sb.deleteCharAt(sb.length()-1);
-        }
-    }
-}
-```
-
-
-
-## 链表
-
-👍**链表模式识别**：
-
-- 涉及链表特殊位置，使用快慢指针
-- 要删除链表节点，找到节点的前驱节点
-
 ### 19、删除链表倒数第N个节点
 
 **题目链接**：[删除链表倒数第N个节点](https://leetcode-cn.com/problems/remove-nth-node-from-end-of-list/)
@@ -451,7 +129,6 @@ class Solution {
 **代码实现**：
 
 ```Java
-
 /**
  * Definition for singly-linked list.
  * public class ListNode {
@@ -557,9 +234,333 @@ class Solution {
 
 
 
+## 三、滑动窗口
+
+### 3、无重复字符的最长子串
+
+**题目链接：** [无重复字符的最长子串](https://leetcode-cn.com/problems/longest-substring-without-repeating-characters/)
+
+**解题思路：** 使用滑动窗口操作
+
+**实现代码：** 
+
+```java
+class Solution {
+    public int lengthOfLongestSubstring(String s) {
+        
+        int left = 0;
+        int right = 0;
+        int res = 0;
+        HashMap<Character,Integer> window = new HashMap<>();
+        //增大窗口
+        while (right < s.length()) {
+            //更新数据
+            char c = s.charAt(right);
+            window.put(c,window.getOrDefault(c,0)+1);
+            right++;
+            //缩小窗口
+            while(window.get(c)>1){              
+                //更新数据
+                char c1 = s.charAt(left);
+                window.put(c1,window.get(c1)-1);
+                left++;
+            }
+             //更新结果
+            res = Math.max(right-left,res);
+        }
+        
+        return res;
+    }
+}
+```
 
 
-## 栈
+
+## 四、排序
+
+### 4、 寻找两个正序数组的中位数
+
+**题目链接**：[寻找两个正序数组的中位数](https://leetcode-cn.com/problems/median-of-two-sorted-arrays/)
+
+**解题思路**：
+
+1、使用归并排序，将两个数组合并。数组长度为奇数，则返回中间值。若是偶数，返回中间两个值除以2
+
+2、既然已经知道两个数组的长度，其实也可以不用合并数组。通过指针下标判断是否已经达到中间值。
+
+**实现代码**：
+
+```java
+class Solution {
+    public double findMedianSortedArrays(int[] nums1, int[] nums2) {
+        ArrayList<Integer> list = new ArrayList<>();
+        int length1 = nums1.length;
+        int length2 = nums2.length;
+        int p1 = 0;
+        int p2 = 0;
+        while(p1<length1 && p2<length2){
+            if(nums1[p1]<=nums2[p2]){
+                list.add(nums1[p1]);
+                p1++;
+            }else{
+                list.add(nums2[p2]);
+                p2++;
+            }
+        }
+        while(p1<length1){
+            list.add(nums1[p1]);
+            p1++;
+        }
+        while(p2<length2){
+            list.add(nums2[p2]);
+            p2++;
+        }
+        int size = list.size();
+        if((size&1)==1){
+            return (double)list.get(size/2);
+        }else{
+            return (list.get(size/2)+list.get(size/2 -1 ))/2.0;
+        }
+    }
+}
+```
+
+
+
+## 五、字符串
+
+### 5、最长回文子串
+
+**题目链接**：[最长回文子串](https://leetcode-cn.com/problems/longest-palindromic-substring/)
+
+**解题思路**：
+
+中心扩展法。把每一个字符都当作中心点去扩展，判断是否是回文子串。因为字符串长度为奇数和偶数是两种情况，所以干脆两者都一起判断，最后取最长的字符串。
+
+**代码实现**：
+
+```java
+class Solution {
+    public String longestPalindrome(String s) {
+        String res = "";
+        for(int i=0;i<s.length();i++){
+            //以s[i]为中心的最长回文子串
+            String s1 = palindrome(s,i,i);
+            //以s[i]和s[i+1]为中心的最长回文子串
+            String s2 = palindrome(s,i,i+1);
+            res = res.length()>s1.length()?res:s1;
+            res = res.length()>s2.length()?res:s2;
+        }
+        return res;
+    }
+
+    private String palindrome(String s,int left,int right){
+        //防止索引越界
+        while(left>=0 && right<=s.length()-1 && s.charAt(left)==s.charAt(right)){
+            left--;
+            right++;
+        }
+        //substring包头不包尾
+        return s.substring(left+1,right);
+    }
+}
+```
+
+
+
+## 六、动态规划
+
+### 10、正则表达式匹配
+
+题目链接：[正则表达式匹配](https://leetcode-cn.com/problems/regular-expression-matching/)
+
+解题思路：
+
+递归做法比动态规划容易理解。
+
+核心思路通过不断地剪去s和p的首部，直到某一个或者两个都被剪空，就可以得出答案。
+
+有 ‘*’ 和 没 ‘ * ‘ 两种情况进行讨论。
+
+其中有 ’ * ‘ 的又分两种情况，因为它可以匹配零次或者多次：
+
+1. p的第i个元素在s中出现零次：那就s不动，p剪去前面两个字母。如 s=“aac”，p=“b*aac”，把p前面的两个元素剪去
+2. p的第i个元素在s中出现一次或多次：比较s和p首元素是否相同，如果相同，p不动，s剪去首元素，继续递归。比如 s=“aabb”，p=“a*bb”，比较首元素相同，s 剪去首元素，即 s=“abb”，p不动，继续匹配
+
+没 ’ * ‘ 的情况是最简单的，这时候只需要扫描一遍s和p，从首部开始比较两元素是否相同，如果相同就剪去，比较下一个即可。
+
+```java
+//第i下标位置元素相同，'.'代表任何元素
+s.charAt(i) == p.charAt(i) || p.charAt(i)=='.'
+```
+
+代码实现：
+
+```java
+class Solution {
+    public boolean isMatch(String s, String p) {
+        if(p.length()==0){
+            return s.length()==0;
+        }
+        //判断首字符是否匹配。这里s.length可能为0的情况，但p.length不可能为0，因为p.length为0是递归出口
+        boolean firstIsMatch = (s.length()>0) && 		 (s.charAt(0)==p.charAt(0)||p.charAt(0)=='.');
+        //两种情况，p带'*'和不带'*'
+        if(p.length()>=2 && p.charAt(1)=='*'){
+            return isMatch(s,p.substring(2)) //匹配0次情况
+                || (firstIsMatch && isMatch(s.substring(1),p)); //匹配多次或者一次的情况
+        }else{
+            return firstIsMatch && isMatch(s.substring(1),p.substring(1));
+        }
+    }
+}
+```
+
+
+
+## 七、双指针
+
+👍**双指针算法模板**：[双指针技巧框架](https://blog.csdn.net/weixin_42870497/article/details/119893198)
+
+### 11、盛最多水的容器
+
+**题目链接**：[盛最多水的容器](https://leetcode-cn.com/problems/container-with-most-water/)
+
+**解题思路**：
+
+使用双指针，分别指向左右两端。容器的面积的长（right-left）* 宽（Math.min(height[left],height[right])）
+
+只有移动的较短的那个木板才会使得面积有变大的可能，移动较长的那个木板只会使面积变小。
+
+**代码实现**：
+
+```java
+class Solution {
+    public int maxArea(int[] height) {
+        int left = 0;
+        int right = height.length-1;
+        int res = 0;
+        while(left<right){
+            res = height[left]<=height[right]?
+                Math.max(res,(right-left) * height[left++]):
+                Math.max(res,(right-left) * height[right--]);
+        }
+        return res;
+    }
+}
+```
+
+### 15、三数之和
+
+**题目链接**：[三数之和](https://leetcode-cn.com/problems/3sum/)
+
+**解题思路**：
+
+1. 首先对数组排序，然后遍历数组，固定num[i]，再使用左右指针指向num[i]后面两端
+2. 计算三个数的 sum是否为0，如果是则添加进结果集。
+3. 如果 nums[i]大于 0，则三数之和必然无法等于 0，结束循环
+4. 如果 nums[i] == nums[i-1]，则说明该数字重复，会导致结果重复，所以应该跳过
+5. 当 sum0 时，nums[L] == nums[L+1] 则会导致结果重复，应该跳过，L++
+6. 当 sum0 时，nums[R]== nums[R-1] 则会导致结果重复，应该跳过，R--
+
+**代码实现**：
+
+```java
+class Solution {
+    public static List<List<Integer>> threeSum(int[] nums) {
+        List<List<Integer>> ans = new ArrayList();
+        int len = nums.length;
+        if(nums == null || len < 3) return ans;
+        Arrays.sort(nums); // 排序
+        for (int i = 0; i < len ; i++) {
+            if(nums[i] > 0) break; // 如果当前数字大于0，则三数之和一定大于0，所以结束循环
+            if(i > 0 && nums[i] == nums[i-1]) continue; // 去重
+            int L = i+1;
+            int R = len-1;
+            while(L < R){
+                int sum = nums[i] + nums[L] + nums[R];
+                if(sum == 0){
+                    ans.add(Arrays.asList(nums[i],nums[L],nums[R]));
+                    while (L<R && nums[L] == nums[L+1]) L++; // 去重
+                    while (L<R && nums[R] == nums[R-1]) R--; // 去重
+                    L++;
+                    R--;
+                }
+                else if (sum < 0) L++;
+                else if (sum > 0) R--;
+            }
+        }        
+        return ans;
+    }
+}
+
+```
+
+
+
+## 八、回溯法
+
+**算法模板**：[回溯框架](https://blog.csdn.net/weixin_42870497/article/details/119443910)
+
+### 17、电话号码的字母组合
+
+**题目链接**：[电话号码的字母组合](https://leetcode-cn.com/problems/letter-combinations-of-a-phone-number/)
+
+**解题思路**：
+
+应用回溯法的解题思路
+
+1. 先用HashMap初始化数字和字母的组合
+2. 使用回溯法开始深度遍历
+
+**代码实现**：
+
+```java
+class Solution {
+
+    HashMap<Character,String> map = new HashMap<>(){
+        {
+            put('2',"abc");
+            put('3',"def");
+            put('4',"ghi");
+            put('5',"jkl");
+            put('6',"mno");
+            put('7',"pqrs");
+            put('8',"tuv");
+            put('9',"wxyz");
+        }
+    };
+
+    List<String> list = new ArrayList<>();
+    public List<String> letterCombinations(String digits) {
+        if(digits.length()==0){
+            return list;
+        }
+        StringBuilder sb = new StringBuilder();
+        dfs(digits,sb,0);
+        return list;
+    }
+
+    private void dfs(String digits,StringBuilder sb,int index){
+        if(index==digits.length()){
+            list.add(sb.toString());
+            return;
+        }
+        char c = digits.charAt(index);
+        String str = map.get(c);
+        for(int i=0;i<str.length();i++){
+            sb.append(str.charAt(i));
+            dfs(digits,sb,index+1);
+            sb.deleteCharAt(sb.length()-1);
+        }
+    }
+}
+```
+
+
+
+
+
+## 九、栈
 
 ### 20、有效的括号
 
@@ -607,6 +608,75 @@ class Solution {
 
     }
     
+}
+```
+
+
+
+## 十、递归
+
+👍**递归模板**：
+
+```java
+public void recur(int level,int param){
+    //1.递归终止条件
+    if(level>MaxLevel){
+        //过程结果
+        return;
+    }
+    //2.处理当前层逻辑
+    process...
+    //3.进入下一层
+    recur(level+1,newParam);
+    //4.清理当前层，如果需要的话
+    process...
+}
+
+参数说明：
+level表示来到了第几层
+param表示其他参数
+```
+
+
+
+### 22、括号生成
+
+**题目链接**：[括号生成](https://leetcode-cn.com/problems/generate-parentheses/)
+
+**解题思路**：
+
+使用暴力递归，枚举所有可能的结果。
+
+使用left和right两个参数分别表示左括号和右括号的个数，只要左括号没有达到最大值就可以一直往里面添加左括号。只要右括号小于左括号的个数，就可以往里面添加右括号。最后只要左括号和右括号达到最大个数就可以停止递归。
+
+**代码实现**：
+
+```java
+class Solution {
+
+    List<String> res;
+    public List<String> generateParenthesis(int n) {
+        res = new ArrayList<>();
+        recursion(0,0,n,"");
+        return res;
+    }
+
+    private void recursion(int left,int right,int max,String s){
+        //递归结束条件
+        if(left==max && right==max){
+            res.add(s);
+            return;
+        }
+        //处理逻辑
+        if(left<max){
+            recursion(left+1,right,max,s+"(");
+        }
+        if(left>right){
+            recursion(left,right+1,max,s+")");
+        }
+        return;
+
+    }
 }
 ```
 
