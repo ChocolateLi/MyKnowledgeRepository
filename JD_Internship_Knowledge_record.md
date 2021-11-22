@@ -365,11 +365,49 @@ select ...
 
 
 
+Hive 解析json
+
 Get_json_object(string json_string,string path):用于解析json字符串，支持多层嵌套解析
 
 第一个参数是要解析的字符串
 
 第二个参数是要获取的key,第二个参数使用$表示json变量标识，然后用.或者[]读取对象或数组
+
+```json
+data =
+{
+ "store":
+        {
+         "fruit":[{"weight":8,"type":"apple"}, {"weight":9,"type":"pear"}],  
+         "bicycle":{"price":19.95,"color":"red"}
+         }, 
+ "email":"amy@only_for_json_udf_test.net", 
+ "owner":"amy" 
+}
+```
+
+get单层值
+
+```sql
+hive> select  get_json_object(data, '$.owner') from test;
+结果：amy
+```
+
+get多层值
+
+```sql
+hive> select  get_json_object(data, '$.store.bicycle.price') from test;
+结果：19.95
+```
+
+get数组值
+
+```sql
+hive> select  get_json_object(data, '$.store.fruit[0]') from test;
+结果：{"weight":8,"type":"apple"}
+```
+
+
 
 
 
@@ -474,6 +512,25 @@ select from_unixtime(unix_timestamp('20171205','yyyymmdd'),'yyyy-mm-dd') from du
 --2017-12-05转成20171205
 
 select from_unixtime(unix_timestamp('2017-12-05','yyyy-mm-dd'),'yyyymmdd') from dual;
+```
+
+
+
+Instr(str,substr):返回substr在str第一次出现的位置（从1开始计数），如果substr在str中不存在则返回0
+
+```sql
+select instr('23e,wec',',') -- 4
+
+select instr('23e,wec','f') -- 0 
+
+select instr('23e,wec','') -- 1
+
+select instr('2f3ef,wec','f') -- 2
+
+select instr('23e,wec','wec') -- 5
+
+select instr('23e,wec','wecv') -- 0
+
 ```
 
 
