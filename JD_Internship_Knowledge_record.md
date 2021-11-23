@@ -350,6 +350,10 @@ union [all]
 select  column,...... from table2
 ```
 
+union 会去重
+
+union all 不会去重 
+
 
 
 With table as :创建一个临时表，放在select 语句前面
@@ -532,6 +536,41 @@ select instr('23e,wec','wec') -- 5
 select instr('23e,wec','wecv') -- 0
 
 ```
+
+
+
+hive中的字符连接函数：Concat()、concat_ws
+
+Concat(st1,str2,str3,...)是将字符串连接起来
+
+```sql
+select concat('jack',',','mike')
+结果：jack,mike
+```
+
+Concat_ws(分隔符,str1,str2,...):将每个参数值和第一个参数指定的分隔符依次连接到一起组成新的字符串
+
+注意：如果分隔符取值为null，则将分隔符视作与空串进行拼接。如果其它参数为NULL，在执行拼接过程中跳过取值为NULL的参数。
+
+```sql
+select concat_ws('|','jack','mike','may')
+结果：jack|mike|may
+```
+
+
+
+hive中多行合并为一行：collect_set()函数和collect_list()函数。列转行。经常喝和concat_ws()结合使用
+
+Collect_set和collect_list都是将分组中的某一列转换为一个数组返回，collect_set去重，collect_list不去重
+
+```sql
+select user,concat_ws('|',collect_set(cast(id as string))) id from table;
+结果：张三 1｜2｜3. .
+```
+
+
+
+
 
 
 

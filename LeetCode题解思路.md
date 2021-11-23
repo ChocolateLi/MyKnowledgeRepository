@@ -737,3 +737,47 @@ class Solution {
 
 
 
+## 十一、其他
+
+### 31、下一个排列
+
+**题目链接**：[下一个排列](https://leetcode-cn.com/problems/next-permutation/)
+
+**解题思路**：
+
+1. 定义 i=nums.length-1，从后向前寻找第一个满足nums[i]>nums[i-1]的数，其中nums[i-1]就是要交换的数
+2. 对 i 到 nums.length范围的数进行排序
+3. 排序后，在 i 到 nums.length中寻找第一个nuns[j] > nums[i-1]的数，其中nums[j] 就是要交换的数
+4. 交换nums[i-1] 和 nums[j] ，返回
+
+**代码实现**：
+
+```java
+class Solution {
+    public void nextPermutation(int[] nums) {
+
+        int len = nums.length;
+        for(int i=len-1;i>0;i--){
+          	//1.从后往前寻找第一个nums[i]>nums[i-1]的数
+            if (nums[i] > nums[i - 1]) {
+                //i后面的元素排序
+                Arrays.sort(nums,i,len);
+                //在后面元素中查找第一个大于nums[i-1]的元素进行交换
+                for(int j=i;i<len;j++){
+                    if(nums[j]>nums[i-1]){
+                        int tmp = nums[i-1];
+                        nums[i-1] = nums[j];
+                        nums[j] = tmp;
+                        return;
+                    }
+                }
+            }
+        }
+        Arrays.sort(nums);
+        return;
+    }
+}
+```
+
+
+
