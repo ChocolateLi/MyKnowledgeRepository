@@ -668,6 +668,50 @@ class Solution {
 
 
 
+### 32、最长有效括号
+
+**题目链接**：[最长有效括号](https://leetcode-cn.com/problems/longest-valid-parentheses/)
+
+**解题思路**：
+
+方法一：动态规划
+
+方法二：栈
+
+1. 定义一个栈，先放入-1。这样做的目的是，让当前右括号的下标减去栈顶元素即为要求的长度，也为了保持统一。
+2. 遇到 '(' ，将它的下标放入栈中
+3. 遇到 ')' ，先弹出栈顶元素表示匹配了当前右括号：如果栈为空，说明当前的右括号没有被匹配，我们将其下标放入栈中
+
+**代码实现**：
+
+```java
+class Solution {
+    public int longestValidParentheses(String s) {
+        int maxLen = 0;
+        Stack<Integer> stack = new Stack<>();
+        //初始化先放一个-1。目的是让当前右括号的下标减去栈顶元素即为要求的长度
+        stack.push(-1);
+        for (int i = 0; i < s.length(); i++) {
+            //碰到'('，将其下标入栈
+            if (s.charAt(i) == '(') {
+                stack.push(i);
+            }else{//碰到 ')'，弹出栈顶，并计算长度
+                stack.pop();
+                if (stack.isEmpty()) {
+                    stack.push(i);
+                }
+                maxLen = Math.max(maxLen, i - stack.peek());
+            }
+        }
+        return maxLen;
+    }
+}
+```
+
+
+
+
+
 ## 十、递归
 
 👍**递归模板**：
