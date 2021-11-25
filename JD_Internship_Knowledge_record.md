@@ -570,7 +570,11 @@ select user,concat_ws('|',collect_set(cast(id as string))) id from table;
 
 
 
+Cascade 关键字
 
+删除：删除主表时自动删除从表。删除从表，主表不变
+
+更新：更新主表时自动更新从表。更新从表，主表不变
 
 
 

@@ -550,6 +550,57 @@ class Solution {
 
 ```
 
+### 33、搜索旋转排序数组
+
+**题目链接**：[搜索旋转排序数组](https://leetcode-cn.com/problems/search-in-rotated-sorted-array/)
+
+**解题思路**：
+
+采用二分法的思路进行搜索。
+
+旋转数组后，从中间划分，一定有一边是有序的。
+
+由于一定有一边是有序的，可以根据有序的两个边界值来判断目标值在有序一边还是无序一边。
+
+注意：有序一边的边界值可能等于目标值，所以判断时别忘了等号
+
+**代码实现**：
+
+```java
+class Solution {
+    public int search(int[] nums, int target) {
+        int left = 0;
+        int right = nums.length-1;
+        while (left <= right) {
+            int mid = left + ((right - left) >> 1);
+            if (nums[mid] == target) {
+                return mid;
+            }
+            //右边有序
+            if(nums[mid]<nums[right]){
+                //目标值在右边
+                if(target>nums[mid] && target<=nums[right]){
+                    left = mid + 1;
+                }else{//目标值在左边
+                    right = mid - 1;
+                }
+            }else{//左边有序
+                //目标值在左边
+                if(target<nums[mid] && target>=nums[left]){
+                    right = mid - 1;
+                }else{//目标值在右边
+                    left = mid + 1;
+                }
+            }
+            
+        }
+        return -1;
+    }
+}
+```
+
+
+
 
 
 ## 八、回溯法
