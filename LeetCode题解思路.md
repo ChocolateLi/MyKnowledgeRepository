@@ -605,7 +605,7 @@ class Solution {
 
 ## 八、回溯法
 
-**算法模板**：[回溯框架](https://blog.csdn.net/weixin_42870497/article/details/119443910)
+👍**算法模板**：[回溯框架](https://blog.csdn.net/weixin_42870497/article/details/119443910)
 
 ### 17、电话号码的字母组合
 
@@ -832,7 +832,76 @@ class Solution {
 
 
 
-## 十一、其他
+## 十一、二分查找
+
+👍**二分查找模板**：[二分查找模板](https://blog.csdn.net/weixin_42870497/article/details/119728363)
+
+### 34、在排序数组中查找元素的第一个和最后一个位置
+
+**题目链接**：[在排序数组中查找元素的第一个和最后一个位置](https://leetcode-cn.com/problems/find-first-and-last-position-of-element-in-sorted-array/)
+
+**解题思路**：二分查找
+
+**代码模板**：
+
+```java
+class Solution {
+    public int[] searchRange(int[] nums, int target) {
+        if (nums.length == 0) {
+            return new int[]{-1,-1};
+        }
+        int left = binarySearchLeft(nums, target);
+        int right = binarySearchRight(nums, target);
+        return new int[]{left, right};
+    }
+
+    private int binarySearchLeft(int[] nums, int target) {
+        int left = 0;
+        int right = nums.length-1;
+        while (left <= right) {
+            int mid = left + ((right - left) >> 1);
+            if (nums[mid] < target) {
+                left = mid + 1;
+            } else if (nums[mid] > target) {
+                right = mid - 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+        if (left >= nums.length || nums[left] != target) {
+            return -1;
+        }
+        return left;
+    }
+
+    private int binarySearchRight(int[] nums, int target) {
+        int left = 0;
+        int right = nums.length-1;
+        while (left <= right) {
+            int mid = left + ((right - left) >> 1);
+            if (nums[mid] < target) {
+                left = mid + 1;
+            } else if (nums[mid] > target) {
+                right = mid - 1;
+            } else {
+                left = mid + 1;
+            }
+        }
+        if (right < 0 || nums[right] != target) {
+            return -1;
+        }
+        return right;
+    }
+
+
+}
+```
+
+
+
+
+
+## 十二、其他
 
 ### 31、下一个排列
 
