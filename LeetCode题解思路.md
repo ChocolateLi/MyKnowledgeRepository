@@ -664,6 +664,48 @@ class Solution {
 
 
 
+### 39、组合总和
+
+**题目链接：**[组合总和](https://leetcode-cn.com/problems/combination-sum/)
+
+**解题思路：**回溯法。关键点：start这个参数
+
+**代码实现：**
+
+```java
+class Solution {
+
+    List<List<Integer>> res;
+    public List<List<Integer>> combinationSum(int[] candidates, int target) {
+        res = new ArrayList<>();
+        LinkedList<Integer> list = new LinkedList<>();
+        Arrays.sort(candidates);
+        dfs(candidates,target,list,0);
+        return res;
+    }
+
+    private void dfs(int[] nums,int target,LinkedList<Integer> list,int start){
+        if (target == 0) {
+            res.add(new ArrayList<Integer>(list));
+        }
+        for (int i = start; i < nums.length; i++) {
+            //剪枝
+            if (target < nums[i]) {
+                return;
+            }
+            list.add(nums[i]);
+            dfs(nums,target-nums[i],list,i);
+            list.removeLast();
+
+        }
+    }
+}
+```
+
+
+
+
+
 
 
 ## 九、栈

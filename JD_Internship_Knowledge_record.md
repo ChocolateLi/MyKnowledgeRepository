@@ -867,6 +867,8 @@ spark从mysql表中读取场景表数据，createOrReplaceTempView注册为临�
 
 (一天跑完之后join出来的数据：160167，原本数据量是194862，差了20个百分点，要不误差小于等于5个百分点)
 
+(join出来的数据：169968，原本数据量是195005，差了12.8%)
+
 问题：spark作业出现maxResultSize异常而失败。大概意思是有多少个任务的序列化结果总大小大于spark.driver.maxResultSize。
 
 发生此错误的原因是超出了配置的大小限制，配置是2G。spark.driver.maxResultSize是每个Spark action分区的序列化结果的总大小限制（例如，collection 行动算子），如果超过了限制大小，job就会被终止，job aborted 任务流产。
