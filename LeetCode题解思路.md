@@ -599,6 +599,133 @@ class Solution {
 }
 ```
 
+### 42、接雨水
+
+**题目链接**：[接雨水](https://leetcode-cn.com/problems/trapping-rain-water/)
+
+**解题思路**：
+
+一、暴力解法
+
+先考虑局部，仅仅对于位置i，能装多少水？
+
+算出位置i左边的最高柱子leftMax和右边最高的柱子rightMax，则位置 i 能装的水为Math.min(leftMax,rightMax)-height[i]
+
+时间复杂度：O(n^2)
+
+空间复杂度：O(1)
+
+二、备忘录
+
+开两个数组leftMax[]和rightMax[]做备忘录，leftMax[i]表示位置 i  左边最高的柱子高度，rightMax[i] 表示位置 i  右边最高的柱子高度。预先把这两个数组计算好，避免重复计算。
+
+并不需要知道右边或者左边最高的是谁，只要知道当前位置最小的是谁。
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)
+
+![](https://labuladong.gitee.io/algo/images/%e6%8e%a5%e9%9b%a8%e6%b0%b4/3.jpg)
+
+三、双指针
+
+使用双指针边走边算
+
+时间复杂度：O(n)
+
+空间复杂度：O(1)
+
+![](https://labuladong.gitee.io/algo/images/%e6%8e%a5%e9%9b%a8%e6%b0%b4/4.jpg)
+
+
+
+**代码实现**：
+
+一、暴力解法
+
+ ```java
+ class Solution {
+     public int trap(int[] height) {
+         int maxResult = 0;
+         int n = height.length;
+         for(int i=1;i<n-1;i++){
+             int maxLeft = 0;
+             int maxRight = 0;
+             //找左边最高的柱子
+             for(int left=i;left >= 0;left--){
+                 maxLeft = Math.max(maxLeft, height[left]);
+             }
+             //找右边最高的柱子
+             for (int right = i; right < n; right++) {
+                 maxRight = Math.max(maxRight, height[right]);
+             }
+             maxResult += Math.min(maxLeft,maxRight) - height[i];
+         }
+         return maxResult;
+     }
+ }
+ 
+ ```
+
+二、备忘录
+
+```java
+class Solution {
+    public int trap(int[] height) {
+        int maxResult = 0;
+        int n = height.length;
+        //使用备忘录
+        int leftMax[] = new int[n];
+        int rightMax[] = new int[n];
+        leftMax[0] = height[0];
+        rightMax[n-1] = height[n-1];
+        //从左向右计算左边最高的柱子
+        //leftMax[i]表示第i位柱子的左边最高的柱子
+        for (int i=1;i<n;i++){
+            leftMax[i] = Math.max(height[i],leftMax[i-1]);
+        }
+        //从右向左计算右边最高的柱子
+        //leftMax[i]表示第i位柱子的左边最高的柱子
+        for (int i = n - 2; i >= 0; i--) {
+            rightMax[i] = Math.max(height[i],rightMax[i+1]);
+        }
+        //计算能接的雨水
+        for (int i = 0; i < n; i++) {
+            maxResult += Math.min(leftMax[i],rightMax[i]) - height[i];
+        }
+        return maxResult;
+    }
+}
+
+```
+
+三、双指针
+
+```java
+class Solution {
+    public int trap(int[] height) {
+        int maxResult = 0;
+        int left = 0;
+        int right = height.length-1;
+        int leftMax = 0;
+        int rightMax = 0;
+        while(left < right){
+            leftMax = Math.max(leftMax,height[left]);
+            rightMax = Math.max(rightMax,height[right]);
+            if (leftMax < rightMax) {
+                maxResult += leftMax - height[left];
+                left++;
+            }else{
+                maxResult += rightMax - height[right];
+                right--;
+            }
+        }
+        return maxResult;
+    }
+}
+
+```
+
 
 
 
