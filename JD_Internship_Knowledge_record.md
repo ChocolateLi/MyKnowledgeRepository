@@ -2,6 +2,19 @@
 
 ## 数据仓库
 
+### 数仓模型设计流程
+
+1. 需求申请
+2. 需求调研
+3. 数据探查
+4. 模型设计：概念模型、逻辑模型、物理模型
+5. mapping设计
+6. 脚本编写
+7. 任务测试和模型验证
+8. 模型完善
+9. 模型上线
+10. 模型运营
+
 ### 数据仓库位置
 
 ![数据仓库位置](/Users/chenli75/Desktop/MyFile/github/MyKnowledgeRepository/internship_picture/数据仓库位置.png)
@@ -80,6 +93,16 @@ sysdate(-1)表示昨天的日期
 拉链表查询方式：
 
 ![拉链表查询方式](/Users/chenli75/Desktop/MyFile/github/MyKnowledgeRepository/internship_picture/拉链表查询方式.png)
+
+
+
+拉链表场景：
+
+1. 表中部分字段会被update，例如订单的状态，从下单到待付款到已付款
+2. 需要查看某一个时间点或者时间段的历史快照信息，例如查看某一个订单在某一个时间点是什么状态
+3. 变化比例或者频率不是很大
+
+
 
 
 
@@ -634,6 +657,31 @@ partiton(dt='2021-11-11')
 无local表示从HDFS加载数据（注意：是文件移动，而不是拷贝）
 
 overwrite表示是否覆盖表中的数据（可以指定分区覆盖）（没有overwrite会直接append，不会去重）
+
+
+
+空值处理
+
+nvl(表达式1，表达式2)：空值转换函数。其表达式的值可以是数字型、字符型和日期型。但是表达式1和表达式2的数据类型必须为同一个类型。对数字型： NVL（ comm,0);对字符型 NVL( TO_CHAR(comm), 'No Commission')对日期型 NVL（hiredate,' 31-DEC-99')
+
+NVL2(表达式1，表达式2，表达式3）：如果表达式1为空，返回值为表达式3的值。如果表达式1不为空，返回值为表达式2的值
+
+NULLIF(表达式1，表达式2)：如果表达1和表达2相等则返回空(null)，否则返回第一个值
+
+Coalesce(表达式1，表达式2，...，表达式n)，遇到非null值即停止并返回该值，如果所有表达式都是空值，最终返回一个空值。
+
+```
+select coalesce(a,b,c);
+参数说明：如果a==null,则选择b；如果b==null,则选择c；如果a!=null,则选择a；如果a b c 都为null ，则返回为null。
+```
+
+
+
+
+
+
+
+
 
 
 

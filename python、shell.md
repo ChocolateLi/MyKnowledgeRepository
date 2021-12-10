@@ -314,6 +314,28 @@ sayHello
 
 ## Python
 
+### 脚本开发规范
+
+标准头部
+
+```python
+#!/usr/bin/python    --python2写法
+#！/usr/bin/env python3	--python3写法
+```
+
+编码
+
+```python
+所有python脚本文件都应该在文件头上标上
+# -*- coding: utf-8 -*-
+设置编辑器，默认保存为utf8格式
+使用python3可以无视
+```
+
+
+
+
+
 ### os模块
 
 
