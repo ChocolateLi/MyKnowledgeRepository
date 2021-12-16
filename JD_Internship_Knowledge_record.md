@@ -976,6 +976,16 @@ spark从mysql表中读取场景表数据，createOrReplaceTempView注册为临�
 
 
 
+adm层回刷的过程中出现spark异常，spark作业出现maxResultSize异常而失败，排查原因发现是商品维表数据量太大导致的。因为商品维表一天的数据量是三个月的
+
+
+
+报错：Cannot broadcast the table that is larger than 8GB: 8 GB
+
+原因：map join(a,b,c)三个表
+
+
+
 5、A/B test 商品实验设计
 
 设置三个组，ABC，A 组是对照组、B组是结果展示组、C组是主站点击高的组
@@ -984,13 +994,9 @@ spark从mysql表中读取场景表数据，createOrReplaceTempView注册为临�
 
 
 
-hive表开发完的一般测试过程：
+6、京东180新和360新的数据统计
 
-自测部分：
 
-1、新表和老表的量级测试（每天的行数对比）
-
-2、按租户或者设备的明细数据对比，直接使用bdp新老表关联做差值或者下载下来用excel看diff
 
 
 
