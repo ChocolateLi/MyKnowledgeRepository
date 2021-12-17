@@ -980,6 +980,8 @@ adm层回刷的过程中出现spark异常，spark作业出现maxResultSize异常
 
 
 
+设置spark.driver.maxResultSize=10G
+
 报错：Cannot broadcast the table that is larger than 8GB: 8 GB
 
 原因：map join(a,b,c)三个表
