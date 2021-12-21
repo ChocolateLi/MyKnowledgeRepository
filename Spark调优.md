@@ -18,6 +18,19 @@
 --executor-memory 100m \  配置每个executor的内存大小
 --executor-cores 3 \  配置每个executor的cpu core数量
 /usr/local/SparkTest-0.0.1-SNAPSHOT-jar-with-dependencies.jar \
+
+
+
+spark-submit \
+--conf spark.sql.catalogImplementation=hive \
+--master yarn-cluster \
+--driver-cores 8 \
+--driver-memory 40g \
+--executor-cores 8 \
+--num-executors 10 \ --提高并行度也可以提高速度
+--executor-memory 20g  \ --提高executor 吞吐量
+--class com.jd.iot.tlink.data.apps.applicationJPStore.UserBehavior \
+./data_warehouse-1.0-SNAPSHOT.jar
 ```
 
 
@@ -38,7 +51,7 @@
 
 #### 调节资源以后，性能为什么会提升？
 
-![分配资源](D:\MyFile\求职面试\spark_picture\分配资源.png)
+![分配资源](https://raw.githubusercontent.com/ChocolateLi/spark-project/master/spark_picture/%E5%88%86%E9%85%8D%E8%B5%84%E6%BA%90.png)
 
 
 
@@ -437,6 +450,22 @@ Spark在Driver上，对Application的每一个stage的task，进行分配之前�
 
 
 你别本末倒置，本地化级别倒是提升了，但是因为大量的等待时长，spark作业的运行时间反而增加了，那就还是不要调节了
+
+
+
+**Spark Locality level**
+
+数据本地性的优和差排序： PROCESS_LOCAL > NODE_LOCAL > NO_PREF > RACK_LOCAL
+
+```
+PROCESS_LOCAL: 数据在同一个 JVM 中，即同一个 executor 上。这是最佳数据 locality。
+NODE_LOCAL: 数据在同一个节点上。比如数据在同一个节点的另一个 executor上；或在 HDFS 上，恰好有 block 在同一个节点上。速度比 PROCESS_LOCAL 稍慢，因为数据需要在不同进程之间传递或从文件中读取
+NO_PREF: 数据从哪里访问都一样快，不需要位置优先
+RACK_LOCAL: 数据在同一机架的不同节点上。需要通过网络传输数据及文件 IO，比 NODE_LOCAL 慢
+ANY: 数据在非同一机架的网络上，速度最慢
+```
+
+
 
 
 
