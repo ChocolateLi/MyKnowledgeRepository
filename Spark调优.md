@@ -95,8 +95,6 @@ task没有设置，或者设置的很少，比如就设置了，100个task。50�
 
 1、task数量，至少设置成与Spark application的总cpu core数量相同（最理想情况，比如总共150个cpu core，分配了150个task，一起运行，差不多同一时间运行完毕）
 
-
-
 2、官方是推荐，task数量，设置成spark application总cpu core数量的2~3倍，比如150个cpu core，基本要设置task数量为300~500；
 
 
@@ -132,16 +130,16 @@ SparkConf conf = new SparkConf()
 
 使用：
 
-```
+```java
 rdd调用persist()方法,并传入一个持久化级别
 
 rdd.persist(持久化级别);
 
 如果是persist(StorageLevel.MEMORY_ONLY())，纯内存，无序列化，那么就可以用cache()方法来替代
-StorageLevel.MEMORY_ONLY_SER()，第二选择
-StorageLevel.MEMORY_AND_DISK()，第三选择
-StorageLevel.MEMORY_AND_DISK_SER()，第四选择
-StorageLevel.DISK_ONLY()，第五选择 
+StorageLevel.MEMORY_ONLY_SER()，第二选择，纯内存，序列化
+StorageLevel.MEMORY_AND_DISK()，第三选择，内存和磁盘，无序列化
+StorageLevel.MEMORY_AND_DISK_SER()，第四选择，内存和磁盘，序列化
+StorageLevel.DISK_ONLY()，第五选择，纯磁盘
 
 如果内存充足，要使用双副本高可靠机制
 选择后缀带_2的策略
@@ -180,7 +178,7 @@ StorageLevel.MEMORY_ONLY_2()
 
 #### 广播变量原理图
 
-![](D:\MyFile\求职面试\spark_picture\广播变量.png)
+![广播变量](https://github.com/ChocolateLi/spark-project/blob/master/spark_picture/%E5%B9%BF%E6%92%AD%E5%8F%98%E9%87%8F.png?raw=true)
 
 
 
@@ -499,7 +497,7 @@ new SparkConf()
 
 JVM基本结构图
 
-![](D:\MyFile\求职面试\spark_picture\JVM结构.png)
+![](https://github.com/ChocolateLi/spark-project/blob/master/spark_picture/JVM%E7%BB%93%E6%9E%84.png?raw=true)
 
 
 
@@ -604,7 +602,7 @@ ${1}
 
 ##### 原理图
 
-![](D:\MyFile\求职面试\spark_picture\executor堆外内存原理图.png)
+![](https://github.com/ChocolateLi/spark-project/blob/master/spark_picture/executor%E5%A0%86%E5%A4%96%E5%86%85%E5%AD%98%E5%8E%9F%E7%90%86%E5%9B%BE.png?raw=true)
 
 
 

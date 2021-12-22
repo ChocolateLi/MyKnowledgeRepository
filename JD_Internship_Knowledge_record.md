@@ -874,6 +874,14 @@ SPU和SkU是包含关系，一个SPU可以包含若干个SKU，SKU从属于SPU
 
 
 
+## 实时计算
+
+ Flink + clickhouse
+
+Jdq -> fdm -> jdq -> gdm ->clickhouse
+
+
+
 ## 项目
 
 需求简述：小程序上展示屏前客流人次指标，需要大数据将租户设备的屏前客流回写给业务系统。
@@ -997,6 +1005,10 @@ adm层回刷的过程中出现spark异常，spark作业出现maxResultSize异常
 
 
 6、京东180新和360新的数据统计
+
+思路：
+
+优化：73min(调节参数，分配更多资源) -> 28min(mapjoin优化，主站订单表的优化，减少数据传输) -> 12min
 
 
 
