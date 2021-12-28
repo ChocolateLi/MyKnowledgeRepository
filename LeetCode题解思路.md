@@ -1068,9 +1068,99 @@ class Solution {
 
 
 
+## 十二、二维数组
+
+**主对角线反转矩阵(按照左上到右下的对角线进行镜像对称)**
+
+![主对角线](/Users/chenli75/Desktop/MyFile/github/MyKnowledgeRepository/picture/主对角线镜像.jpg)
+
+```java
+public void rotate(int[][] matrix) {
+    int n = matrix.length;
+    // 先沿对角线镜像对称二维矩阵
+    for (int i = 0; i < n; i++) {
+        for (int j = i; j < n; j++) {
+            // swap(matrix[i][j], matrix[j][i]);
+            int temp = matrix[i][j];
+            matrix[i][j] = matrix[j][i];
+            matrix[j][i] = temp;
+        }
+    }
+}
+```
+
+**反对角线反转矩阵**
+
+![反对角线](/Users/chenli75/Desktop/MyFile/github/MyKnowledgeRepository/picture/反对角线镜像.jpg)
+
+```java
+public void rotate(int[][] matrix) {
+    int n = matrix.length;
+    // 沿左下到右上的对角线镜像对称二维矩阵
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n - i; j++) {
+            // swap(matrix[i][j], matrix[n-j-1][n-i-1])
+            int temp = matrix[i][j];
+            matrix[i][j] = matrix[n - j - 1][n - i - 1];
+            matrix[n - j - 1][n - i - 1] = temp;
+        }
+    }
+}
+```
 
 
-## 十二、其他
+
+
+
+### 48、旋转图像
+
+**题目链接**：[旋转图像](https://leetcode-cn.com/problems/rotate-image/)
+
+**解题思路**：
+
+**代码实现**：
+
+```java
+class Solution {
+    public void rotate(int[][] matrix) {
+        int n = matrix.length;
+        //沿对角线翻转矩阵
+        for (int i = 0; i < n; i++) {
+            for (int j = i; j < n; j++) {
+                int tmp = matrix[i][j];
+                matrix[i][j] = matrix[j][i];
+                matrix[j][i] = tmp;
+            }
+        }
+        //将矩阵的每一行进行反转
+        for (int[] row : matrix) {
+            reverse(row);
+        }
+    }
+
+    //反转一维数组
+    private void reverse(int[] row) {
+        int i = 0;
+        int j = row.length - 1;
+        while (i < j) {
+            int tmp = row[i];
+            row[i] = row[j];
+            row[j] = tmp;
+            i++;
+            j--;
+        }
+    }
+}
+
+```
+
+
+
+
+
+
+
+## 十三、其他
 
 ### 31、下一个排列
 

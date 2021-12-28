@@ -747,7 +747,17 @@ spark.sql(sql)返回的是RDD类型的数据
 
 #### Flink
 
-Flink 为了解决读取配置文件问题了提供了一个工具类ParameterTool
+##### ParameterTool 管理配置
+
+Flink 为了解决读取配置文件问题了提供了一个工具类ParameterTool，它可以读取环境变量、运行参数、配置文件
+
+读取运行参数
+
+```
+在 Flink 程序中你可以直接使用 ParameterTool.fromArgs(args) 获取到所有的参数，然后如果你要获取某个参数对应的值的话，可以通过 parameterTool.get("username") 方法
+```
+
+
 
 
 
