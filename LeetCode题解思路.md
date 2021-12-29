@@ -33,6 +33,40 @@ class Solution {
 
 
 
+### 49、字母异位词分组
+
+**题目链接**：[字母异位词分组](https://leetcode-cn.com/problems/group-anagrams/)
+
+**解题思路**：
+
+解题关键是异位词排序后是相同的，所以考虑使用HashMap数据结构，以排序后的异位词为key。
+
+**代码实现**：
+
+```java
+class Solution {
+    public List<List<String>> groupAnagrams(String[] strs) {
+        HashMap<String, List<String>> map = new HashMap<>();
+        for (String s : strs) {
+            char[] c = s.toCharArray();
+            //对字符数组排序
+            Arrays.sort(c);
+            //排序后的字符数组作为hashmap的key
+            String key = String.valueOf(c);
+            List<String> list = map.getOrDefault(key, new ArrayList<>());
+            list.add(s);
+            map.put(key, list);
+        }
+        return new ArrayList<List<String>>(map.values());
+
+    }
+}
+```
+
+
+
+
+
 ## 二、链表
 
 👍**链表模式识别**：
@@ -1117,6 +1151,8 @@ public void rotate(int[][] matrix) {
 **题目链接**：[旋转图像](https://leetcode-cn.com/problems/rotate-image/)
 
 **解题思路**：
+
+先沿主对角线反转矩阵，然后将矩阵的每一行进行反转，就可以实现按顺时针旋转图像。
 
 **代码实现**：
 

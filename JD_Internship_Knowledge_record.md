@@ -731,6 +731,15 @@ List/ListBuffer
 
 
 
+Scala 使用一个特定的类型来表示可能会导致异常的计算，这个类型就是 Try。
+
+Try 有两个子类型：
+
+1. `Success[A]`：代表成功的计算。
+2. 封装了 `Throwable` 的 `Failure[A]`：代表出了错的计算。
+
+
+
 #### Spark
 
 Row的数值获取
@@ -746,6 +755,8 @@ spark.sql(sql)返回的是RDD类型的数据
 
 
 #### Flink
+
+数据会随着时间的流失迅速降低
 
 ##### ParameterTool 管理配置
 
