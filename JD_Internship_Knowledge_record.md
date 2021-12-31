@@ -635,6 +635,38 @@ Cascade 关键字
 
 
 
+**删除表**
+
+仅删除表中数据，保留表结构
+
+```sql
+hive> truncate table 表名;
+```
+
+truncate操作用于删除指定表中的所有行，truncate 不能删除外部表！因为外部表里的数据并不是存放在Hive Meta store中。创建表的时候指定了EXTERNAL，外部表在删除分区后，hdfs中的数据还存在，不会被删除。因此要想删除外部表数据，可以把外部表转成内部表或者删除hdfs文件。
+
+
+
+删除表的所有，包括数据和结构
+
+```sql
+hive> drop table if exists 表名;
+```
+
+
+
+删除分区
+
+```sql
+alter table table_name drop partition (partition_name='分区名')
+```
+
+
+
+
+
+
+
 查看自己跑的数据文件生成时间
 
 ```sql
