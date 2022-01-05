@@ -506,6 +506,39 @@ class Solution {
 
 
 
+### 53、最大子数组和
+
+**题目链接**：[最大子数组和](https://leetcode-cn.com/problems/maximum-subarray/)
+
+**解题思路**：
+
+1. 定义dp数组，dp[i]表示以nums[i]结尾的最大值
+2. 初始化dp数组，只要初始化第一个数
+3. 状态转移方程。dp[i] = Math.max(nums[i],dp[i-1]+nums[i])
+
+**代码实现**：
+
+```java
+class Solution {
+    public int maxSubArray(int[] nums) {
+        int dp[] = new int[nums.length];
+        dp[0] = nums[0];
+        for (int i = 1; i < nums.length; i++) {
+            dp[i] = Math.max(nums[i],dp[i-1]+nums[i]);
+        }
+        int res = Integer.MIN_VALUE;
+        for(int i=0;i<nums.length;i++){
+            res = Math.max(res,dp[i]);
+        }
+        return res;
+    }
+}
+```
+
+
+
+
+
 ## 七、双指针
 
 👍**双指针算法模板**：[双指针技巧框架](https://blog.csdn.net/weixin_42870497/article/details/119893198)
