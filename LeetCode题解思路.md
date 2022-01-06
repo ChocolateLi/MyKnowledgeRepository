@@ -1177,6 +1177,27 @@ public void rotate(int[][] matrix) {
 
 
 
+**Arrays.sort对二维数组进行排序**
+
+```java
+//第一位相同，比较第二位
+int[][] nums = new int[][]{{1,3},{1,2},{4,5},{3,7}};
+Arrays.sort(nums, new Comparator<int[]>() {
+  public int compare(int[] a, int[] b){
+    if(a[0]==b[0]){
+      return a[1] - b[1];
+    }else {
+      return a[0] - b[0];
+    }
+  }
+});
+
+//只根据第一位进行排序
+Arrays.sort(nums,(v1,v2) -> v1[0]-v2[0])
+```
+
+
+
 
 
 ### 48、旋转图像
@@ -1225,11 +1246,47 @@ class Solution {
 
 
 
+## 十三、贪心算法
+
+### 55、跳跃游戏
+
+**题目描述**：[跳跃游戏](https://leetcode-cn.com/problems/jump-game/)
+
+**算法思路**：
+
+第 i 个元素能跳的最远距离为 i + nums[i]（i从下标0开始），如果这个最远距离大于等于最后一个元素的位置，则说明能跳到。
+
+使用一个变量去记录最远距离，实时更新它，只要有一次能达到就说明能跳到。
+
+**代码实现**：
+
+```java
+class Solution {
+    public boolean canJump(int[] nums) {
+
+        if (nums == null || nums.length == 0) {
+            return false;
+        }
+        //记录最远距离的变量
+        int tmp = 0;
+        for (int i = 0; i <= tmp; i++) {
+            //第i个元素能够跳的最远距离
+            int dis = i + nums[i];
+            tmp = Math.max(tmp, dis);
+            if(tmp>=nums.length-1){
+                return true;
+            }
+        }
+        return false;
+    }
+}
+```
 
 
 
 
-## 十三、其他
+
+## 十四、其他
 
 ### 31、下一个排列
 
