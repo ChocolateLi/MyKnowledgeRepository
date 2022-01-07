@@ -1246,6 +1246,49 @@ class Solution {
 
 
 
+### 56、合并区间
+
+**题目链接**：[合并区间](https://leetcode-cn.com/problems/merge-intervals/)
+
+**算法思路**：
+
+1、先对二维数组排序，根据开始区间进行排序
+
+2、合并区间元素，根据当前结果集的结束元素和下一个区间的开始元素进行比较，若下一个区间的开始元素大于结果集的结束元素，则添加一个结果集区间，否则更新现有结果集的结束元素，取他们之间的最大值
+
+**代码实现**：
+
+```java
+class Solution {
+    public int[][] merge(int[][] intervals) {
+
+        //结果数组
+        int[][] res = new int[intervals.length][2];
+        int index = -1;
+
+        //根据开始区间对数组升序排序
+        Arrays.sort(intervals,(v1,v2)->v1[0]-v2[0]);
+
+        //合并区间
+        //根据下一个区间的开始元素和结果集的结束元素比较
+        for (int[] interval : intervals) {
+            //若结果数组为空，或者下一个的开始元素大于结果集的结束元素,形成一个新的结果集
+            if (index == -1 || interval[0] > res[index][1]) {
+                res[++index] = interval;
+            }else{//更新现在的结果集，取最大的区间
+                res[index][1] = Math.max(res[index][1],interval[1]);
+            }
+        }
+
+        return Arrays.copyOf(res, index + 1);
+    }
+}
+```
+
+
+
+
+
 ## 十三、贪心算法
 
 ### 55、跳跃游戏
