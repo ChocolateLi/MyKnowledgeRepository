@@ -537,6 +537,157 @@ class Solution {
 
 
 
+### 62、不同路径
+
+**题目链接**：[不同路径](https://leetcode-cn.com/problems/unique-paths/)
+
+**解题思路**：
+
+1. 定义dp数组，dp[ i ] [ j ]表示到达第 i 行 第 j 列 时有多少路径
+2. 初始化dp数组。第一行只能往左移动和第一列只能往下移动，所以路径都为1
+3. 定义状态转移方程。除第一行和第一列外，每个位置都可以由上面和左边过来，所以dp[ i ] [ j ] = dp [i-1] [j] + dp [i] [ j-1]
+
+**代码实现**：
+
+```java
+class Solution {
+    public int uniquePaths(int m, int n) {
+        //定义dp数组
+        int [][] dp = new int[m][n];
+        //初始化dp
+        for (int i = 0; i < m; i++) {
+            dp[i][0] = 1;
+        }
+        for (int j = 0; j < n; j++) {
+            dp[0][j] = 1;
+        }
+        //状态转移方程
+        for (int i = 1; i < m; i++) {
+            for (int j = 1; j < n; j++) {
+                dp[i][j] = dp[i-1][j] + dp[i][j-1];
+            }
+        }
+        return dp[m - 1][n - 1];
+    }
+}
+```
+
+
+
+### 64、最小路径和
+
+**题目描述**：[最小路径和](https://leetcode-cn.com/problems/minimum-path-sum/)
+
+**算法思路**：
+
+思路一：暴力求解，枚举所有可能的结果，时间复杂度高
+
+思路二：使用动态规划
+
+1. 定义dp数组，dp[ i ] [ j ]表达达到第 i 行 第 j 列时的最短路径
+2. 初始化dp数组。第一行只能往左走，第一列只能向下走。
+3. 定义状态转移方程，一个位置要么由左边过来，要么由上面下来。 dp[ i ] [j ] = Math.min(dp[ i -1] [ j],dp [i] [j-1]) + grid[i] [j];
+
+**代码实现**：
+
+暴力求解
+
+```java
+class Solution {
+    int minRes;
+    int m,n;
+    public int minPathSum(int[][] grid) {
+        m = grid.length;
+        n = grid[0].length;
+        minRes = Integer.MAX_VALUE;
+        dfs(grid,0,0,0);
+        return minRes;
+    }
+
+    private void dfs(int[][] grid, int i, int j,int res) {
+        if (i < 0 || i >= m || j < 0 || j >= n) {
+            return;
+        }
+        res += grid[i][j];
+        if (i == m - 1 && j == n - 1) {
+            minRes = Math.min(minRes,res);
+            return;
+        }
+        dfs(grid,i+1,j,res);
+        dfs(grid,i,j+1,res);
+        res -= grid[i][j];
+    }
+}
+```
+
+动态规划
+
+```java
+class Solution {
+
+    public int minPathSum(int[][] grid) {
+        int m = grid.length;
+        int n = grid[0].length;
+        //定义dp数组
+        int[][] dp = new int[m][n];
+        //初始化dp数组
+        dp[0][0] = grid[0][0];
+        //第一列，只能向下走
+        for (int i = 1; i < m; i++) {
+            dp[i][0] = dp[i-1][0] + grid[i][0];
+        }
+        //第一行，只能向左走
+        for (int j = 1; j < n; j++) {
+            dp[0][j] = dp[0][j-1] + grid[0][j];
+        }
+        //状态转移方程
+        for (int i = 1; i < m; i++) {
+            for (int j = 1; j < n; j++) {
+                dp[i][j] = Math.min(dp[i - 1][j], dp[i][j - 1]) + grid[i][j];
+            }
+        }
+        return dp[m-1][n-1];
+    }
+
+}
+```
+
+
+
+### 70、爬楼梯
+
+**题目链接**：[爬楼梯](https://leetcode-cn.com/problems/climbing-stairs/)
+
+**算法思路**：
+
+1. 定义dp数组。dp[i]表示到达第i层楼梯有多少种方法
+2. 初始化dp数组。需要初始化第一二层的楼梯
+3. 定义状态转移方程。当前楼层可以由前一层和前两层楼层得到，所以dp[i ] = dp[ i -1] + dp[ i-2]
+
+**代码实现**：
+
+```java
+class Solution {
+    public int climbStairs(int n) {
+        if (n <= 2) {
+            return n;
+        }
+        //定义dp数组
+        int[] dp = new int[n+1];
+        //初始化dp数组
+        dp[1] = 1;
+        dp[2] = 2;
+        //定义状态转移方程
+        for (int i = 3; i <= n; i++) {
+            dp[i] = dp[i - 1] + dp[i - 2];
+        }
+        return dp[n];
+    }
+}
+```
+
+
+
 
 
 ## 七、双指针
