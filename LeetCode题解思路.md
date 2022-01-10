@@ -688,6 +688,66 @@ class Solution {
 
 
 
+### 72、编辑距离
+
+👍**解决两个字符串的动态规划问题，一般都是用两个指针 `i,j` 分别指向两个字符串的最后，然后一步步往前走，缩小问题的规模**。
+
+**题目链接**：[编辑距离](https://leetcode-cn.com/problems/edit-distance/)
+
+**算法思路**：
+
+1. 定义dp数组。dp[i] [j]表示word1的[0..i]的字符转换成word2[0..j]的字符最少需要多少次
+2. 初始化dp数组。如果word1为空，只能插入word2长度的字符；如果word2为空，只能删除word1个字符
+3. 定义状态转移方程。当word1[i-1] = word2[j-1]时，dp[i] [j] = dp[i-1] [j-1]；如果不相等的话，则从删除、替换、增加中选择最少次数作为转移dp [i] [j] = Math.min(dp[i-1] [j-1],Math.min(dp[i-1] [j],dp[i] [j-1])) + 1;
+
+**代码实现**：
+
+```java
+class Solution {
+    public int minDistance(String word1, String word2) {
+        int n1 = word1.length();
+        int n2 = word2.length();
+        //如果word1为空，只能插入n2个字符
+        if(n1==0) return n2;
+        //如果word2为空，只能删除n1个字符
+        if(n2==0) return n1;
+
+        //1.定义dp数组
+        //dp[i][j]表示word1中[0..i]的字符转换到word2的[0..j]的最少次数
+        int dp[][] = new int[n1+1][n2+1];
+        //2.初始化dp数组
+        dp[0][0] = 0;
+        //当word1为空时，只能通过插入变成word2
+        for (int j = 1; j <= n2 ; j++) {
+            dp[0][j] = dp[0][j-1] + 1;
+        }
+        //当word2为空时，只能通过删除word1来变成word2
+        for (int i = 1; i <= n1; i++) {
+            dp[i][0] = dp[i-1][0] + 1;
+        }
+        //3.定义状态转移方程
+        for (int i = 1; i <= n1; i++) {
+            for (int j = 1; j <= n2; j++) {
+                //如果word1[i-1]==word2[j-1]，啥也不做
+                if (word1.charAt(i - 1) == word2.charAt(j - 1)) {
+                    dp[i][j] = dp[i - 1][j - 1];
+                }else{
+                    //如果不相等，则从插入、删除、替换中次数最少的选择一个
+                    //dp[i-1][j-1]表示替换
+                    //dp[i-1][j]表示删除
+                    //dp[i][j-1]表示插入
+                    dp[i][j] = Math.min(dp[i-1][j-1],Math.min(dp[i-1][j],dp[i][j-1])) + 1;
+                }
+            }
+        }
+        return dp[n1][n2];
+
+    }
+}
+```
+
+
+
 
 
 ## 七、双指针

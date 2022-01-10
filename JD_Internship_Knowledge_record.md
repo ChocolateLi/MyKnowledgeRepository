@@ -1100,6 +1100,12 @@ spark.sqlContext.setConf("spark.default.parallelism", "1000") --并行度提到�
 
 实现过程：FDM层：从jdq（kafka）中取出消息数据，使用flink自定义flatMap对其进行数据解析封装成对象，再写进jdq中 GDM层：从jdq中取出消息数据，使用flinksql将数据写进clickhouse中
 
+问题：线上问题，fdm层实时任务运行一段时间挂掉，gdm层写入clickhouse失败。
+
+解决：因为数据类型的问题导致，最后统一修改成字符串类型就解决问题了
+
+难点：自定义flatMap函数
+
 
 
 
