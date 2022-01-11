@@ -325,6 +325,34 @@ class Solution {
 
 ## 三、滑动窗口
 
+👍**滑动窗口模板**
+
+```java
+int left = 0, right = 0;
+
+while (right < s.size()) {
+    window.add(s[right]);
+    right++;
+    
+    while (满足缩小窗口条件) {
+        window.remove(s[left]);
+        left++;
+    }
+}
+```
+
+使用滑动窗口前需要思考以下4个点：
+
+1. 增大窗口时，要更新哪些数据？
+
+2. 什么时候停止增大窗口，开始缩小窗口？
+
+3. 缩小窗口时，要更新哪些数据？
+
+4. 最后的结果在增大窗口时更新，还是缩小窗口时更新？
+
+   
+
 ### 3、无重复字符的最长子串
 
 **题目链接：** [无重复字符的最长子串](https://leetcode-cn.com/problems/longest-substring-without-repeating-characters/)
@@ -365,7 +393,140 @@ class Solution {
 
 
 
+### 76、最小覆盖子串
+
+**题目链接**：[最小覆盖子串](https://leetcode-cn.com/problems/minimum-window-substring/)
+
+**算法思路**：
+
+1. 使用一个HashMap表示一个窗口，再使用一个HashMap表示辅助窗口，存储需要覆盖的字符串
+2. 不断增大窗口，往窗口里不断添加元素，当窗口覆盖辅助窗口时，停止增大窗口开始缩小窗口
+3. 在缩小窗口时开始更新结果数据，然后缩小窗口，直到窗口不能覆盖辅助窗口
+4. 返回结果值
+
+**代码实现**：
+
+```java
+class Solution {
+    public String minWindow(String s, String t) {
+        int len1 = s.length();
+        int len2 = t.length();
+        if (len1 == 0 || len2 == 0 || len1 < len2) {
+            return "";
+        }
+        //滑动窗口
+        HashMap<Character, Integer> window = new HashMap<>();
+        HashMap<Character, Integer> need = new HashMap<>();
+        for (char c : t.toCharArray()) {
+            need.put(c, need.getOrDefault(c, 0) + 1);
+        }
+        int left = 0;
+        int right = 0;
+        //存储结果的变量
+        int start = 0;
+        int end = 0;
+        int match = 0;
+        int minLen = Integer.MAX_VALUE;
+        while (right < len1) {
+          	//增大窗口
+            char c = s.charAt(right);
+            window.put(c, window.getOrDefault(c, 0) + 1);
+            right++;
+            if (window.get(c).equals(need.get(c))) {
+                match++;
+            }
+            //缩小窗口
+            while (match == need.size()) {
+                //缩小窗口时更新结果
+                if (right - left < minLen) {
+                    start = left;
+                    end = right;
+                    minLen = right - left;
+                }
+                //对称结构
+                char c1 = s.charAt(left);
+                window.put(c1, window.get(c1) - 1);
+                left++;
+                if (need.containsKey(c1)) {
+                    if (window.get(c1) < need.get(c1)) {
+                        match--;
+                    }
+                }
+            }
+        }
+        return minLen == Integer.MAX_VALUE ? "" : s.substring(start, end);
+
+    }
+}
+```
+
+
+
+
+
 ## 四、排序
+
+👍**快排模板**
+
+```java
+/**
+ * 快速排序
+ * @author: 小LeetCode~
+ **/
+public class QuickSort {
+
+    public static void main(String[] args) {
+        int[] nums = {7, 8, 5, 1, 3, 4, 9, 6};
+        System.out.println(Arrays.toString(nums));
+        quicksort(nums,0,nums.length-1);
+        System.out.println(Arrays.toString(nums));
+    }
+
+    private static void quicksort(int[] nums, int left, int right) {
+        if(left>=right){
+            return;
+        }
+        int mid = partition(nums,left,right);
+        quicksort(nums,left,mid-1);
+        quicksort(nums,mid+1,right);
+    }
+
+    private static int partition(int[] nums, int left, int right) {
+        //基准数，一半选取第一个元素
+        int x = nums[left];
+        int i = left;
+        int j = right+1;
+        while(true){
+            while(nums[++i]<x){
+                if(i>=right){
+                    break;
+                }
+            }
+            while(nums[--j]>x){
+
+            };
+            if(i>=j){
+                break;
+            }
+            swap(nums,i,j);
+        }
+        swap(nums,left,j);
+        return j;
+    }
+
+    private static void swap(int[] nums, int i, int j) {
+        int temp = nums[i];
+        nums[i] = nums[j];
+        nums[j] = temp;
+    }
+}
+
+
+```
+
+
+
+
 
 ### 4、 寻找两个正序数组的中位数
 
@@ -413,6 +574,65 @@ class Solution {
     }
 }
 ```
+
+
+
+### 75、颜色分类
+
+**题目链接**：[颜色分类](https://leetcode-cn.com/problems/sort-colors/)
+
+**算法思路**：使用快速排序即可解决问题
+
+**代码实现**：
+
+```java
+class Solution {
+    public void sortColors(int[] nums) {
+        int left = 0;
+        int right = nums.length - 1;
+        quicksort(nums, left, right);
+    }
+
+    private void quicksort(int[] nums, int left, int right) {
+        if (left >= right) {
+            return;
+        }
+        int mid = partition(nums, left, right);
+        quicksort(nums, left, mid - 1);
+        quicksort(nums, mid + 1, right);
+    }
+
+    private int partition(int[] nums, int left, int right) {
+        int x = nums[left];
+        int i = left;
+        int j = right + 1;
+        while (true) {
+            while (nums[++i] < x) {
+                if (i >= right) {
+                    break;
+                }
+            }
+            while (nums[--j] > x) ;
+            if(i>=j) break;
+            swap(nums, i, j);
+        }
+        swap(nums, left, j);
+        return j;
+    }
+
+    private void swap(int[] nums, int i, int j) {
+        int tmp = nums[i];
+        nums[i] = nums[j];
+        nums[j] = tmp;
+    }
+
+
+}
+```
+
+
+
+
 
 
 
