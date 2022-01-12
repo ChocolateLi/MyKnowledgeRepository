@@ -1230,7 +1230,7 @@ class Solution {
 
 ## 八、回溯法
 
-👍**算法模板**：[回溯框架](https://blog.csdn.net/weixin_42870497/article/details/119443910)
+👍**算法模板**：[回溯框架团灭排列、组合、子集问题](https://blog.csdn.net/weixin_42870497/article/details/119443910)
 
 ### 17、电话号码的字母组合
 
@@ -1322,6 +1322,40 @@ class Solution {
             dfs(nums,target-nums[i],list,i);
             list.removeLast();
 
+        }
+    }
+}
+```
+
+
+
+### 78、子集
+
+**题目链接**：[子集](https://leetcode-cn.com/problems/subsets/)
+
+**算法思路**：
+
+1. 使用回溯法的思路进行求解
+2. 注意参数start的作用，它是避免进入下一层递归时，添加到重复的元素
+
+**代码实现**：
+
+```java
+class Solution {
+
+    List<List<Integer>> res = new ArrayList<>();
+    public List<List<Integer>> subsets(int[] nums) {
+        LinkedList<Integer> list = new LinkedList<>();
+        dfs(nums, list,0);
+        return res;
+    }
+
+    private void dfs(int[] nums, LinkedList<Integer> list,int start) {
+        res.add(new ArrayList<>(list));
+        for (int i = start; i < nums.length; i++) {
+            list.add(nums[i]);
+            dfs(nums, list, i + 1);
+            list.removeLast();
         }
     }
 }
