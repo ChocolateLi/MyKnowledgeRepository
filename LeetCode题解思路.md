@@ -1232,6 +1232,8 @@ class Solution {
 
 👍**算法模板**：[回溯框架团灭排列、组合、子集问题](https://blog.csdn.net/weixin_42870497/article/details/119443910)
 
+👍**矩阵搜索算法模板：**[DFS团灭矩阵中的搜索问题](https://blog.csdn.net/weixin_42870497/article/details/120048719)
+
 ### 17、电话号码的字母组合
 
 **题目链接**：[电话号码的字母组合](https://leetcode-cn.com/problems/letter-combinations-of-a-phone-number/)
@@ -1360,6 +1362,64 @@ class Solution {
     }
 }
 ```
+
+
+
+### 79、单词搜索
+
+**题目链接：**[单词搜索](https://leetcode-cn.com/problems/word-search/)
+
+**算法思路：**
+
+1. 使用回溯法的思路进行矩阵的遍历
+2. 注意不能重复访问，所以需要visit变量记录。遍历的过程中，首先单词第一个元素必须匹配上，所以需要一个index变量进行记录
+
+**代码实现：**
+
+```java
+class Solution {
+
+    int m, n;
+
+    public boolean exist(char[][] board, String word) {
+
+        m = board.length;
+        n = board[0].length;
+
+        boolean[][] visit = new boolean[m][n];
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (dfs(board, word, i, j,0, visit)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private boolean dfs(char[][] board, String word, int i, int j, int index,boolean[][] visit) {
+
+        if (i < 0 || i >= m || j < 0 || j >= n || board[i][j]!=word.charAt(index)|| visit[i][j]) {
+            return false;
+        }
+
+        if (index == word.length()-1) {
+            return true;
+        }
+
+        visit[i][j] = true;
+        boolean res = dfs(board, word, i - 1, j, index+1,visit) ||
+                        dfs(board, word, i + 1, j,index+1, visit) ||
+                        dfs(board, word, i, j - 1, index+1,visit) ||
+                        dfs(board, word, i, j + 1, index+1,visit);
+        visit[i][j] = false;
+        return res;
+    }
+}
+```
+
+
 
 
 
