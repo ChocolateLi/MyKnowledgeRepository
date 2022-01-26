@@ -1429,6 +1429,53 @@ class Solution {
 
 ## 九、栈
 
+👍**单调栈算法模板：**
+
+```java
+//单调栈就是保证里面的元素是递增的或者是递减的
+//它的应用场景比较多的应用于Next Greater Element（下一个更大数组）
+vector<int> nextGreaterElement(vector<int>& nums) {
+    vector<int> res(nums.size()); // 存放答案的数组
+    stack<int> s;
+    // 倒着往栈里放（正放和倒放取决于对题目的要求和理解）
+    for (int i = nums.size() - 1; i >= 0; i--) {
+        // 判定个子高矮
+        while (!s.empty() && s.top() <= nums[i]) {
+            // 矮个起开，反正也被挡着了。。。
+            s.pop();
+        }
+        // nums[i] 身后的 next great number
+        res[i] = s.empty() ? -1 : s.top();
+        // 
+        s.push(nums[i]);
+    }
+    return res;
+}
+
+//使不使用哨兵，取决于具体题目
+int[] nextGreaterElement(int[] nums){
+    int[] res = new int[nums.length];//存放数组答案
+    Deque<Integer> stack = new ArrayDeque<>();
+    for(int i=nums.length-1;i>=0;i--){
+        //单调栈,判定个子高矮
+        while(!stack.isEmpty() && stack.peek()<= nums[i]){
+             // 矮个起开，反正也被挡着了。。。
+            stack.pop();
+        }
+        // nums[i] 身后的 next great number
+        res[i] = s.empty() ? -1 : s.top();
+        // 入栈
+        s.push(nums[i]);
+    }
+    
+    return res;
+}
+```
+
+
+
+
+
 ### 20、有效的括号
 
 **题目链接**：[有效的括号](https://leetcode-cn.com/problems/valid-parentheses/)
@@ -1521,6 +1568,99 @@ class Solution {
 ```
 
 
+
+### 84、柱状图中最大的矩形
+
+**题目链接：**[柱状图中最大的矩形](https://leetcode-cn.com/problems/largest-rectangle-in-histogram/)
+
+**算法思路：**
+
+1、暴力解法
+
+1. 面积=底*高。固定底边，求最大高度不好求；固定高，求最长底边好求
+2. 从i向左右两边遍历，找到左边和右边第1个严格小于height[i]的时候停下，中间的长度就是最长底边
+
+
+
+2、单调栈
+
+1. 使用一个栈存储数组下标，里面元素是单调递增的；当进栈的元素严格小于栈顶元素时，栈顶元素出栈，求出矩阵的高，矩阵的宽度就是当前下标减去现在的栈顶元素下标再减1，求出矩阵面积；再比较最大的矩阵面积
+2. 注意，可以使用哨兵，可以强制使所有进栈元素都出栈，一种设计技巧
+
+
+
+**代码实现：**
+
+暴力实现
+
+```java
+class Solution {
+    public int largestRectangleArea(int[] heights) {
+        int len = heights.length;
+        if (len == 0) return 0;
+
+        int res = 0;
+        for (int i = 0; i < len; i++) {
+            int left = i;
+            //寻找左边 最后一个 大于等于heights[i]的
+            while (left > 0 && heights[left - 1] >= heights[i]) {
+                left--;
+            }
+            int right = i;
+            //寻找右边 最后一个 大于等于heights[i]的
+            while (right < len - 1 && heights[right + 1] >= heights[i]) {
+                right++;
+            }
+            //求面积，比较大小
+            int area = (right - left + 1) * heights[i];
+            res = Math.max(res, area);
+            
+        }
+
+        return res;
+    }
+}
+
+```
+
+单调栈
+
+```java
+class Solution {
+    public int largestRectangleArea(int[] heights) {
+        int len = heights.length;
+        if(len==0) return 0;
+        if(len==1) return heights[0];
+
+        //栈，设计成单调栈
+        Deque<Integer> stack = new ArrayDeque<>();
+
+        //拷贝一个新的数组，增加数组长度
+        int[] newHeights = new int[len + 2];
+        //设置哨兵，保证栈不为空，即可以把元素全部出栈
+        newHeights[0] = 0;
+        newHeights[len+1] = 0;
+        System.arraycopy(heights,0,newHeights,1,len);
+
+        //存储结果
+        int res = 0;
+
+        for (int i = 0; i < newHeights.length; i++) {
+            //单调栈,存储的是数组下标
+            while (!stack.isEmpty() && newHeights[stack.peek()] > newHeights[i]) {
+                int curHeight = stack.pop();
+                int left = stack.peek();
+                int width = i - left - 1;
+                res = Math.max(res, newHeights[curHeight] * width);
+            }
+            stack.push(i);
+        }
+
+        return res;
+
+    }
+}
+```
 
 
 
