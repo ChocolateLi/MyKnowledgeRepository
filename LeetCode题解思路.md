@@ -1664,6 +1664,74 @@ class Solution {
 
 
 
+### 85、最大矩形
+
+**题目链接**：[最大矩形](https://leetcode-cn.com/problems/maximal-rectangle/)
+
+**解题思路**：
+
+将题目这样变形，就变成了84题的柱状图中最大的矩形
+
+![](D:\github\MyKnowledgeRepository\Leetcode_img\85题.png)
+
+依次遍历每一行的矩阵的高，然后代入到上一题的代码中就可以实现最大矩形的计算
+
+**代码实现**：
+
+```java
+class Solution {
+    public int maximalRectangle(char[][] matrix) {
+        int m = matrix.length;
+        int n = matrix[0].length;
+        if (m == 0) {
+            return 0;
+        }
+
+        //存储矩阵的最大面积
+        int res = 0;
+
+        //存储矩阵的高度
+        int[] heights = new int[n];
+
+        for (int i = 0; i < m; i++) {
+            //遍历每一个列求出矩阵的高度
+            for (int j = 0; j < n; j++) {
+                if (matrix[i][j] == '1') {
+                    heights[j] += 1;
+                }else{
+                    heights[j] = 0;
+                }
+            }
+            res = Math.max(res,largeRectangleArea(heights,n));
+        }
+
+        return res;
+    }
+
+    //上一题的求最大矩阵的面积
+    private int largeRectangleArea(int heights[],int len) {
+        int res = 0;
+        int[] newHeights = new int[len + 2];
+        System.arraycopy(heights,0,newHeights,1,len);
+        Deque<Integer> stack = new ArrayDeque<>();
+        for (int i = 0; i < newHeights.length; i++) {
+            while (!stack.isEmpty() && newHeights[stack.peek()] > newHeights[i]) {
+                int curHeightIndex = stack.pop();
+                int left = stack.peek();
+                int curWidth = i - left - 1;
+                res = Math.max(res, newHeights[curHeightIndex] * curWidth);
+            }
+            stack.push(i);
+        }
+        return res;
+    }
+}
+```
+
+
+
+
+
 ## 十、递归
 
 👍**递归模板**：
