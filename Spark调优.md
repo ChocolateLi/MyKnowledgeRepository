@@ -178,7 +178,7 @@ StorageLevel.MEMORY_ONLY_2()
 
 #### 广播变量原理图
 
-![广播变量](https://github.com/ChocolateLi/spark-project/blob/master/spark_picture/%E5%B9%BF%E6%92%AD%E5%8F%98%E9%87%8F.png?raw=true)
+![广播变量](https://github.com/ChocolateLi/spark-project/blob/master/spark_picture/%E5%B9%BF%E6%92%AD%E5%8F%98%E9%87%8F.png)
 
 
 

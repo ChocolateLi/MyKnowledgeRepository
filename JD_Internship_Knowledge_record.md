@@ -975,7 +975,7 @@ Jdq -> fdm -> jdq -> gdm ->clickhouse
 
 1、通过一个设备报警接口，它是单例模式的(写入数据库的类也是单例的)，获取到mysql表中的场景id，存储到 ListBuffer 数据结构中。（场景表数据是存储到mysql数据库的。什么叫场景？比如说设备会放到便利店、药店、商超等场景）spark调用parallelize将ListBuffer集合中的数据转化成 RDD ，createOrReplaceTempView注册为临时试图表。
 
-2、spark从hive中读取adm层的屏前客流数据（曝光人数（有人脸数据去重的）、触达人次（没有正脸的faceid不去重的）、互动人数（有人脸停留时间超过3秒，小于6小时算是互动人数））、设备表数据，分别注册为临时表。将三张表进行关联，将场景、设备、屏前客流数据关联上。分别提取曝光人数、屏前触达人次、互动人数进行union all，通过stay_type字段进行区分（stat_type=1表示曝光人数，stat_type=2表示触达人次，stat_type=3表示互动人数）。并且通过filter算子过滤出设备产品key不为空的数据，写入数据库。
+2、spark从hive中读取adm层的屏前客流数据（曝光人数（有人脸数据去重的）、触达人次（没有正脸的faceid不去重的）、互动人数（有人脸停留时间超过3秒，小于6小时算是互动人数））、设备表数据，分别注册为临时表。将三张表进行union关联，将场景、设备、屏前客流数据关联上。分别提取曝光人数、屏前触达人次、互动人数进行union all，通过stay_type字段进行区分（stat_type=1表示曝光人数，stat_type=2表示触达人次，stat_type=3表示互动人数）。并且通过filter算子过滤出设备产品key不为空的数据，写入数据库。
 
 3、统计不同停留阶段的人数：由于adm层的屏前客流指标是设备、年龄、性别粒度的聚合数据，而结果表需要的是设备、停留时长聚合的数据。所以不能使用adm层的屏前客流数据，需要使用gdm层的屏前客流数据。所以这里需要将gdm层的屏前客流表、设备表、场景表进行关联，注册为临时表。通过不同停留阶段进行分组求count(distinct faceid)，将数据结果写入mysql数据库。
 
@@ -1131,7 +1131,7 @@ spark.sqlContext.setConf("spark.default.parallelism", "1000") --并行度提到�
 
 **7、实时扫码**
 
-实现过程：FDM层：从jdq（kafka）中取出消息数据，使用flink自定义flatMap对其进行数据解析封装成对象，再写进jdq中 GDM层：从jdq中取出消息数据，使用flinksql将数据写进clickhouse中
+实现过程：FDM层：从jdq（kafka）中取出消息数据，使用flink自定义flatMap对埋点进行数据解析封装成对象，再写进jdq中 GDM层：从jdq中取出消息数据，使用flinksql将数据写进clickhouse中，读取clickhouse的数据进行实时BI报表展示
 
 问题：线上问题，fdm层实时任务运行一段时间挂掉，gdm层写入clickhouse失败。
 
