@@ -1,5 +1,7 @@
 # LeetCode题解思路
 
+# 数据结构
+
 ## 一、哈希表
 
 ### 1、两数之和
@@ -319,1115 +321,7 @@ class Solution {
 
 
 
-
-
-
-
-## 三、滑动窗口
-
-👍**滑动窗口模板**
-
-```java
-int left = 0, right = 0;
-
-while (right < s.size()) {
-    window.add(s[right]);
-    right++;
-    
-    while (满足缩小窗口条件) {
-        window.remove(s[left]);
-        left++;
-    }
-}
-```
-
-使用滑动窗口前需要思考以下4个点：
-
-1. 增大窗口时，要更新哪些数据？
-
-2. 什么时候停止增大窗口，开始缩小窗口？
-
-3. 缩小窗口时，要更新哪些数据？
-
-4. 最后的结果在增大窗口时更新，还是缩小窗口时更新？
-
-   
-
-### 3、无重复字符的最长子串
-
-**题目链接：** [无重复字符的最长子串](https://leetcode-cn.com/problems/longest-substring-without-repeating-characters/)
-
-**解题思路：** 使用滑动窗口操作
-
-**实现代码：** 
-
-```java
-class Solution {
-    public int lengthOfLongestSubstring(String s) {
-        
-        int left = 0;
-        int right = 0;
-        int res = 0;
-        HashMap<Character,Integer> window = new HashMap<>();
-        //增大窗口
-        while (right < s.length()) {
-            //更新数据
-            char c = s.charAt(right);
-            window.put(c,window.getOrDefault(c,0)+1);
-            right++;
-            //缩小窗口
-            while(window.get(c)>1){              
-                //更新数据
-                char c1 = s.charAt(left);
-                window.put(c1,window.get(c1)-1);
-                left++;
-            }
-             //更新结果
-            res = Math.max(right-left,res);
-        }
-        
-        return res;
-    }
-}
-```
-
-
-
-### 76、最小覆盖子串
-
-**题目链接**：[最小覆盖子串](https://leetcode-cn.com/problems/minimum-window-substring/)
-
-**算法思路**：
-
-1. 使用一个HashMap表示一个窗口，再使用一个HashMap表示辅助窗口，存储需要覆盖的字符串
-2. 不断增大窗口，往窗口里不断添加元素，当窗口覆盖辅助窗口时，停止增大窗口开始缩小窗口
-3. 在缩小窗口时开始更新结果数据，然后缩小窗口，直到窗口不能覆盖辅助窗口
-4. 返回结果值
-
-**代码实现**：
-
-```java
-class Solution {
-    public String minWindow(String s, String t) {
-        int len1 = s.length();
-        int len2 = t.length();
-        if (len1 == 0 || len2 == 0 || len1 < len2) {
-            return "";
-        }
-        //滑动窗口
-        HashMap<Character, Integer> window = new HashMap<>();
-        HashMap<Character, Integer> need = new HashMap<>();
-        for (char c : t.toCharArray()) {
-            need.put(c, need.getOrDefault(c, 0) + 1);
-        }
-        int left = 0;
-        int right = 0;
-        //存储结果的变量
-        int start = 0;
-        int end = 0;
-        int match = 0;
-        int minLen = Integer.MAX_VALUE;
-        while (right < len1) {
-          	//增大窗口
-            char c = s.charAt(right);
-            window.put(c, window.getOrDefault(c, 0) + 1);
-            right++;
-            if (window.get(c).equals(need.get(c))) {
-                match++;
-            }
-            //缩小窗口
-            while (match == need.size()) {
-                //缩小窗口时更新结果
-                if (right - left < minLen) {
-                    start = left;
-                    end = right;
-                    minLen = right - left;
-                }
-                //对称结构
-                char c1 = s.charAt(left);
-                window.put(c1, window.get(c1) - 1);
-                left++;
-                if (need.containsKey(c1)) {
-                    if (window.get(c1) < need.get(c1)) {
-                        match--;
-                    }
-                }
-            }
-        }
-        return minLen == Integer.MAX_VALUE ? "" : s.substring(start, end);
-
-    }
-}
-```
-
-
-
-
-
-## 四、排序
-
-👍**快排模板**
-
-```java
-/**
- * 快速排序
- * @author: 小LeetCode~
- **/
-public class QuickSort {
-
-    public static void main(String[] args) {
-        int[] nums = {7, 8, 5, 1, 3, 4, 9, 6};
-        System.out.println(Arrays.toString(nums));
-        quicksort(nums,0,nums.length-1);
-        System.out.println(Arrays.toString(nums));
-    }
-
-    private static void quicksort(int[] nums, int left, int right) {
-        if(left>=right){
-            return;
-        }
-        int mid = partition(nums,left,right);
-        quicksort(nums,left,mid-1);
-        quicksort(nums,mid+1,right);
-    }
-
-    private static int partition(int[] nums, int left, int right) {
-        //基准数，一半选取第一个元素
-        int x = nums[left];
-        int i = left;
-        int j = right+1;
-        while(true){
-            while(nums[++i]<x){
-                if(i>=right){
-                    break;
-                }
-            }
-            while(nums[--j]>x){
-
-            };
-            if(i>=j){
-                break;
-            }
-            swap(nums,i,j);
-        }
-        swap(nums,left,j);
-        return j;
-    }
-
-    private static void swap(int[] nums, int i, int j) {
-        int temp = nums[i];
-        nums[i] = nums[j];
-        nums[j] = temp;
-    }
-}
-
-
-```
-
-
-
-
-
-### 4、 寻找两个正序数组的中位数
-
-**题目链接**：[寻找两个正序数组的中位数](https://leetcode-cn.com/problems/median-of-two-sorted-arrays/)
-
-**解题思路**：
-
-1、使用归并排序，将两个数组合并。数组长度为奇数，则返回中间值。若是偶数，返回中间两个值除以2
-
-2、既然已经知道两个数组的长度，其实也可以不用合并数组。通过指针下标判断是否已经达到中间值。
-
-**实现代码**：
-
-```java
-class Solution {
-    public double findMedianSortedArrays(int[] nums1, int[] nums2) {
-        ArrayList<Integer> list = new ArrayList<>();
-        int length1 = nums1.length;
-        int length2 = nums2.length;
-        int p1 = 0;
-        int p2 = 0;
-        while(p1<length1 && p2<length2){
-            if(nums1[p1]<=nums2[p2]){
-                list.add(nums1[p1]);
-                p1++;
-            }else{
-                list.add(nums2[p2]);
-                p2++;
-            }
-        }
-        while(p1<length1){
-            list.add(nums1[p1]);
-            p1++;
-        }
-        while(p2<length2){
-            list.add(nums2[p2]);
-            p2++;
-        }
-        int size = list.size();
-        if((size&1)==1){
-            return (double)list.get(size/2);
-        }else{
-            return (list.get(size/2)+list.get(size/2 -1 ))/2.0;
-        }
-    }
-}
-```
-
-
-
-### 75、颜色分类
-
-**题目链接**：[颜色分类](https://leetcode-cn.com/problems/sort-colors/)
-
-**算法思路**：使用快速排序即可解决问题
-
-**代码实现**：
-
-```java
-class Solution {
-    public void sortColors(int[] nums) {
-        int left = 0;
-        int right = nums.length - 1;
-        quicksort(nums, left, right);
-    }
-
-    private void quicksort(int[] nums, int left, int right) {
-        if (left >= right) {
-            return;
-        }
-        int mid = partition(nums, left, right);
-        quicksort(nums, left, mid - 1);
-        quicksort(nums, mid + 1, right);
-    }
-
-    private int partition(int[] nums, int left, int right) {
-        int x = nums[left];
-        int i = left;
-        int j = right + 1;
-        while (true) {
-            while (nums[++i] < x) {
-                if (i >= right) {
-                    break;
-                }
-            }
-            while (nums[--j] > x) ;
-            if(i>=j) break;
-            swap(nums, i, j);
-        }
-        swap(nums, left, j);
-        return j;
-    }
-
-    private void swap(int[] nums, int i, int j) {
-        int tmp = nums[i];
-        nums[i] = nums[j];
-        nums[j] = tmp;
-    }
-
-
-}
-```
-
-
-
-
-
-
-
-## 五、字符串
-
-### 5、最长回文子串
-
-**题目链接**：[最长回文子串](https://leetcode-cn.com/problems/longest-palindromic-substring/)
-
-**解题思路**：
-
-中心扩展法。把每一个字符都当作中心点去扩展，判断是否是回文子串。因为字符串长度为奇数和偶数是两种情况，所以干脆两者都一起判断，最后取最长的字符串。
-
-**代码实现**：
-
-```java
-class Solution {
-    public String longestPalindrome(String s) {
-        String res = "";
-        for(int i=0;i<s.length();i++){
-            //以s[i]为中心的最长回文子串
-            String s1 = palindrome(s,i,i);
-            //以s[i]和s[i+1]为中心的最长回文子串
-            String s2 = palindrome(s,i,i+1);
-            res = res.length()>s1.length()?res:s1;
-            res = res.length()>s2.length()?res:s2;
-        }
-        return res;
-    }
-
-    private String palindrome(String s,int left,int right){
-        //防止索引越界
-        while(left>=0 && right<=s.length()-1 && s.charAt(left)==s.charAt(right)){
-            left--;
-            right++;
-        }
-        //substring包头不包尾
-        return s.substring(left+1,right);
-    }
-}
-```
-
-
-
-## 六、动态规划
-
-### 10、正则表达式匹配
-
-题目链接：[正则表达式匹配](https://leetcode-cn.com/problems/regular-expression-matching/)
-
-解题思路：
-
-递归做法比动态规划容易理解。
-
-核心思路通过不断地剪去s和p的首部，直到某一个或者两个都被剪空，就可以得出答案。
-
-有 ‘*’ 和 没 ‘ * ‘ 两种情况进行讨论。
-
-其中有 ’ * ‘ 的又分两种情况，因为它可以匹配零次或者多次：
-
-1. p的第i个元素在s中出现零次：那就s不动，p剪去前面两个字母。如 s=“aac”，p=“b*aac”，把p前面的两个元素剪去
-2. p的第i个元素在s中出现一次或多次：比较s和p首元素是否相同，如果相同，p不动，s剪去首元素，继续递归。比如 s=“aabb”，p=“a*bb”，比较首元素相同，s 剪去首元素，即 s=“abb”，p不动，继续匹配
-
-没 ’ * ‘ 的情况是最简单的，这时候只需要扫描一遍s和p，从首部开始比较两元素是否相同，如果相同就剪去，比较下一个即可。
-
-```java
-//第i下标位置元素相同，'.'代表任何元素
-s.charAt(i) == p.charAt(i) || p.charAt(i)=='.'
-```
-
-代码实现：
-
-```java
-class Solution {
-    public boolean isMatch(String s, String p) {
-        if(p.length()==0){
-            return s.length()==0;
-        }
-        //判断首字符是否匹配。这里s.length可能为0的情况，但p.length不可能为0，因为p.length为0是递归出口
-        boolean firstIsMatch = (s.length()>0) && 		 (s.charAt(0)==p.charAt(0)||p.charAt(0)=='.');
-        //两种情况，p带'*'和不带'*'
-        if(p.length()>=2 && p.charAt(1)=='*'){
-            return isMatch(s,p.substring(2)) //匹配0次情况
-                || (firstIsMatch && isMatch(s.substring(1),p)); //匹配多次或者一次的情况
-        }else{
-            return firstIsMatch && isMatch(s.substring(1),p.substring(1));
-        }
-    }
-}
-```
-
-
-
-### 53、最大子数组和
-
-**题目链接**：[最大子数组和](https://leetcode-cn.com/problems/maximum-subarray/)
-
-**解题思路**：
-
-1. 定义dp数组，dp[i]表示以nums[i]结尾的最大值
-2. 初始化dp数组，只要初始化第一个数
-3. 状态转移方程。dp[i] = Math.max(nums[i],dp[i-1]+nums[i])
-
-**代码实现**：
-
-```java
-class Solution {
-    public int maxSubArray(int[] nums) {
-        int dp[] = new int[nums.length];
-        dp[0] = nums[0];
-        for (int i = 1; i < nums.length; i++) {
-            dp[i] = Math.max(nums[i],dp[i-1]+nums[i]);
-        }
-        int res = Integer.MIN_VALUE;
-        for(int i=0;i<nums.length;i++){
-            res = Math.max(res,dp[i]);
-        }
-        return res;
-    }
-}
-```
-
-
-
-### 62、不同路径
-
-**题目链接**：[不同路径](https://leetcode-cn.com/problems/unique-paths/)
-
-**解题思路**：
-
-1. 定义dp数组，dp[ i ] [ j ]表示到达第 i 行 第 j 列 时有多少路径
-2. 初始化dp数组。第一行只能往左移动和第一列只能往下移动，所以路径都为1
-3. 定义状态转移方程。除第一行和第一列外，每个位置都可以由上面和左边过来，所以dp[ i ] [ j ] = dp [i-1] [j] + dp [i] [ j-1]
-
-**代码实现**：
-
-```java
-class Solution {
-    public int uniquePaths(int m, int n) {
-        //定义dp数组
-        int [][] dp = new int[m][n];
-        //初始化dp
-        for (int i = 0; i < m; i++) {
-            dp[i][0] = 1;
-        }
-        for (int j = 0; j < n; j++) {
-            dp[0][j] = 1;
-        }
-        //状态转移方程
-        for (int i = 1; i < m; i++) {
-            for (int j = 1; j < n; j++) {
-                dp[i][j] = dp[i-1][j] + dp[i][j-1];
-            }
-        }
-        return dp[m - 1][n - 1];
-    }
-}
-```
-
-
-
-### 64、最小路径和
-
-**题目描述**：[最小路径和](https://leetcode-cn.com/problems/minimum-path-sum/)
-
-**算法思路**：
-
-思路一：暴力求解，枚举所有可能的结果，时间复杂度高
-
-思路二：使用动态规划
-
-1. 定义dp数组，dp[ i ] [ j ]表达达到第 i 行 第 j 列时的最短路径
-2. 初始化dp数组。第一行只能往左走，第一列只能向下走。
-3. 定义状态转移方程，一个位置要么由左边过来，要么由上面下来。 dp[ i ] [j ] = Math.min(dp[ i -1] [ j],dp [i] [j-1]) + grid[i] [j];
-
-**代码实现**：
-
-暴力求解
-
-```java
-class Solution {
-    int minRes;
-    int m,n;
-    public int minPathSum(int[][] grid) {
-        m = grid.length;
-        n = grid[0].length;
-        minRes = Integer.MAX_VALUE;
-        dfs(grid,0,0,0);
-        return minRes;
-    }
-
-    private void dfs(int[][] grid, int i, int j,int res) {
-        if (i < 0 || i >= m || j < 0 || j >= n) {
-            return;
-        }
-        res += grid[i][j];
-        if (i == m - 1 && j == n - 1) {
-            minRes = Math.min(minRes,res);
-            return;
-        }
-        dfs(grid,i+1,j,res);
-        dfs(grid,i,j+1,res);
-        res -= grid[i][j];
-    }
-}
-```
-
-动态规划
-
-```java
-class Solution {
-
-    public int minPathSum(int[][] grid) {
-        int m = grid.length;
-        int n = grid[0].length;
-        //定义dp数组
-        int[][] dp = new int[m][n];
-        //初始化dp数组
-        dp[0][0] = grid[0][0];
-        //第一列，只能向下走
-        for (int i = 1; i < m; i++) {
-            dp[i][0] = dp[i-1][0] + grid[i][0];
-        }
-        //第一行，只能向左走
-        for (int j = 1; j < n; j++) {
-            dp[0][j] = dp[0][j-1] + grid[0][j];
-        }
-        //状态转移方程
-        for (int i = 1; i < m; i++) {
-            for (int j = 1; j < n; j++) {
-                dp[i][j] = Math.min(dp[i - 1][j], dp[i][j - 1]) + grid[i][j];
-            }
-        }
-        return dp[m-1][n-1];
-    }
-
-}
-```
-
-
-
-### 70、爬楼梯
-
-**题目链接**：[爬楼梯](https://leetcode-cn.com/problems/climbing-stairs/)
-
-**算法思路**：
-
-1. 定义dp数组。dp[i]表示到达第i层楼梯有多少种方法
-2. 初始化dp数组。需要初始化第一二层的楼梯
-3. 定义状态转移方程。当前楼层可以由前一层和前两层楼层得到，所以dp[i ] = dp[ i -1] + dp[ i-2]
-
-**代码实现**：
-
-```java
-class Solution {
-    public int climbStairs(int n) {
-        if (n <= 2) {
-            return n;
-        }
-        //定义dp数组
-        int[] dp = new int[n+1];
-        //初始化dp数组
-        dp[1] = 1;
-        dp[2] = 2;
-        //定义状态转移方程
-        for (int i = 3; i <= n; i++) {
-            dp[i] = dp[i - 1] + dp[i - 2];
-        }
-        return dp[n];
-    }
-}
-```
-
-
-
-### 72、编辑距离
-
-👍**解决两个字符串的动态规划问题，一般都是用两个指针 `i,j` 分别指向两个字符串的最后，然后一步步往前走，缩小问题的规模**。
-
-**题目链接**：[编辑距离](https://leetcode-cn.com/problems/edit-distance/)
-
-**算法思路**：
-
-1. 定义dp数组。dp[i] [j]表示word1的[0..i]的字符转换成word2[0..j]的字符最少需要多少次
-2. 初始化dp数组。如果word1为空，只能插入word2长度的字符；如果word2为空，只能删除word1个字符
-3. 定义状态转移方程。当word1[i-1] = word2[j-1]时，dp[i] [j] = dp[i-1] [j-1]；如果不相等的话，则从删除、替换、增加中选择最少次数作为转移dp [i] [j] = Math.min(dp[i-1] [j-1],Math.min(dp[i-1] [j],dp[i] [j-1])) + 1;
-
-**代码实现**：
-
-```java
-class Solution {
-    public int minDistance(String word1, String word2) {
-        int n1 = word1.length();
-        int n2 = word2.length();
-        //如果word1为空，只能插入n2个字符
-        if(n1==0) return n2;
-        //如果word2为空，只能删除n1个字符
-        if(n2==0) return n1;
-
-        //1.定义dp数组
-        //dp[i][j]表示word1中[0..i]的字符转换到word2的[0..j]的最少次数
-        int dp[][] = new int[n1+1][n2+1];
-        //2.初始化dp数组
-        dp[0][0] = 0;
-        //当word1为空时，只能通过插入变成word2
-        for (int j = 1; j <= n2 ; j++) {
-            dp[0][j] = dp[0][j-1] + 1;
-        }
-        //当word2为空时，只能通过删除word1来变成word2
-        for (int i = 1; i <= n1; i++) {
-            dp[i][0] = dp[i-1][0] + 1;
-        }
-        //3.定义状态转移方程
-        for (int i = 1; i <= n1; i++) {
-            for (int j = 1; j <= n2; j++) {
-                //如果word1[i-1]==word2[j-1]，啥也不做
-                if (word1.charAt(i - 1) == word2.charAt(j - 1)) {
-                    dp[i][j] = dp[i - 1][j - 1];
-                }else{
-                    //如果不相等，则从插入、删除、替换中次数最少的选择一个
-                    //dp[i-1][j-1]表示替换
-                    //dp[i-1][j]表示删除
-                    //dp[i][j-1]表示插入
-                    dp[i][j] = Math.min(dp[i-1][j-1],Math.min(dp[i-1][j],dp[i][j-1])) + 1;
-                }
-            }
-        }
-        return dp[n1][n2];
-
-    }
-}
-```
-
-
-
-
-
-## 七、双指针
-
-👍**双指针算法模板**：[双指针技巧框架](https://blog.csdn.net/weixin_42870497/article/details/119893198)
-
-### 11、盛最多水的容器
-
-**题目链接**：[盛最多水的容器](https://leetcode-cn.com/problems/container-with-most-water/)
-
-**解题思路**：
-
-使用双指针，分别指向左右两端。容器的面积的长（right-left）* 宽（Math.min(height[left],height[right])）
-
-只有移动的较短的那个木板才会使得面积有变大的可能，移动较长的那个木板只会使面积变小。
-
-**代码实现**：
-
-```java
-class Solution {
-    public int maxArea(int[] height) {
-        int left = 0;
-        int right = height.length-1;
-        int res = 0;
-        while(left<right){
-            res = height[left]<=height[right]?
-                Math.max(res,(right-left) * height[left++]):
-                Math.max(res,(right-left) * height[right--]);
-        }
-        return res;
-    }
-}
-```
-
-### 15、三数之和
-
-**题目链接**：[三数之和](https://leetcode-cn.com/problems/3sum/)
-
-**解题思路**：
-
-1. 首先对数组排序，然后遍历数组，固定num[i]，再使用左右指针指向num[i]后面两端
-2. 计算三个数的 sum是否为0，如果是则添加进结果集。
-3. 如果 nums[i]大于 0，则三数之和必然无法等于 0，结束循环
-4. 如果 nums[i] == nums[i-1]，则说明该数字重复，会导致结果重复，所以应该跳过
-5. 当 sum0 时，nums[L] == nums[L+1] 则会导致结果重复，应该跳过，L++
-6. 当 sum0 时，nums[R]== nums[R-1] 则会导致结果重复，应该跳过，R--
-
-**代码实现**：
-
-```java
-class Solution {
-    public static List<List<Integer>> threeSum(int[] nums) {
-        List<List<Integer>> ans = new ArrayList();
-        int len = nums.length;
-        if(nums == null || len < 3) return ans;
-        Arrays.sort(nums); // 排序
-        for (int i = 0; i < len ; i++) {
-            if(nums[i] > 0) break; // 如果当前数字大于0，则三数之和一定大于0，所以结束循环
-            if(i > 0 && nums[i] == nums[i-1]) continue; // 去重
-            int L = i+1;
-            int R = len-1;
-            while(L < R){
-                int sum = nums[i] + nums[L] + nums[R];
-                if(sum == 0){
-                    ans.add(Arrays.asList(nums[i],nums[L],nums[R]));
-                    while (L<R && nums[L] == nums[L+1]) L++; // 去重
-                    while (L<R && nums[R] == nums[R-1]) R--; // 去重
-                    L++;
-                    R--;
-                }
-                else if (sum < 0) L++;
-                else if (sum > 0) R--;
-            }
-        }        
-        return ans;
-    }
-}
-
-```
-
-### 33、搜索旋转排序数组
-
-**题目链接**：[搜索旋转排序数组](https://leetcode-cn.com/problems/search-in-rotated-sorted-array/)
-
-**解题思路**：
-
-采用二分法的思路进行搜索。
-
-旋转数组后，从中间划分，一定有一边是有序的。
-
-由于一定有一边是有序的，可以根据有序的两个边界值来判断目标值在有序一边还是无序一边。
-
-注意：有序一边的边界值可能等于目标值，所以判断时别忘了等号
-
-**代码实现**：
-
-```java
-class Solution {
-    public int search(int[] nums, int target) {
-        int left = 0;
-        int right = nums.length-1;
-        while (left <= right) {
-            int mid = left + ((right - left) >> 1);
-            if (nums[mid] == target) {
-                return mid;
-            }
-            //右边有序
-            if(nums[mid]<nums[right]){
-                //目标值在右边
-                if(target>nums[mid] && target<=nums[right]){
-                    left = mid + 1;
-                }else{//目标值在左边
-                    right = mid - 1;
-                }
-            }else{//左边有序
-                //目标值在左边
-                if(target<nums[mid] && target>=nums[left]){
-                    right = mid - 1;
-                }else{//目标值在右边
-                    left = mid + 1;
-                }
-            }
-            
-        }
-        return -1;
-    }
-}
-```
-
-### 42、接雨水
-
-**题目链接**：[接雨水](https://leetcode-cn.com/problems/trapping-rain-water/)
-
-**解题思路**：
-
-一、暴力解法
-
-先考虑局部，仅仅对于位置i，能装多少水？
-
-算出位置i左边的最高柱子leftMax和右边最高的柱子rightMax，则位置 i 能装的水为Math.min(leftMax,rightMax)-height[i]
-
-时间复杂度：O(n^2)
-
-空间复杂度：O(1)
-
-二、备忘录
-
-开两个数组leftMax[]和rightMax[]做备忘录，leftMax[i]表示位置 i  左边最高的柱子高度，rightMax[i] 表示位置 i  右边最高的柱子高度。预先把这两个数组计算好，避免重复计算。
-
-并不需要知道右边或者左边最高的是谁，只要知道当前位置最小的是谁。
-
-时间复杂度：O(n)
-
-空间复杂度：O(n)
-
-![](https://labuladong.gitee.io/algo/images/%e6%8e%a5%e9%9b%a8%e6%b0%b4/3.jpg)
-
-三、双指针
-
-使用双指针边走边算
-
-时间复杂度：O(n)
-
-空间复杂度：O(1)
-
-![](https://labuladong.gitee.io/algo/images/%e6%8e%a5%e9%9b%a8%e6%b0%b4/4.jpg)
-
-
-
-**代码实现**：
-
-一、暴力解法
-
- ```java
- class Solution {
-     public int trap(int[] height) {
-         int maxResult = 0;
-         int n = height.length;
-         for(int i=1;i<n-1;i++){
-             int maxLeft = 0;
-             int maxRight = 0;
-             //找左边最高的柱子
-             for(int left=i;left >= 0;left--){
-                 maxLeft = Math.max(maxLeft, height[left]);
-             }
-             //找右边最高的柱子
-             for (int right = i; right < n; right++) {
-                 maxRight = Math.max(maxRight, height[right]);
-             }
-             maxResult += Math.min(maxLeft,maxRight) - height[i];
-         }
-         return maxResult;
-     }
- }
- 
- ```
-
-二、备忘录
-
-```java
-class Solution {
-    public int trap(int[] height) {
-        int maxResult = 0;
-        int n = height.length;
-        //使用备忘录
-        int leftMax[] = new int[n];
-        int rightMax[] = new int[n];
-        leftMax[0] = height[0];
-        rightMax[n-1] = height[n-1];
-        //从左向右计算左边最高的柱子
-        //leftMax[i]表示第i位柱子的左边最高的柱子
-        for (int i=1;i<n;i++){
-            leftMax[i] = Math.max(height[i],leftMax[i-1]);
-        }
-        //从右向左计算右边最高的柱子
-        //leftMax[i]表示第i位柱子的左边最高的柱子
-        for (int i = n - 2; i >= 0; i--) {
-            rightMax[i] = Math.max(height[i],rightMax[i+1]);
-        }
-        //计算能接的雨水
-        for (int i = 0; i < n; i++) {
-            maxResult += Math.min(leftMax[i],rightMax[i]) - height[i];
-        }
-        return maxResult;
-    }
-}
-
-```
-
-三、双指针
-
-```java
-class Solution {
-    public int trap(int[] height) {
-        int maxResult = 0;
-        int left = 0;
-        int right = height.length-1;
-        int leftMax = 0;
-        int rightMax = 0;
-        while(left < right){
-            leftMax = Math.max(leftMax,height[left]);
-            rightMax = Math.max(rightMax,height[right]);
-            if (leftMax < rightMax) {
-                maxResult += leftMax - height[left];
-                left++;
-            }else{
-                maxResult += rightMax - height[right];
-                right--;
-            }
-        }
-        return maxResult;
-    }
-}
-
-```
-
-
-
-
-
-## 八、回溯法
-
-👍**算法模板**：[回溯框架团灭排列、组合、子集问题](https://blog.csdn.net/weixin_42870497/article/details/119443910)
-
-👍**矩阵搜索算法模板：**[DFS团灭矩阵中的搜索问题](https://blog.csdn.net/weixin_42870497/article/details/120048719)
-
-### 17、电话号码的字母组合
-
-**题目链接**：[电话号码的字母组合](https://leetcode-cn.com/problems/letter-combinations-of-a-phone-number/)
-
-**解题思路**：
-
-应用回溯法的解题思路
-
-1. 先用HashMap初始化数字和字母的组合
-2. 使用回溯法开始深度遍历
-
-**代码实现**：
-
-```java
-class Solution {
-
-    HashMap<Character,String> map = new HashMap<>(){
-        {
-            put('2',"abc");
-            put('3',"def");
-            put('4',"ghi");
-            put('5',"jkl");
-            put('6',"mno");
-            put('7',"pqrs");
-            put('8',"tuv");
-            put('9',"wxyz");
-        }
-    };
-
-    List<String> list = new ArrayList<>();
-    public List<String> letterCombinations(String digits) {
-        if(digits.length()==0){
-            return list;
-        }
-        StringBuilder sb = new StringBuilder();
-        dfs(digits,sb,0);
-        return list;
-    }
-
-    private void dfs(String digits,StringBuilder sb,int index){
-        if(index==digits.length()){
-            list.add(sb.toString());
-            return;
-        }
-        char c = digits.charAt(index);
-        String str = map.get(c);
-        for(int i=0;i<str.length();i++){
-            sb.append(str.charAt(i));
-            dfs(digits,sb,index+1);
-            sb.deleteCharAt(sb.length()-1);
-        }
-    }
-}
-```
-
-
-
-### 39、组合总和
-
-**题目链接：**[组合总和](https://leetcode-cn.com/problems/combination-sum/)
-
-**解题思路：**回溯法。关键点：start这个参数
-
-**代码实现：**
-
-```java
-class Solution {
-
-    List<List<Integer>> res;
-    public List<List<Integer>> combinationSum(int[] candidates, int target) {
-        res = new ArrayList<>();
-        LinkedList<Integer> list = new LinkedList<>();
-        Arrays.sort(candidates);
-        dfs(candidates,target,list,0);
-        return res;
-    }
-
-    private void dfs(int[] nums,int target,LinkedList<Integer> list,int start){
-        if (target == 0) {
-            res.add(new ArrayList<Integer>(list));
-        }
-        for (int i = start; i < nums.length; i++) {
-            //剪枝
-            if (target < nums[i]) {
-                return;
-            }
-            list.add(nums[i]);
-            dfs(nums,target-nums[i],list,i);
-            list.removeLast();
-
-        }
-    }
-}
-```
-
-
-
-### 78、子集
-
-**题目链接**：[子集](https://leetcode-cn.com/problems/subsets/)
-
-**算法思路**：
-
-1. 使用回溯法的思路进行求解
-2. 注意参数start的作用，它是避免进入下一层递归时，添加到重复的元素
-
-**代码实现**：
-
-```java
-class Solution {
-
-    List<List<Integer>> res = new ArrayList<>();
-    public List<List<Integer>> subsets(int[] nums) {
-        LinkedList<Integer> list = new LinkedList<>();
-        dfs(nums, list,0);
-        return res;
-    }
-
-    private void dfs(int[] nums, LinkedList<Integer> list,int start) {
-        res.add(new ArrayList<>(list));
-        for (int i = start; i < nums.length; i++) {
-            list.add(nums[i]);
-            dfs(nums, list, i + 1);
-            list.removeLast();
-        }
-    }
-}
-```
-
-
-
-### 79、单词搜索
-
-**题目链接：**[单词搜索](https://leetcode-cn.com/problems/word-search/)
-
-**算法思路：**
-
-1. 使用回溯法的思路进行矩阵的遍历
-2. 注意不能重复访问，所以需要visit变量记录。遍历的过程中，首先单词第一个元素必须匹配上，所以需要一个index变量进行记录
-
-**代码实现：**
-
-```java
-class Solution {
-
-    int m, n;
-
-    public boolean exist(char[][] board, String word) {
-
-        m = board.length;
-        n = board[0].length;
-
-        boolean[][] visit = new boolean[m][n];
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
-                if (dfs(board, word, i, j,0, visit)) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    private boolean dfs(char[][] board, String word, int i, int j, int index,boolean[][] visit) {
-
-        if (i < 0 || i >= m || j < 0 || j >= n || board[i][j]!=word.charAt(index)|| visit[i][j]) {
-            return false;
-        }
-
-        if (index == word.length()-1) {
-            return true;
-        }
-
-        visit[i][j] = true;
-        boolean res = dfs(board, word, i - 1, j, index+1,visit) ||
-                        dfs(board, word, i + 1, j,index+1, visit) ||
-                        dfs(board, word, i, j - 1, index+1,visit) ||
-                        dfs(board, word, i, j + 1, index+1,visit);
-        visit[i][j] = false;
-        return res;
-    }
-}
-```
-
-
-
-
-
-
-
-
-
-## 九、栈
+## 三、栈
 
 👍**单调栈算法模板：**
 
@@ -1730,145 +624,207 @@ class Solution {
 
 
 
+## 四、二叉树
 
+👍**二叉树的非递归遍历模板**
 
-## 十、递归
-
-👍**递归模板**：
+👍前序遍历
 
 ```java
-public void recur(int level,int param){
-    //1.递归终止条件
-    if(level>MaxLevel){
-        //过程结果
-        return;
+/**
+     * 迭代前序遍历
+     * @param root
+     */
+private static void pre_travers_iterator(TreeNode root) {
+    Deque<TreeNode> stack = new ArrayDeque<>();
+    TreeNode cur = root;
+    while (cur!=null || !stack.isEmpty()) {
+        if (cur != null) {
+            System.out.print(cur.val + " ");//前序遍历代码
+            stack.push(cur);
+            cur = cur.left;
+        }else{
+            cur = stack.pop();
+            //中序遍历代码写这里
+            cur = cur.right;
+        }
     }
-    //2.处理当前层逻辑
-    process...
-    //3.进入下一层
-    recur(level+1,newParam);
-    //4.清理当前层，如果需要的话
-    process...
-}
 
-参数说明：
-level表示来到了第几层
-param表示其他参数
+}
+```
+
+👍中序遍历
+
+```java
+/**
+     * 迭代中序遍历
+     * @param root
+     */
+private static void in_travers_itrator(TreeNode root) {
+    ArrayDeque<TreeNode> stack = new ArrayDeque<>();
+    TreeNode cur = root;
+    while (cur!=null || !stack.isEmpty()) {
+        if(cur != null) {
+            stack.push(cur);
+            cur = cur.left;
+        }else{
+            cur = stack.pop();
+            System.out.print(cur.val + " ");
+            cur = cur.right;
+        }
+    }
+}
+```
+
+👍后序遍历
+
+```java
+/**
+     * 迭代后序遍历
+     * @param root
+     */
+private static void post_travers_iterator(TreeNode root) {
+    ArrayDeque<TreeNode> stack_main = new ArrayDeque<>();
+    ArrayDeque<TreeNode> stack_help = new ArrayDeque<>();
+    stack_help.push(root);
+    while (!stack_help.isEmpty()) {
+        TreeNode cur = stack_help.pop();
+        stack_main.push(cur);
+        if (cur.left != null) {
+            stack_help.push(cur.left);
+        }
+        if (cur.right != null) {
+            stack_help.push(cur.right);
+        }
+    }
+
+    while (!stack_main.isEmpty()) {
+        TreeNode node = stack_main.pop();
+        System.out.print(node.val + " ");
+    }
+}
 ```
 
 
 
-### 22、括号生成
+### 94、二叉树的中序遍历
 
-**题目链接**：[括号生成](https://leetcode-cn.com/problems/generate-parentheses/)
+**题目链接**：[二叉树的中序遍历](https://leetcode-cn.com/problems/binary-tree-inorder-traversal/)
 
 **解题思路**：
 
-使用暴力递归，枚举所有可能的结果。
+1、递归
 
-使用left和right两个参数分别表示左括号和右括号的个数，只要左括号没有达到最大值就可以一直往里面添加左括号。只要右括号小于左括号的个数，就可以往里面添加右括号。最后只要左括号和右括号达到最大个数就可以停止递归。
+2、迭代
+
+**代码实现**：
+
+递归
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+
+    List<Integer> list = new ArrayList<>();
+    public List<Integer> inorderTraversal(TreeNode root) {
+        inorder(root);
+        return list;
+    }
+
+    private void inorder(TreeNode root) {
+        if (root == null) {
+            return;
+        }
+        inorder(root.left);
+        list.add(root.val);
+        inorder(root.right);
+    }
+}
+```
+
+迭代
+
+```java
+class Solution {
+    
+    public List<Integer> inorderTraversal(TreeNode root) {
+        List<Integer> list = new ArrayList<>();
+        Deque<TreeNode> stack = new ArrayDeque<>();
+        TreeNode cur = root;
+        while (cur != null || !stack.isEmpty()) {
+            if (cur != null) {
+                stack.push(cur);
+                cur = cur.left;
+            }else{
+                TreeNode node = stack.pop();
+                list.add(node.val);
+                cur = node.right;
+            }
+        }
+        return list;
+    }
+
+}
+```
+
+
+
+## 五、字符串
+
+### 5、最长回文子串
+
+**题目链接**：[最长回文子串](https://leetcode-cn.com/problems/longest-palindromic-substring/)
+
+**解题思路**：
+
+中心扩展法。把每一个字符都当作中心点去扩展，判断是否是回文子串。因为字符串长度为奇数和偶数是两种情况，所以干脆两者都一起判断，最后取最长的字符串。
 
 **代码实现**：
 
 ```java
 class Solution {
-
-    List<String> res;
-    public List<String> generateParenthesis(int n) {
-        res = new ArrayList<>();
-        recursion(0,0,n,"");
+    public String longestPalindrome(String s) {
+        String res = "";
+        for(int i=0;i<s.length();i++){
+            //以s[i]为中心的最长回文子串
+            String s1 = palindrome(s,i,i);
+            //以s[i]和s[i+1]为中心的最长回文子串
+            String s2 = palindrome(s,i,i+1);
+            res = res.length()>s1.length()?res:s1;
+            res = res.length()>s2.length()?res:s2;
+        }
         return res;
     }
 
-    private void recursion(int left,int right,int max,String s){
-        //递归结束条件
-        if(left==max && right==max){
-            res.add(s);
-            return;
+    private String palindrome(String s,int left,int right){
+        //防止索引越界
+        while(left>=0 && right<=s.length()-1 && s.charAt(left)==s.charAt(right)){
+            left--;
+            right++;
         }
-        //处理逻辑
-        if(left<max){
-            recursion(left+1,right,max,s+"(");
-        }
-        if(left>right){
-            recursion(left,right+1,max,s+")");
-        }
-        return;
-
+        //substring包头不包尾
+        return s.substring(left+1,right);
     }
 }
 ```
 
 
 
-## 十一、二分查找
-
-👍**二分查找模板**：[二分查找模板](https://blog.csdn.net/weixin_42870497/article/details/119728363)
-
-### 34、在排序数组中查找元素的第一个和最后一个位置
-
-**题目链接**：[在排序数组中查找元素的第一个和最后一个位置](https://leetcode-cn.com/problems/find-first-and-last-position-of-element-in-sorted-array/)
-
-**解题思路**：二分查找
-
-**代码模板**：
-
-```java
-class Solution {
-    public int[] searchRange(int[] nums, int target) {
-        if (nums.length == 0) {
-            return new int[]{-1,-1};
-        }
-        int left = binarySearchLeft(nums, target);
-        int right = binarySearchRight(nums, target);
-        return new int[]{left, right};
-    }
-
-    private int binarySearchLeft(int[] nums, int target) {
-        int left = 0;
-        int right = nums.length-1;
-        while (left <= right) {
-            int mid = left + ((right - left) >> 1);
-            if (nums[mid] < target) {
-                left = mid + 1;
-            } else if (nums[mid] > target) {
-                right = mid - 1;
-            } else {
-                right = mid - 1;
-            }
-        }
-        if (left >= nums.length || nums[left] != target) {
-            return -1;
-        }
-        return left;
-    }
-
-    private int binarySearchRight(int[] nums, int target) {
-        int left = 0;
-        int right = nums.length-1;
-        while (left <= right) {
-            int mid = left + ((right - left) >> 1);
-            if (nums[mid] < target) {
-                left = mid + 1;
-            } else if (nums[mid] > target) {
-                right = mid - 1;
-            } else {
-                left = mid + 1;
-            }
-        }
-        if (right < 0 || nums[right] != target) {
-            return -1;
-        }
-        return right;
-    }
-
-
-}
-```
-
-
-
-## 十二、二维数组
+## 六、二维数组
 
 **主对角线反转矩阵(按照左上到右下的对角线进行镜像对称)**
 
@@ -2022,7 +978,1218 @@ class Solution {
 
 
 
-## 十三、贪心算法
+# 常见算法
+
+## 一、滑动窗口
+
+👍**滑动窗口模板**
+
+```java
+int left = 0, right = 0;
+
+while (right < s.size()) {
+    window.add(s[right]);
+    right++;
+    
+    while (满足缩小窗口条件) {
+        window.remove(s[left]);
+        left++;
+    }
+}
+```
+
+使用滑动窗口前需要思考以下4个点：
+
+1. 增大窗口时，要更新哪些数据？
+
+2. 什么时候停止增大窗口，开始缩小窗口？
+
+3. 缩小窗口时，要更新哪些数据？
+
+4. 最后的结果在增大窗口时更新，还是缩小窗口时更新？
+
+   
+
+### 3、无重复字符的最长子串
+
+**题目链接：** [无重复字符的最长子串](https://leetcode-cn.com/problems/longest-substring-without-repeating-characters/)
+
+**解题思路：** 使用滑动窗口操作
+
+**实现代码：** 
+
+```java
+class Solution {
+    public int lengthOfLongestSubstring(String s) {
+        
+        int left = 0;
+        int right = 0;
+        int res = 0;
+        HashMap<Character,Integer> window = new HashMap<>();
+        //增大窗口
+        while (right < s.length()) {
+            //更新数据
+            char c = s.charAt(right);
+            window.put(c,window.getOrDefault(c,0)+1);
+            right++;
+            //缩小窗口
+            while(window.get(c)>1){              
+                //更新数据
+                char c1 = s.charAt(left);
+                window.put(c1,window.get(c1)-1);
+                left++;
+            }
+             //更新结果
+            res = Math.max(right-left,res);
+        }
+        
+        return res;
+    }
+}
+```
+
+
+
+### 76、最小覆盖子串
+
+**题目链接**：[最小覆盖子串](https://leetcode-cn.com/problems/minimum-window-substring/)
+
+**算法思路**：
+
+1. 使用一个HashMap表示一个窗口，再使用一个HashMap表示辅助窗口，存储需要覆盖的字符串
+2. 不断增大窗口，往窗口里不断添加元素，当窗口覆盖辅助窗口时，停止增大窗口开始缩小窗口
+3. 在缩小窗口时开始更新结果数据，然后缩小窗口，直到窗口不能覆盖辅助窗口
+4. 返回结果值
+
+**代码实现**：
+
+```java
+class Solution {
+    public String minWindow(String s, String t) {
+        int len1 = s.length();
+        int len2 = t.length();
+        if (len1 == 0 || len2 == 0 || len1 < len2) {
+            return "";
+        }
+        //滑动窗口
+        HashMap<Character, Integer> window = new HashMap<>();
+        HashMap<Character, Integer> need = new HashMap<>();
+        for (char c : t.toCharArray()) {
+            need.put(c, need.getOrDefault(c, 0) + 1);
+        }
+        int left = 0;
+        int right = 0;
+        //存储结果的变量
+        int start = 0;
+        int end = 0;
+        int match = 0;
+        int minLen = Integer.MAX_VALUE;
+        while (right < len1) {
+          	//增大窗口
+            char c = s.charAt(right);
+            window.put(c, window.getOrDefault(c, 0) + 1);
+            right++;
+            if (window.get(c).equals(need.get(c))) {
+                match++;
+            }
+            //缩小窗口
+            while (match == need.size()) {
+                //缩小窗口时更新结果
+                if (right - left < minLen) {
+                    start = left;
+                    end = right;
+                    minLen = right - left;
+                }
+                //对称结构
+                char c1 = s.charAt(left);
+                window.put(c1, window.get(c1) - 1);
+                left++;
+                if (need.containsKey(c1)) {
+                    if (window.get(c1) < need.get(c1)) {
+                        match--;
+                    }
+                }
+            }
+        }
+        return minLen == Integer.MAX_VALUE ? "" : s.substring(start, end);
+
+    }
+}
+```
+
+
+
+
+
+## 二、排序
+
+👍**快排模板**
+
+```java
+/**
+ * 快速排序
+ * @author: 小LeetCode~
+ **/
+public class QuickSort {
+
+    public static void main(String[] args) {
+        int[] nums = {7, 8, 5, 1, 3, 4, 9, 6};
+        System.out.println(Arrays.toString(nums));
+        quicksort(nums,0,nums.length-1);
+        System.out.println(Arrays.toString(nums));
+    }
+
+    private static void quicksort(int[] nums, int left, int right) {
+        if(left>=right){
+            return;
+        }
+        int mid = partition(nums,left,right);
+        quicksort(nums,left,mid-1);
+        quicksort(nums,mid+1,right);
+    }
+
+    private static int partition(int[] nums, int left, int right) {
+        //基准数，一半选取第一个元素
+        int x = nums[left];
+        int i = left;
+        int j = right+1;
+        while(true){
+            while(nums[++i]<x){
+                if(i>=right){
+                    break;
+                }
+            }
+            while(nums[--j]>x){
+
+            };
+            if(i>=j){
+                break;
+            }
+            swap(nums,i,j);
+        }
+        swap(nums,left,j);
+        return j;
+    }
+
+    private static void swap(int[] nums, int i, int j) {
+        int temp = nums[i];
+        nums[i] = nums[j];
+        nums[j] = temp;
+    }
+}
+
+
+```
+
+
+
+
+
+### 4、 寻找两个正序数组的中位数
+
+**题目链接**：[寻找两个正序数组的中位数](https://leetcode-cn.com/problems/median-of-two-sorted-arrays/)
+
+**解题思路**：
+
+1、使用归并排序，将两个数组合并。数组长度为奇数，则返回中间值。若是偶数，返回中间两个值除以2
+
+2、既然已经知道两个数组的长度，其实也可以不用合并数组。通过指针下标判断是否已经达到中间值。
+
+**实现代码**：
+
+```java
+class Solution {
+    public double findMedianSortedArrays(int[] nums1, int[] nums2) {
+        ArrayList<Integer> list = new ArrayList<>();
+        int length1 = nums1.length;
+        int length2 = nums2.length;
+        int p1 = 0;
+        int p2 = 0;
+        while(p1<length1 && p2<length2){
+            if(nums1[p1]<=nums2[p2]){
+                list.add(nums1[p1]);
+                p1++;
+            }else{
+                list.add(nums2[p2]);
+                p2++;
+            }
+        }
+        while(p1<length1){
+            list.add(nums1[p1]);
+            p1++;
+        }
+        while(p2<length2){
+            list.add(nums2[p2]);
+            p2++;
+        }
+        int size = list.size();
+        if((size&1)==1){
+            return (double)list.get(size/2);
+        }else{
+            return (list.get(size/2)+list.get(size/2 -1 ))/2.0;
+        }
+    }
+}
+```
+
+
+
+### 75、颜色分类
+
+**题目链接**：[颜色分类](https://leetcode-cn.com/problems/sort-colors/)
+
+**算法思路**：使用快速排序即可解决问题
+
+**代码实现**：
+
+```java
+class Solution {
+    public void sortColors(int[] nums) {
+        int left = 0;
+        int right = nums.length - 1;
+        quicksort(nums, left, right);
+    }
+
+    private void quicksort(int[] nums, int left, int right) {
+        if (left >= right) {
+            return;
+        }
+        int mid = partition(nums, left, right);
+        quicksort(nums, left, mid - 1);
+        quicksort(nums, mid + 1, right);
+    }
+
+    private int partition(int[] nums, int left, int right) {
+        int x = nums[left];
+        int i = left;
+        int j = right + 1;
+        while (true) {
+            while (nums[++i] < x) {
+                if (i >= right) {
+                    break;
+                }
+            }
+            while (nums[--j] > x) ;
+            if(i>=j) break;
+            swap(nums, i, j);
+        }
+        swap(nums, left, j);
+        return j;
+    }
+
+    private void swap(int[] nums, int i, int j) {
+        int tmp = nums[i];
+        nums[i] = nums[j];
+        nums[j] = tmp;
+    }
+
+
+}
+```
+
+
+
+
+
+
+
+
+
+## 三、动态规划
+
+### 10、正则表达式匹配
+
+题目链接：[正则表达式匹配](https://leetcode-cn.com/problems/regular-expression-matching/)
+
+解题思路：
+
+递归做法比动态规划容易理解。
+
+核心思路通过不断地剪去s和p的首部，直到某一个或者两个都被剪空，就可以得出答案。
+
+有 ‘*’ 和 没 ‘ * ‘ 两种情况进行讨论。
+
+其中有 ’ * ‘ 的又分两种情况，因为它可以匹配零次或者多次：
+
+1. p的第i个元素在s中出现零次：那就s不动，p剪去前面两个字母。如 s=“aac”，p=“b*aac”，把p前面的两个元素剪去
+2. p的第i个元素在s中出现一次或多次：比较s和p首元素是否相同，如果相同，p不动，s剪去首元素，继续递归。比如 s=“aabb”，p=“a*bb”，比较首元素相同，s 剪去首元素，即 s=“abb”，p不动，继续匹配
+
+没 ’ * ‘ 的情况是最简单的，这时候只需要扫描一遍s和p，从首部开始比较两元素是否相同，如果相同就剪去，比较下一个即可。
+
+```java
+//第i下标位置元素相同，'.'代表任何元素
+s.charAt(i) == p.charAt(i) || p.charAt(i)=='.'
+```
+
+代码实现：
+
+```java
+class Solution {
+    public boolean isMatch(String s, String p) {
+        if(p.length()==0){
+            return s.length()==0;
+        }
+        //判断首字符是否匹配。这里s.length可能为0的情况，但p.length不可能为0，因为p.length为0是递归出口
+        boolean firstIsMatch = (s.length()>0) && 		 (s.charAt(0)==p.charAt(0)||p.charAt(0)=='.');
+        //两种情况，p带'*'和不带'*'
+        if(p.length()>=2 && p.charAt(1)=='*'){
+            return isMatch(s,p.substring(2)) //匹配0次情况
+                || (firstIsMatch && isMatch(s.substring(1),p)); //匹配多次或者一次的情况
+        }else{
+            return firstIsMatch && isMatch(s.substring(1),p.substring(1));
+        }
+    }
+}
+```
+
+
+
+### 53、最大子数组和
+
+**题目链接**：[最大子数组和](https://leetcode-cn.com/problems/maximum-subarray/)
+
+**解题思路**：
+
+1. 定义dp数组，dp[i]表示以nums[i]结尾的最大值
+2. 初始化dp数组，只要初始化第一个数
+3. 状态转移方程。dp[i] = Math.max(nums[i],dp[i-1]+nums[i])
+
+**代码实现**：
+
+```java
+class Solution {
+    public int maxSubArray(int[] nums) {
+        int dp[] = new int[nums.length];
+        dp[0] = nums[0];
+        for (int i = 1; i < nums.length; i++) {
+            dp[i] = Math.max(nums[i],dp[i-1]+nums[i]);
+        }
+        int res = Integer.MIN_VALUE;
+        for(int i=0;i<nums.length;i++){
+            res = Math.max(res,dp[i]);
+        }
+        return res;
+    }
+}
+```
+
+
+
+### 62、不同路径
+
+**题目链接**：[不同路径](https://leetcode-cn.com/problems/unique-paths/)
+
+**解题思路**：
+
+1. 定义dp数组，dp[ i ] [ j ]表示到达第 i 行 第 j 列 时有多少路径
+2. 初始化dp数组。第一行只能往左移动和第一列只能往下移动，所以路径都为1
+3. 定义状态转移方程。除第一行和第一列外，每个位置都可以由上面和左边过来，所以dp[ i ] [ j ] = dp [i-1] [j] + dp [i] [ j-1]
+
+**代码实现**：
+
+```java
+class Solution {
+    public int uniquePaths(int m, int n) {
+        //定义dp数组
+        int [][] dp = new int[m][n];
+        //初始化dp
+        for (int i = 0; i < m; i++) {
+            dp[i][0] = 1;
+        }
+        for (int j = 0; j < n; j++) {
+            dp[0][j] = 1;
+        }
+        //状态转移方程
+        for (int i = 1; i < m; i++) {
+            for (int j = 1; j < n; j++) {
+                dp[i][j] = dp[i-1][j] + dp[i][j-1];
+            }
+        }
+        return dp[m - 1][n - 1];
+    }
+}
+```
+
+
+
+### 64、最小路径和
+
+**题目描述**：[最小路径和](https://leetcode-cn.com/problems/minimum-path-sum/)
+
+**算法思路**：
+
+思路一：暴力求解，枚举所有可能的结果，时间复杂度高
+
+思路二：使用动态规划
+
+1. 定义dp数组，dp[ i ] [ j ]表达达到第 i 行 第 j 列时的最短路径
+2. 初始化dp数组。第一行只能往左走，第一列只能向下走。
+3. 定义状态转移方程，一个位置要么由左边过来，要么由上面下来。 dp[ i ] [j ] = Math.min(dp[ i -1] [ j],dp [i] [j-1]) + grid[i] [j];
+
+**代码实现**：
+
+暴力求解
+
+```java
+class Solution {
+    int minRes;
+    int m,n;
+    public int minPathSum(int[][] grid) {
+        m = grid.length;
+        n = grid[0].length;
+        minRes = Integer.MAX_VALUE;
+        dfs(grid,0,0,0);
+        return minRes;
+    }
+
+    private void dfs(int[][] grid, int i, int j,int res) {
+        if (i < 0 || i >= m || j < 0 || j >= n) {
+            return;
+        }
+        res += grid[i][j];
+        if (i == m - 1 && j == n - 1) {
+            minRes = Math.min(minRes,res);
+            return;
+        }
+        dfs(grid,i+1,j,res);
+        dfs(grid,i,j+1,res);
+        res -= grid[i][j];
+    }
+}
+```
+
+动态规划
+
+```java
+class Solution {
+
+    public int minPathSum(int[][] grid) {
+        int m = grid.length;
+        int n = grid[0].length;
+        //定义dp数组
+        int[][] dp = new int[m][n];
+        //初始化dp数组
+        dp[0][0] = grid[0][0];
+        //第一列，只能向下走
+        for (int i = 1; i < m; i++) {
+            dp[i][0] = dp[i-1][0] + grid[i][0];
+        }
+        //第一行，只能向左走
+        for (int j = 1; j < n; j++) {
+            dp[0][j] = dp[0][j-1] + grid[0][j];
+        }
+        //状态转移方程
+        for (int i = 1; i < m; i++) {
+            for (int j = 1; j < n; j++) {
+                dp[i][j] = Math.min(dp[i - 1][j], dp[i][j - 1]) + grid[i][j];
+            }
+        }
+        return dp[m-1][n-1];
+    }
+
+}
+```
+
+
+
+### 70、爬楼梯
+
+**题目链接**：[爬楼梯](https://leetcode-cn.com/problems/climbing-stairs/)
+
+**算法思路**：
+
+1. 定义dp数组。dp[i]表示到达第i层楼梯有多少种方法
+2. 初始化dp数组。需要初始化第一二层的楼梯
+3. 定义状态转移方程。当前楼层可以由前一层和前两层楼层得到，所以dp[i ] = dp[ i -1] + dp[ i-2]
+
+**代码实现**：
+
+```java
+class Solution {
+    public int climbStairs(int n) {
+        if (n <= 2) {
+            return n;
+        }
+        //定义dp数组
+        int[] dp = new int[n+1];
+        //初始化dp数组
+        dp[1] = 1;
+        dp[2] = 2;
+        //定义状态转移方程
+        for (int i = 3; i <= n; i++) {
+            dp[i] = dp[i - 1] + dp[i - 2];
+        }
+        return dp[n];
+    }
+}
+```
+
+
+
+### 72、编辑距离
+
+👍**解决两个字符串的动态规划问题，一般都是用两个指针 `i,j` 分别指向两个字符串的最后，然后一步步往前走，缩小问题的规模**。
+
+**题目链接**：[编辑距离](https://leetcode-cn.com/problems/edit-distance/)
+
+**算法思路**：
+
+1. 定义dp数组。dp[i] [j]表示word1的[0..i]的字符转换成word2[0..j]的字符最少需要多少次
+2. 初始化dp数组。如果word1为空，只能插入word2长度的字符；如果word2为空，只能删除word1个字符
+3. 定义状态转移方程。当word1[i-1] = word2[j-1]时，dp[i] [j] = dp[i-1] [j-1]；如果不相等的话，则从删除、替换、增加中选择最少次数作为转移dp [i] [j] = Math.min(dp[i-1] [j-1],Math.min(dp[i-1] [j],dp[i] [j-1])) + 1;
+
+**代码实现**：
+
+```java
+class Solution {
+    public int minDistance(String word1, String word2) {
+        int n1 = word1.length();
+        int n2 = word2.length();
+        //如果word1为空，只能插入n2个字符
+        if(n1==0) return n2;
+        //如果word2为空，只能删除n1个字符
+        if(n2==0) return n1;
+
+        //1.定义dp数组
+        //dp[i][j]表示word1中[0..i]的字符转换到word2的[0..j]的最少次数
+        int dp[][] = new int[n1+1][n2+1];
+        //2.初始化dp数组
+        dp[0][0] = 0;
+        //当word1为空时，只能通过插入变成word2
+        for (int j = 1; j <= n2 ; j++) {
+            dp[0][j] = dp[0][j-1] + 1;
+        }
+        //当word2为空时，只能通过删除word1来变成word2
+        for (int i = 1; i <= n1; i++) {
+            dp[i][0] = dp[i-1][0] + 1;
+        }
+        //3.定义状态转移方程
+        for (int i = 1; i <= n1; i++) {
+            for (int j = 1; j <= n2; j++) {
+                //如果word1[i-1]==word2[j-1]，啥也不做
+                if (word1.charAt(i - 1) == word2.charAt(j - 1)) {
+                    dp[i][j] = dp[i - 1][j - 1];
+                }else{
+                    //如果不相等，则从插入、删除、替换中次数最少的选择一个
+                    //dp[i-1][j-1]表示替换
+                    //dp[i-1][j]表示删除
+                    //dp[i][j-1]表示插入
+                    dp[i][j] = Math.min(dp[i-1][j-1],Math.min(dp[i-1][j],dp[i][j-1])) + 1;
+                }
+            }
+        }
+        return dp[n1][n2];
+
+    }
+}
+```
+
+
+
+
+
+## 四、双指针
+
+👍**双指针算法模板**：[双指针技巧框架](https://blog.csdn.net/weixin_42870497/article/details/119893198)
+
+### 11、盛最多水的容器
+
+**题目链接**：[盛最多水的容器](https://leetcode-cn.com/problems/container-with-most-water/)
+
+**解题思路**：
+
+使用双指针，分别指向左右两端。容器的面积的长（right-left）* 宽（Math.min(height[left],height[right])）
+
+只有移动的较短的那个木板才会使得面积有变大的可能，移动较长的那个木板只会使面积变小。
+
+**代码实现**：
+
+```java
+class Solution {
+    public int maxArea(int[] height) {
+        int left = 0;
+        int right = height.length-1;
+        int res = 0;
+        while(left<right){
+            res = height[left]<=height[right]?
+                Math.max(res,(right-left) * height[left++]):
+                Math.max(res,(right-left) * height[right--]);
+        }
+        return res;
+    }
+}
+```
+
+### 15、三数之和
+
+**题目链接**：[三数之和](https://leetcode-cn.com/problems/3sum/)
+
+**解题思路**：
+
+1. 首先对数组排序，然后遍历数组，固定num[i]，再使用左右指针指向num[i]后面两端
+2. 计算三个数的 sum是否为0，如果是则添加进结果集。
+3. 如果 nums[i]大于 0，则三数之和必然无法等于 0，结束循环
+4. 如果 nums[i] == nums[i-1]，则说明该数字重复，会导致结果重复，所以应该跳过
+5. 当 sum0 时，nums[L] == nums[L+1] 则会导致结果重复，应该跳过，L++
+6. 当 sum0 时，nums[R]== nums[R-1] 则会导致结果重复，应该跳过，R--
+
+**代码实现**：
+
+```java
+class Solution {
+    public static List<List<Integer>> threeSum(int[] nums) {
+        List<List<Integer>> ans = new ArrayList();
+        int len = nums.length;
+        if(nums == null || len < 3) return ans;
+        Arrays.sort(nums); // 排序
+        for (int i = 0; i < len ; i++) {
+            if(nums[i] > 0) break; // 如果当前数字大于0，则三数之和一定大于0，所以结束循环
+            if(i > 0 && nums[i] == nums[i-1]) continue; // 去重
+            int L = i+1;
+            int R = len-1;
+            while(L < R){
+                int sum = nums[i] + nums[L] + nums[R];
+                if(sum == 0){
+                    ans.add(Arrays.asList(nums[i],nums[L],nums[R]));
+                    while (L<R && nums[L] == nums[L+1]) L++; // 去重
+                    while (L<R && nums[R] == nums[R-1]) R--; // 去重
+                    L++;
+                    R--;
+                }
+                else if (sum < 0) L++;
+                else if (sum > 0) R--;
+            }
+        }        
+        return ans;
+    }
+}
+
+```
+
+### 33、搜索旋转排序数组
+
+**题目链接**：[搜索旋转排序数组](https://leetcode-cn.com/problems/search-in-rotated-sorted-array/)
+
+**解题思路**：
+
+采用二分法的思路进行搜索。
+
+旋转数组后，从中间划分，一定有一边是有序的。
+
+由于一定有一边是有序的，可以根据有序的两个边界值来判断目标值在有序一边还是无序一边。
+
+注意：有序一边的边界值可能等于目标值，所以判断时别忘了等号
+
+**代码实现**：
+
+```java
+class Solution {
+    public int search(int[] nums, int target) {
+        int left = 0;
+        int right = nums.length-1;
+        while (left <= right) {
+            int mid = left + ((right - left) >> 1);
+            if (nums[mid] == target) {
+                return mid;
+            }
+            //右边有序
+            if(nums[mid]<nums[right]){
+                //目标值在右边
+                if(target>nums[mid] && target<=nums[right]){
+                    left = mid + 1;
+                }else{//目标值在左边
+                    right = mid - 1;
+                }
+            }else{//左边有序
+                //目标值在左边
+                if(target<nums[mid] && target>=nums[left]){
+                    right = mid - 1;
+                }else{//目标值在右边
+                    left = mid + 1;
+                }
+            }
+            
+        }
+        return -1;
+    }
+}
+```
+
+### 42、接雨水
+
+**题目链接**：[接雨水](https://leetcode-cn.com/problems/trapping-rain-water/)
+
+**解题思路**：
+
+一、暴力解法
+
+先考虑局部，仅仅对于位置i，能装多少水？
+
+算出位置i左边的最高柱子leftMax和右边最高的柱子rightMax，则位置 i 能装的水为Math.min(leftMax,rightMax)-height[i]
+
+时间复杂度：O(n^2)
+
+空间复杂度：O(1)
+
+二、备忘录
+
+开两个数组leftMax[]和rightMax[]做备忘录，leftMax[i]表示位置 i  左边最高的柱子高度，rightMax[i] 表示位置 i  右边最高的柱子高度。预先把这两个数组计算好，避免重复计算。
+
+并不需要知道右边或者左边最高的是谁，只要知道当前位置最小的是谁。
+
+时间复杂度：O(n)
+
+空间复杂度：O(n)
+
+![](https://labuladong.gitee.io/algo/images/%e6%8e%a5%e9%9b%a8%e6%b0%b4/3.jpg)
+
+三、双指针
+
+使用双指针边走边算
+
+时间复杂度：O(n)
+
+空间复杂度：O(1)
+
+![](https://labuladong.gitee.io/algo/images/%e6%8e%a5%e9%9b%a8%e6%b0%b4/4.jpg)
+
+
+
+**代码实现**：
+
+一、暴力解法
+
+ ```java
+ class Solution {
+     public int trap(int[] height) {
+         int maxResult = 0;
+         int n = height.length;
+         for(int i=1;i<n-1;i++){
+             int maxLeft = 0;
+             int maxRight = 0;
+             //找左边最高的柱子
+             for(int left=i;left >= 0;left--){
+                 maxLeft = Math.max(maxLeft, height[left]);
+             }
+             //找右边最高的柱子
+             for (int right = i; right < n; right++) {
+                 maxRight = Math.max(maxRight, height[right]);
+             }
+             maxResult += Math.min(maxLeft,maxRight) - height[i];
+         }
+         return maxResult;
+     }
+ }
+ 
+ ```
+
+二、备忘录
+
+```java
+class Solution {
+    public int trap(int[] height) {
+        int maxResult = 0;
+        int n = height.length;
+        //使用备忘录
+        int leftMax[] = new int[n];
+        int rightMax[] = new int[n];
+        leftMax[0] = height[0];
+        rightMax[n-1] = height[n-1];
+        //从左向右计算左边最高的柱子
+        //leftMax[i]表示第i位柱子的左边最高的柱子
+        for (int i=1;i<n;i++){
+            leftMax[i] = Math.max(height[i],leftMax[i-1]);
+        }
+        //从右向左计算右边最高的柱子
+        //leftMax[i]表示第i位柱子的左边最高的柱子
+        for (int i = n - 2; i >= 0; i--) {
+            rightMax[i] = Math.max(height[i],rightMax[i+1]);
+        }
+        //计算能接的雨水
+        for (int i = 0; i < n; i++) {
+            maxResult += Math.min(leftMax[i],rightMax[i]) - height[i];
+        }
+        return maxResult;
+    }
+}
+
+```
+
+三、双指针
+
+```java
+class Solution {
+    public int trap(int[] height) {
+        int maxResult = 0;
+        int left = 0;
+        int right = height.length-1;
+        int leftMax = 0;
+        int rightMax = 0;
+        while(left < right){
+            leftMax = Math.max(leftMax,height[left]);
+            rightMax = Math.max(rightMax,height[right]);
+            if (leftMax < rightMax) {
+                maxResult += leftMax - height[left];
+                left++;
+            }else{
+                maxResult += rightMax - height[right];
+                right--;
+            }
+        }
+        return maxResult;
+    }
+}
+
+```
+
+
+
+
+
+## 五、回溯法
+
+👍**算法模板**：[回溯框架团灭排列、组合、子集问题](https://blog.csdn.net/weixin_42870497/article/details/119443910)
+
+👍**矩阵搜索算法模板：**[DFS团灭矩阵中的搜索问题](https://blog.csdn.net/weixin_42870497/article/details/120048719)
+
+### 17、电话号码的字母组合
+
+**题目链接**：[电话号码的字母组合](https://leetcode-cn.com/problems/letter-combinations-of-a-phone-number/)
+
+**解题思路**：
+
+应用回溯法的解题思路
+
+1. 先用HashMap初始化数字和字母的组合
+2. 使用回溯法开始深度遍历
+
+**代码实现**：
+
+```java
+class Solution {
+
+    HashMap<Character,String> map = new HashMap<>(){
+        {
+            put('2',"abc");
+            put('3',"def");
+            put('4',"ghi");
+            put('5',"jkl");
+            put('6',"mno");
+            put('7',"pqrs");
+            put('8',"tuv");
+            put('9',"wxyz");
+        }
+    };
+
+    List<String> list = new ArrayList<>();
+    public List<String> letterCombinations(String digits) {
+        if(digits.length()==0){
+            return list;
+        }
+        StringBuilder sb = new StringBuilder();
+        dfs(digits,sb,0);
+        return list;
+    }
+
+    private void dfs(String digits,StringBuilder sb,int index){
+        if(index==digits.length()){
+            list.add(sb.toString());
+            return;
+        }
+        char c = digits.charAt(index);
+        String str = map.get(c);
+        for(int i=0;i<str.length();i++){
+            sb.append(str.charAt(i));
+            dfs(digits,sb,index+1);
+            sb.deleteCharAt(sb.length()-1);
+        }
+    }
+}
+```
+
+
+
+### 39、组合总和
+
+**题目链接：**[组合总和](https://leetcode-cn.com/problems/combination-sum/)
+
+**解题思路：**回溯法。关键点：start这个参数
+
+**代码实现：**
+
+```java
+class Solution {
+
+    List<List<Integer>> res;
+    public List<List<Integer>> combinationSum(int[] candidates, int target) {
+        res = new ArrayList<>();
+        LinkedList<Integer> list = new LinkedList<>();
+        Arrays.sort(candidates);
+        dfs(candidates,target,list,0);
+        return res;
+    }
+
+    private void dfs(int[] nums,int target,LinkedList<Integer> list,int start){
+        if (target == 0) {
+            res.add(new ArrayList<Integer>(list));
+        }
+        for (int i = start; i < nums.length; i++) {
+            //剪枝
+            if (target < nums[i]) {
+                return;
+            }
+            list.add(nums[i]);
+            dfs(nums,target-nums[i],list,i);
+            list.removeLast();
+
+        }
+    }
+}
+```
+
+
+
+### 78、子集
+
+**题目链接**：[子集](https://leetcode-cn.com/problems/subsets/)
+
+**算法思路**：
+
+1. 使用回溯法的思路进行求解
+2. 注意参数start的作用，它是避免进入下一层递归时，添加到重复的元素
+
+**代码实现**：
+
+```java
+class Solution {
+
+    List<List<Integer>> res = new ArrayList<>();
+    public List<List<Integer>> subsets(int[] nums) {
+        LinkedList<Integer> list = new LinkedList<>();
+        dfs(nums, list,0);
+        return res;
+    }
+
+    private void dfs(int[] nums, LinkedList<Integer> list,int start) {
+        res.add(new ArrayList<>(list));
+        for (int i = start; i < nums.length; i++) {
+            list.add(nums[i]);
+            dfs(nums, list, i + 1);
+            list.removeLast();
+        }
+    }
+}
+```
+
+
+
+### 79、单词搜索
+
+**题目链接：**[单词搜索](https://leetcode-cn.com/problems/word-search/)
+
+**算法思路：**
+
+1. 使用回溯法的思路进行矩阵的遍历
+2. 注意不能重复访问，所以需要visit变量记录。遍历的过程中，首先单词第一个元素必须匹配上，所以需要一个index变量进行记录
+
+**代码实现：**
+
+```java
+class Solution {
+
+    int m, n;
+
+    public boolean exist(char[][] board, String word) {
+
+        m = board.length;
+        n = board[0].length;
+
+        boolean[][] visit = new boolean[m][n];
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (dfs(board, word, i, j,0, visit)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private boolean dfs(char[][] board, String word, int i, int j, int index,boolean[][] visit) {
+
+        if (i < 0 || i >= m || j < 0 || j >= n || board[i][j]!=word.charAt(index)|| visit[i][j]) {
+            return false;
+        }
+
+        if (index == word.length()-1) {
+            return true;
+        }
+
+        visit[i][j] = true;
+        boolean res = dfs(board, word, i - 1, j, index+1,visit) ||
+                        dfs(board, word, i + 1, j,index+1, visit) ||
+                        dfs(board, word, i, j - 1, index+1,visit) ||
+                        dfs(board, word, i, j + 1, index+1,visit);
+        visit[i][j] = false;
+        return res;
+    }
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+## 六、递归
+
+👍**递归模板**：
+
+```java
+public void recur(int level,int param){
+    //1.递归终止条件
+    if(level>MaxLevel){
+        //过程结果
+        return;
+    }
+    //2.处理当前层逻辑
+    process...
+    //3.进入下一层
+    recur(level+1,newParam);
+    //4.清理当前层，如果需要的话
+    process...
+}
+
+参数说明：
+level表示来到了第几层
+param表示其他参数
+```
+
+
+
+### 22、括号生成
+
+**题目链接**：[括号生成](https://leetcode-cn.com/problems/generate-parentheses/)
+
+**解题思路**：
+
+使用暴力递归，枚举所有可能的结果。
+
+使用left和right两个参数分别表示左括号和右括号的个数，只要左括号没有达到最大值就可以一直往里面添加左括号。只要右括号小于左括号的个数，就可以往里面添加右括号。最后只要左括号和右括号达到最大个数就可以停止递归。
+
+**代码实现**：
+
+```java
+class Solution {
+
+    List<String> res;
+    public List<String> generateParenthesis(int n) {
+        res = new ArrayList<>();
+        recursion(0,0,n,"");
+        return res;
+    }
+
+    private void recursion(int left,int right,int max,String s){
+        //递归结束条件
+        if(left==max && right==max){
+            res.add(s);
+            return;
+        }
+        //处理逻辑
+        if(left<max){
+            recursion(left+1,right,max,s+"(");
+        }
+        if(left>right){
+            recursion(left,right+1,max,s+")");
+        }
+        return;
+
+    }
+}
+```
+
+
+
+## 七、二分查找
+
+👍**二分查找模板**：[二分查找模板](https://blog.csdn.net/weixin_42870497/article/details/119728363)
+
+### 34、在排序数组中查找元素的第一个和最后一个位置
+
+**题目链接**：[在排序数组中查找元素的第一个和最后一个位置](https://leetcode-cn.com/problems/find-first-and-last-position-of-element-in-sorted-array/)
+
+**解题思路**：二分查找
+
+**代码模板**：
+
+```java
+class Solution {
+    public int[] searchRange(int[] nums, int target) {
+        if (nums.length == 0) {
+            return new int[]{-1,-1};
+        }
+        int left = binarySearchLeft(nums, target);
+        int right = binarySearchRight(nums, target);
+        return new int[]{left, right};
+    }
+
+    private int binarySearchLeft(int[] nums, int target) {
+        int left = 0;
+        int right = nums.length-1;
+        while (left <= right) {
+            int mid = left + ((right - left) >> 1);
+            if (nums[mid] < target) {
+                left = mid + 1;
+            } else if (nums[mid] > target) {
+                right = mid - 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+        if (left >= nums.length || nums[left] != target) {
+            return -1;
+        }
+        return left;
+    }
+
+    private int binarySearchRight(int[] nums, int target) {
+        int left = 0;
+        int right = nums.length-1;
+        while (left <= right) {
+            int mid = left + ((right - left) >> 1);
+            if (nums[mid] < target) {
+                left = mid + 1;
+            } else if (nums[mid] > target) {
+                right = mid - 1;
+            } else {
+                left = mid + 1;
+            }
+        }
+        if (right < 0 || nums[right] != target) {
+            return -1;
+        }
+        return right;
+    }
+
+
+}
+```
+
+
+
+
+
+
+
+## 八、贪心算法
 
 ### 55、跳跃游戏
 
@@ -2062,7 +2229,7 @@ class Solution {
 
 
 
-## 十四、其他
+## 九、其他
 
 ### 31、下一个排列
 
