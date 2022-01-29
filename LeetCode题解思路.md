@@ -626,6 +626,8 @@ class Solution {
 
 ## 四、二叉树
 
+👍二叉树算法的关键在于明确根节点要做什么
+
 👍**二叉树的非递归遍历模板**
 
 👍前序遍历
@@ -778,6 +780,135 @@ class Solution {
         return list;
     }
 
+}
+```
+
+
+
+### 96、不同的二叉搜索树
+
+**题目链接**：[不同的二叉搜索树](https://leetcode-cn.com/problems/unique-binary-search-trees/)
+
+**解题思路**：
+
+1. 穷举每一个节点作为根节点的情况，它的左右子树使用递归去计算
+2. 如何计算该根节点的所能构造的二叉搜索树的个数？固定根节点，计算左右节点的组合数，左右节点的组合数相乘就是该节点的个数
+
+**代码实现**：
+
+未优化版本,超时
+
+```java
+class Solution {
+    public int numTrees(int n) {
+        return count(1, n);
+    }
+
+    private int count(int low, int high) {
+        //表示一个空区间，也就是空节点，也是一种情况，返回1
+        if (low>high) return 1;
+
+        int res = 0;
+        for (int i = low; i <= high; i++) {
+            //先算出左右节点有几种组合
+            int left = count(low, i - 1);
+            int right = count(i + 1, high);
+            //左右节点的组合相乘就是BST的总数
+            res += left*right;
+        }
+
+        return res;
+    }
+}
+```
+
+存在重叠子问题，可以使用备忘录进行优化
+
+```java
+class Solution {
+
+    //备忘录
+    int  [][] meno;
+    public int numTrees(int n) {
+        meno = new int[n + 1][n + 1];
+        return count(1, n);
+    }
+
+    private int count(int low, int high) {
+        //表示一个空区间，也就是空节点，也是一种情况，返回1
+        if (low>high) return 1;
+
+        if (meno[low][high]!=0) {
+            return meno[low][high];
+        }
+
+        int res = 0;
+        for (int i = low; i <= high; i++) {
+            //先算出左右节点有几种组合
+            int left = count(low, i - 1);
+            int right = count(i + 1, high);
+            //左右节点的组合相乘就是BST的总数
+            res += left*right;
+        }
+        //把结果存储起来
+        meno[low][high] = res;
+
+        return res;
+    }
+}
+```
+
+### 98、验证二叉搜索树
+
+**题目链接**：[验证二叉搜索树](https://leetcode-cn.com/problems/validate-binary-search-tree/)
+
+**解题思路**：
+
+二叉搜索树的根节点的值大于所有左子树的值，小于所有右子树的值。
+
+明确了根节点要干什么了，就是跟左右子树比较。
+
+注意：根节点不只是比较自己的左右节点，而是比较所有左右节点。根节点就是左子树的最大值，右子树的最小值，可以通过添加两个参数
+
+**代码实现**：
+
+错误代码，只比较了自己的左右子树节点
+
+```java
+boolean isValidBST(TreeNode root) {
+    if (root == null) return true;
+    if (root.left != null && root.val <= root.left.val)
+        return false;
+    if (root.right != null && root.val >= root.right.val)
+        return false;
+
+    return isValidBST(root.left)
+        && isValidBST(root.right);
+}
+```
+
+
+
+正确代码，通过添加参数完成最小值和最大值的记录
+
+```java
+class Solution {
+    public boolean isValidBST(TreeNode root) {
+        return isValidBST(root, null, null);
+    }
+
+    private boolean isValidBST(TreeNode root, TreeNode min, TreeNode max) {
+        if (root == null) {
+            return true;
+        }
+        if (min != null && root.val <= min.val) {
+            return false;
+        }
+        if (max != null && root.val >= max.val) {
+            return false;
+        }
+        return isValidBST(root.left, min, root) && isValidBST(root.right, root, max);
+    }
 }
 ```
 
