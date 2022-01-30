@@ -914,6 +914,31 @@ class Solution {
 
 
 
+### 101、对称二叉树
+
+**题目链接**：[对称二叉树](https://leetcode-cn.com/problems/symmetric-tree/)
+
+**解题思路**：
+
+**代码实现**：
+
+```java
+class Solution {
+    public boolean isSymmetric(TreeNode root) {
+        if(root==null) return true;
+        return isSymmetric(root.left, root.right);
+    }
+
+    private boolean isSymmetric(TreeNode left, TreeNode right) {
+        if(left==null || right==null) return left==right;
+        if(left.val!=right.val) return false;
+        return isSymmetric(left.right,right.left) && isSymmetric(left.left,right.right);
+    }
+}
+```
+
+
+
 ## 五、字符串
 
 ### 5、最长回文子串
