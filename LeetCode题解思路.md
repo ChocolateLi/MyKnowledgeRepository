@@ -626,7 +626,15 @@ class Solution {
 
 ## 四、二叉树
 
-👍二叉树算法的关键在于明确根节点要做什么
+👍**关键思考和总结**
+
+```tex
+1.二叉树算法的关键在于明确根节点要做什么
+2.遇到一颗二叉树的通用思考过程：是否可以通过遍历一遍二叉树得到答案？如果不能，是否可以定义一个递归函数，通过子问题（子树）的答案推导出原问题的答案
+3.二叉树前序遍历的代码位置只能从函数参数中获取父节点传递来的数据，而后序遍历的代码位置不仅可以获取参数数据，还可以获取到子树通过函数返回值传递回来的数据。中序位置主要用在 BST 场景中，你完全可以把 BST 的中序遍历认为是遍历有序数组。
+如果题目是和子树有关，那么大概率是要给函数设置合理的定义和返回值，在后序位置写代码
+4.二叉树的一个难点就是如何把题目要求细化成每一个节点要做什么
+```
 
 👍**二叉树的非递归遍历模板**
 
@@ -667,11 +675,12 @@ private static void in_travers_itrator(TreeNode root) {
     TreeNode cur = root;
     while (cur!=null || !stack.isEmpty()) {
         if(cur != null) {
+            //前序遍历代码写这里
             stack.push(cur);
             cur = cur.left;
         }else{
             cur = stack.pop();
-            System.out.print(cur.val + " ");
+            System.out.print(cur.val + " ");//中序遍历代码写这里
             cur = cur.right;
         }
     }
@@ -936,6 +945,267 @@ class Solution {
     }
 }
 ```
+
+
+
+### 106、二叉树的最大深度
+
+**题目链接**：[二叉树的最大深度](https://leetcode-cn.com/problems/maximum-depth-of-binary-tree/)
+
+**解题思路**：
+
+1、后序遍历
+
+分别求出左右子树最大的深度，然后比较左右子树，取出最大的深度加1
+
+2、层序遍历
+
+一层一层的遍历，每遍历一层，深度加1
+
+**代码实现**：
+
+递归(后序遍历)
+
+```java
+class Solution {
+
+    int maxDepth = 0;
+    public int maxDepth(TreeNode root) {
+        return travel(root);
+    }
+
+    private int travel(TreeNode root){
+        if(root == null){
+            return 0;
+        }
+        int leftDepth = travel(root.left);
+        int rightDepth = travel(root.right);
+        return Math.max(leftDepth,rightDepth) + 1;       
+    }
+}
+```
+
+广度遍历
+
+```java
+class Solution {
+    public int maxDepth(TreeNode root) {
+        if(root==null) {
+            return 0;
+        }
+        int deep = 0;
+        Queue<TreeNode> queue = new LinkedList<>();
+        queue.offer(root);
+        while(!queue.isEmpty()){
+            int size = queue.size();
+            for(int i=0;i<size;i++){
+                TreeNode node = queue.poll();
+                if (node.left != null) {
+                    queue.offer(node.left);
+                }
+                if (node.right != null) {
+                    queue.offer(node.right);
+                }
+            }
+            deep++;
+        }
+
+        return deep;
+    }
+}
+
+```
+
+
+
+### 116、填充每个节点的下一个右侧节点指针
+
+**题目链接**：[填充每个节点的下一个右侧节点指针](https://leetcode-cn.com/problems/populating-next-right-pointers-in-each-node/)
+
+**解题思路**：
+
+二叉树的难点，如何把题目的要求细化到每一个节点做什么
+
+**代码实现**：
+
+错误实现。不属于同一个父节点，那么按照这段代码的逻辑，它俩就没办法被穿起来，这是不符合题意的
+
+```java
+class Solution {
+    public Node connect(Node root) {
+        if(root == null || root.left==null) return root;
+        //前序遍历
+        root.left.next = root.right;
+        connect(root.left);
+        connect(root.right);
+        return root;
+    }
+}
+```
+
+正确实现。如果一个节点办不到，那就增加一个节点。即通过增加函数的方式
+
+```java
+class Solution {
+    public Node connect(Node root) {
+        if(root==null) return root;
+        connectNode(root.left,root.right);
+        return root;
+    }
+    private void connectNode(Node node1,Node node2){
+        if(node1==null || node2 == null) return;
+        node1.next = node2;
+        connectNode(node1.left,node1.right);
+        connectNode(node2.left,node2.right);
+        connectNode(node1.right,node2.left);
+    }
+}
+```
+
+
+
+
+
+
+
+### 144、二叉树的前序遍历
+
+**题目链接**：[二叉树的前序遍历](https://leetcode-cn.com/problems/binary-tree-preorder-traversal/)
+
+**解题思路**：
+
+1、递归
+
+2、迭代
+
+**代码实现**：
+
+递归
+
+```java
+class Solution {
+
+    List<Integer> list = new ArrayList<>();
+    public List<Integer> preorderTraversal(TreeNode root) {
+        travel(root);
+        return list;
+    }
+    private void travel(TreeNode root){
+        if(root==null) return;
+        list.add(root.val);
+        travel(root.left);
+        travel(root.right);
+    }
+}
+```
+
+迭代
+
+```java
+class Solution {
+    public List<Integer> preorderTraversal(TreeNode root) {
+        List<Integer> list = new ArrayList<>();
+        Deque<TreeNode> stack = new ArrayDeque<>();
+        while(!stack.isEmpty() || root!=null){
+            if(root!=null){
+                list.add(root.val);
+                stack.push(root);
+                root = root.left;
+            }else{
+                TreeNode node = stack.pop();
+                root = node.right;
+            }
+        }
+        return list;
+    }
+}
+```
+
+
+
+### 226、翻转二叉树
+
+**题目链接**：[翻转二叉树](https://leetcode-cn.com/problems/invert-binary-tree/)
+
+**解题思路**：
+
+1、前序遍历
+
+直接交换左右节点
+
+2、后序遍历
+
+先交换了左右子树，再交换左右节点
+
+**代码实现**：
+
+前序遍历
+
+```java
+class Solution {
+    public TreeNode invertTree(TreeNode root) {
+        if(root==null) return null;
+        TreeNode tmp = root.left;
+        root.left = root.right;
+        root.right = tmp;
+        invertTree(root.left);
+        invertTree(root.right);
+        return root;
+    }
+}
+```
+
+后序遍历
+
+```java
+class Solution {
+    public TreeNode invertTree(TreeNode root) {
+        if(root==null) return null;
+        TreeNode left = invertTree(root.left);
+        TreeNode right = invertTree(root.right);
+        root.left = right;
+        root.right = left;
+        return root;
+    }
+}
+```
+
+
+
+
+
+### 543、二叉树的直径
+
+**题目链接**：[二叉树的直径](https://leetcode-cn.com/problems/diameter-of-binary-tree/)
+
+**解题思路**：
+
+后序遍历，知道左右子树的最大直径，就可以求出当前节点的直径，当前节点的直径=左子树最大深度+右子树最大深度。
+
+就是在106题中，添加一行代码就可以实现
+
+**代码实现**：
+
+```java
+class Solution {
+
+    int maxValue = 0;
+    public int diameterOfBinaryTree(TreeNode root) {
+        maxDepth(root);
+        return maxValue;
+    }
+
+    private int maxDepth(TreeNode root){
+        if(root==null) return 0;
+        int left = maxDepth(root.left);
+        int right = maxDepth(root.right);
+        maxValue = Math.max(maxValue,left+right);//添加的代码
+        return Math.max(left,right) + 1;
+    }
+}
+```
+
+
 
 
 
@@ -2207,6 +2477,8 @@ class Solution {
 
 ## 六、递归
 
+👍写递归算法的关键是明确递归函数的定义是什么
+
 👍**递归模板**：
 
 ```java
@@ -2227,6 +2499,58 @@ public void recur(int level,int param){
 参数说明：
 level表示来到了第几层
 param表示其他参数
+```
+
+
+
+👍**数据结构递归模板**
+
+```java
+//递归遍历二叉树
+void traverse(TreeNode root) {
+    if (root == null) {
+        return;
+    }
+    // 前序位置
+    traverse(root.left);
+    // 中序位置
+    traverse(root.right);
+    // 后序位置
+}
+
+/* 迭代遍历数组 */
+void traverse(int[] arr) {
+    for (int i = 0; i < arr.length; i++) {
+
+    }
+}
+
+/* 递归遍历数组 */
+void traverse(int[] arr, int i) {
+    if (i == arr.length) {
+        return;
+    }
+    // 前序位置
+    traverse(arr, i + 1);
+    // 后序位置
+}
+
+/* 迭代遍历单链表 */
+void traverse(ListNode head) {
+    for (ListNode p = head; p != null; p = p.next) {
+
+    }
+}
+
+/* 递归遍历单链表 */
+void traverse(ListNode head) {
+    if (head == null) {
+        return;
+    }
+    // 前序位置
+    traverse(head.next);
+    // 后序位置
+}
 ```
 
 
