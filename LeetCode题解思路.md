@@ -636,6 +636,20 @@ class Solution {
 4.二叉树的一个难点就是如何把题目要求细化成每一个节点要做什么
 ```
 
+👍**二叉树解题步骤**
+
+```tex
+1.是否可以通过遍历一遍二叉树得到答案？如果不能，是否可以通过定义一个递归函数，通过子问题（子树）的答案推到出原问题的答案
+2.明确递归函数的定义
+3.基于递归框架，明确root节点要做什么，根据题目要求，选择前中后序递归框架
+
+难点：通过题目要求，思考出每个节点要做什么
+```
+
+
+
+
+
 👍**二叉树的非递归遍历模板**
 
 👍前序遍历
@@ -1018,6 +1032,43 @@ class Solution {
 
 
 
+### 114、二叉树展开为链表
+
+**题目链接**：[二叉树展开为链表](https://leetcode-cn.com/problems/flatten-binary-tree-to-linked-list/)
+
+**解题思路**：
+
+1. 后序遍历，先左右子树展开铺平，再考虑根节点
+2. 明确根节点要做什么；先将左子树作为根节点的右子树；再将根节点的右子树拼接到左子树的后面
+
+**代码实现**：
+
+```java
+class Solution {
+    public void flatten(TreeNode root) {
+        if(root==null) return;
+        //后序遍历，先将左右子树拉平
+        flatten(root.left);
+        flatten(root.right);
+        //明确根节点要做什么
+        //1.将左子树作为根节点的右子树
+        TreeNode tmp = root.right;
+        root.right = root.left;
+        root.left = null;
+        //2.将根节点的右子树拼接到左子树的后面
+        TreeNode p = root;
+        while(p.right!=null){
+            p = p.right;
+        }
+        p.right = tmp;
+    }
+}
+```
+
+
+
+
+
 ### 116、填充每个节点的下一个右侧节点指针
 
 **题目链接**：[填充每个节点的下一个右侧节点指针](https://leetcode-cn.com/problems/populating-next-right-pointers-in-each-node/)
@@ -1201,6 +1252,44 @@ class Solution {
         int right = maxDepth(root.right);
         maxValue = Math.max(maxValue,left+right);//添加的代码
         return Math.max(left,right) + 1;
+    }
+}
+```
+
+
+
+### 654、最大二叉树
+
+**题目链接**：[最大二叉树](https://leetcode-cn.com/problems/maximum-binary-tree/)
+
+**解题思路**：
+
+明确根节点要做什么。从数组中选择最大值构建节点，然后递归遍历。显然采用的是先序遍历
+
+需要通过添加参数来数组下标
+
+**代码实现**：
+
+```java
+class Solution {
+    public TreeNode constructMaximumBinaryTree(int[] nums) {
+        return constructMaximumBinaryTree(nums,0,nums.length-1);
+    }
+
+    private TreeNode constructMaximumBinaryTree(int[] nums,int low,int high){
+        if(low>high) return null;
+        int maxValue = Integer.MIN_VALUE;
+        int maxIndex = -1;
+        for(int i=low;i<=high;i++){
+            if(nums[i]>maxValue){
+                maxValue = nums[i];
+                maxIndex = i;
+            }
+        }
+        TreeNode root = new TreeNode(maxValue);
+        root.left = constructMaximumBinaryTree(nums,low,maxIndex-1);
+        root.right = constructMaximumBinaryTree(nums,maxIndex+1,high);
+        return root;
     }
 }
 ```
