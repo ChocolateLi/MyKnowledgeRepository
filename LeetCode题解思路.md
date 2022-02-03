@@ -962,7 +962,7 @@ class Solution {
 
 
 
-### 106、二叉树的最大深度
+### 104、二叉树的最大深度
 
 **题目链接**：[二叉树的最大深度](https://leetcode-cn.com/problems/maximum-depth-of-binary-tree/)
 
@@ -1029,6 +1029,49 @@ class Solution {
 }
 
 ```
+
+
+
+### 105、从前序与中序遍历序列中构造二叉树
+
+**题目链接**：[从前序与中序遍历序列中构造二叉树](https://leetcode-cn.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal/)
+
+**解题思路**：
+
+
+
+**代码实现**：
+
+```java
+class Solution {
+
+    HashMap<Integer,Integer> map;
+    public TreeNode buildTree(int[] preorder, int[] inorder) {
+        map = new HashMap<>();
+        for(int i=0;i<inorder.length;i++){
+            map.put(inorder[i],i);
+        }
+        return buildTree(preorder,0,preorder.length-1,
+                        inorder,0,inorder.length-1);
+    }
+
+    private TreeNode buildTree(int[] preorder,int pre_start,int pre_end,int[] inorder,int in_start,int in_end){
+        if(pre_start>pre_end){
+            return null;
+        }
+        TreeNode root = new TreeNode(preorder[pre_start]);
+        //根节点的值在中序遍历数组中的索引
+        int in_index = map.get(preorder[pre_start]);
+        int left_size = in_index - in_start;
+        root.left = buildTree(preorder,pre_start+1,pre_start+left_size,inorder,in_start,in_index-1);
+        root.right = buildTree(preorder,pre_start + left_size +1,pre_end,inorder,in_index+1,in_end);
+        return root;
+    }
+                             
+}
+```
+
+
 
 
 
@@ -1223,6 +1266,44 @@ class Solution {
 
 
 
+### 230、二叉搜索树中的第k小的元素
+
+**题目链接**：[二叉搜索树中的第k小的元素](https://leetcode-cn.com/problems/kth-smallest-element-in-a-bst/)
+
+**解题思路**：
+
+利用BST的中序遍历的特性（中序遍历是一个有序的数组）
+
+**代码实现**：
+
+```java
+class Solution {
+
+    //存储结果
+    int res = 0;
+    //记录顺序
+    int rank = 0;
+
+    public int kthSmallest(TreeNode root, int k) {
+       travel(root,k);
+       return res;
+    }
+
+    private void travel(TreeNode root,int k){
+        if(root==null) return;
+        travel(root.left,k);
+        if(++rank == k){
+            res = root.val;
+            return;
+        }
+        travel(root.right,k);
+        
+    }
+}
+```
+
+
+
 
 
 ### 543、二叉树的直径
@@ -1255,6 +1336,59 @@ class Solution {
     }
 }
 ```
+
+
+
+### 652、寻找重复的子树
+
+**题目链接**：[寻找重复的子树](https://leetcode-cn.com/problems/find-duplicate-subtrees/submissions/)
+
+**解题思路**：
+
+需要知道两个点：
+
+1、以我为根节点的二叉树长啥样
+
+2、以其他节点为根的子树长啥样
+
+
+
+如何知道自己长啥样？可以通过序列化二叉树，把结果存储起来（使用HashMap）。既然要知道自己长啥样，就得知道左右子树长啥样，所以得通过后序遍历。          
+
+**代码实现**：
+
+```java
+class Solution {
+
+    //记录子树是否重复
+    HashMap<String,Integer> map = new HashMap<>();
+
+    //存储结果
+    List<TreeNode> res = new ArrayList<>();
+    public List<TreeNode> findDuplicateSubtrees(TreeNode root) {
+        travel(root);
+        return res;
+    }
+
+    private String travel(TreeNode root){
+        if(root==null){
+            return "#";
+        }
+        String left = travel(root.left);
+        String right = travel(root.right);
+        String subTree = left + "," + right + "," + root.val;
+        int count = map.getOrDefault(subTree,0);
+        //不管重复多少次，都只存储一次
+        if(count==1){
+            res.add(root);
+        }
+        map.put(subTree,count+1);
+        return subTree;
+    }
+}
+```
+
+
 
 
 
