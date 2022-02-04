@@ -11,7 +11,7 @@
 **解题思路**：
 
 1. 遍历一遍数组，先把所有数存进hashmap中。以空间换时间
-2. 再遍历一遍数组，在hashmap中查找target-nums[i]的值是否存在，若存在，返回i和map.get(target-nums[i])
+   2. 再遍历一遍数组，在hashmap中查找target-nums[i]的值是否存在，若存在，返回i和map.get(target-nums[i])
 
 **实现代码**：
 
@@ -730,6 +730,19 @@ private static void post_travers_iterator(TreeNode root) {
 }
 ```
 
+👍二叉搜索树常用模板
+
+```java
+void BST(TreeNode root, int target) {
+    if (root.val == target)
+        // 找到目标，做点什么
+    if (root.val < target) 
+        BST(root.right, target);
+    if (root.val > target)
+        BST(root.left, target);
+}
+```
+
 
 
 ### 94、二叉树的中序遍历
@@ -1304,6 +1317,52 @@ class Solution {
 
 
 
+### 450、删除二叉搜索树中的节点
+
+**题目链接**：[删除二叉搜索树中的节点](https://leetcode-cn.com/problems/delete-node-in-a-bst/)
+
+**解题思路**：
+
+情况1，删除的节点没有左右节点，直接删除
+
+情况2，删除的节点有其中之一的左右节点，返回它的子节点
+
+情况3，删除的节点有左右节点，找到删除节点的右子树的最小节点作为根节点
+
+**代码实现**：
+
+```java
+class Solution {
+    public TreeNode deleteNode(TreeNode root, int key) {
+        if(root==null) return null;
+        if(root.val==key){
+            //情况1和情况2包含子节点为空或者只有一个节点为空的情况
+            if(root.left==null) return root.right;
+            if(root.right==null) return root.left;
+            //情况3，左右节点都不为空，找到右子树的最小节点，作为删除节点位置的节点
+            //获取右子树最小节点
+            TreeNode rightMinNode = getRightMinNode(root.right);
+            //删除右子树的最小节点
+            root.right = deleteNode(root.right,rightMinNode.val);
+            //用右子树最小节点替换root节点
+            rightMinNode.left = root.left;
+            rightMinNode.right = root.right;
+            root = rightMinNode;
+        }
+        if(root.val > key) root.left = deleteNode(root.left,key);
+        if(root.val < key) root.right = deleteNode(root.right,key);
+        return root;
+    }
+
+    private TreeNode getRightMinNode(TreeNode node){
+        while(node.left!=null) node = node.left;
+        return node;
+    }
+}
+```
+
+
+
 
 
 ### 543、二叉树的直径
@@ -1423,6 +1482,52 @@ class Solution {
         TreeNode root = new TreeNode(maxValue);
         root.left = constructMaximumBinaryTree(nums,low,maxIndex-1);
         root.right = constructMaximumBinaryTree(nums,maxIndex+1,high);
+        return root;
+    }
+}
+```
+
+
+
+### 700、二叉搜索树中的搜索
+
+**题目链接**：[二叉搜索树中的搜索](https://leetcode-cn.com/problems/search-in-a-binary-search-tree/)
+
+**解题思路**：
+
+根据二叉搜索树的二分查找特性
+
+**代码实现**：
+
+```java
+class Solution {
+    public TreeNode searchBST(TreeNode root, int val) {
+        if(root==null) return null;
+        if(root.val>val) return searchBST(root.left,val);
+        else if(root.val<val) return searchBST(root.right,val);
+        else return root;
+    }
+}
+```
+
+
+
+### 701、二叉搜索树中的插入操作
+
+**题目链接**：[二叉搜索树中的插入操作](https://leetcode-cn.com/problems/insert-into-a-binary-search-tree/)
+
+**解题思路**：
+
+根据二叉搜索树的二分查找特性
+
+**代码实现**：
+
+```java
+class Solution {
+    public TreeNode insertIntoBST(TreeNode root, int val) {
+        if(root==null) return new TreeNode(val);
+        if(root.val>val) root.left = insertIntoBST(root.left,val);
+        if(root.val<val) root.right = insertIntoBST(root.right,val);
         return root;
     }
 }
