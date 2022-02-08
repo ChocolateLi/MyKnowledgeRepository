@@ -1171,6 +1171,45 @@ class Solution {
 
 
 
+### 124、二叉树中的最大路径和
+
+**题目链接**：[二叉树中的最大路径和](https://leetcode-cn.com/problems/binary-tree-maximum-path-sum/)
+
+**解题思路**：
+
+后序遍历。求出根节点的最大单边路径和
+
+后序代码的时候去更新最大路径和
+
+**代码实现**：
+
+```java
+class Solution {
+
+    int res = Integer.MIN_VALUE;
+    public int maxPathSum(TreeNode root) {
+        if(root==null) return 0;
+        postOrder(root);
+        return res;
+    }
+
+    //定义：从根节点起的最大单边路径和
+    private int postOrder(TreeNode root){
+        if(root==null) return 0;
+        //后序遍历
+        int leftSum = Math.max(0,postOrder(root.left));
+        int rightSum = Math.max(0,postOrder(root.right));
+        //更新最大路径和
+        int pathSum = root.val + leftSum + rightSum;
+        res = Math.max(res,pathSum);
+        //实现定义，每个节点只能经过一次
+        return Math.max(leftSum,rightSum) + root.val;
+    }
+}
+```
+
+
+
 
 
 
