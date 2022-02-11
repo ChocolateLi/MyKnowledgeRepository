@@ -10,7 +10,7 @@ StringBuffer的方法大都采用了synchonized关键字进行修饰，因此是
 
 StringBuilder没有这个修饰，所以是线程不安全的
 
-在单线程环境下，StringBuilder更快，因为它不需要加锁。
+在单线程环境下，StringBuilder更快，因为它不需要加锁
 
 多线程环境下StringBuffer更安全
 
@@ -60,6 +60,8 @@ public boolean equals(Object obj) {
 2. java没有指针，它的引用可以理解为指针。c++和c一样都是有指针
 3. java支持垃圾自动回收，c++需要手动回收
 4. java不支持多重继承，但可以通过实现多个接口来达到目的，c++支持多重继承
+
+语言不是关键，毕竟语言是一种工具，什么项目适合用什么语言，那就使用相应的语言。
 
 ### 5、static关键字
 

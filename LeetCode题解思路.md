@@ -624,7 +624,114 @@ class Solution {
 
 
 
-## 四、二叉树
+## 四、队列
+
+👍单调递减队列
+
+```java
+//构造一个单调队列
+class MonotonousQueue{
+
+    LinkedList<Integer> q;
+
+    //构造方法
+    MonotonousQueue(){
+        this.q = new LinkedList<>();
+    }
+    //进入队列
+    void addValue(int value){
+        while(!q.isEmpty() && q.getLast()< value){
+            q.pollLast();
+        }
+        q.offer(value);
+    }
+    //获取队内最大元素元素
+    int getMaxValue(){
+        return q.getFirst();
+    }
+    //删除元素
+    void remove(int value){
+        if(!q.isEmpty() && q.getFirst()==value){
+            q.pollFirst();
+        }
+    }
+} 
+```
+
+
+
+### 239、滑动窗口的最大值
+
+**题目链接**：[滑动窗口的最大](https://leetcode-cn.com/problems/sliding-window-maximum/)
+
+**解题思路**：
+
+1. 设计一个容器存储窗口内的元素，这个容器就是单调递减队列
+2. 遍历元素，先往容器添加 k-1 个元素。之后每添加一个元素就取出队列里的最大元素
+
+**代码实现**：
+
+```java
+//构造一个单调队列
+class MonotonousQueue{
+
+    LinkedList<Integer> q;
+
+    //构造方法
+    MonotonousQueue(){
+        this.q = new LinkedList<>();
+    }
+    //进入队列
+    void addValue(int value){
+        while(!q.isEmpty() && q.getLast()< value){
+            q.pollLast();
+        }
+        q.offer(value);
+    }
+    //获取队内最大元素元素
+    int getMaxValue(){
+        return q.getFirst();
+    }
+    //删除元素
+    void remove(int value){
+        if(!q.isEmpty() && q.getFirst()==value){
+            q.pollFirst();
+        }
+    }
+} 
+
+public class Solution {
+    public int[] maxSlidingWindow(int[] nums, int k) {
+
+        //存储结果
+        int[] res = new int[nums.length-k+1];
+        if(k==0) return res;
+
+        MonotonousQueue mq = new MonotonousQueue();
+        for(int i=0;i<nums.length;i++){
+            //先把前k-1个元素填满队列
+            if(i<k-1){
+                mq.addValue(nums[i]);
+            }else{
+                mq.addValue(nums[i]);
+                res[i-k+1] = mq.getMaxValue();
+                mq.remove(nums[i-k+1]);
+            }
+        }
+
+        return res;
+
+    }
+}
+```
+
+
+
+
+
+
+
+## 五、二叉树
 
 👍**关键思考和总结**
 
@@ -1576,7 +1683,7 @@ class Solution {
 
 
 
-## 五、字符串
+## 六、字符串
 
 ### 5、最长回文子串
 
@@ -1617,7 +1724,7 @@ class Solution {
 
 
 
-## 六、二维数组
+## 七、数组
 
 **主对角线反转矩阵(按照左上到右下的对角线进行镜像对称)**
 
@@ -1794,20 +1901,76 @@ while (right < s.size()) {
 使用滑动窗口前需要思考以下4个点：
 
 1. 增大窗口时，要更新哪些数据？
-
 2. 什么时候停止增大窗口，开始缩小窗口？
-
 3. 缩小窗口时，要更新哪些数据？
-
 4. 最后的结果在增大窗口时更新，还是缩小窗口时更新？
 
-   
+应用场景：
+
+1、子字符串。在一个字符串中找出符合另外一个字符串的子串
+
+2、子数组。在一个数组中找到满足条件的子数组
+
+
+
+👍Leetcode 76、438、567总结
+
+```java
+题目特征：涉及到两个字符串，在一个字符串中寻找包含另一个字符串的子串。
+题目思路：
+1.使用一个HashMap，存储要找的那个字符串，对这个字符串进行计数。
+		HashMap<Character, Integer> need = new HashMap<>();
+        for (char c : t.toCharArray()) {
+            need.put(c, need.getOrDefault(c, 0) + 1);
+        }
+2.使用一个变量match，用于判断是否达到缩小窗口。当字符串1中已经包含了字符串2就可以缩小窗口
+3.在缩小窗口时就开始更新结果数据
+    //代码模板总结，具体题目具体修改
+    	//滑动窗口
+        HashMap<Character, Integer> window = new HashMap<>();
+        HashMap<Character, Integer> need = new HashMap<>();
+        for (char c : t.toCharArray()) {
+            need.put(c, need.getOrDefault(c, 0) + 1);
+        }
+		int left = 0;
+        int right = 0;
+        //存储结果的变量
+        int match = 0;
+        while (right < s1.length) {
+          	//增大窗口
+            char c = s.charAt(right);
+            window.put(c, window.getOrDefault(c, 0) + 1);
+            right++;
+            if (window.get(c).equals(need.get(c))) {
+                match++;
+            }
+            //缩小窗口
+            while (match == need.size()) {
+                //缩小窗口时更新结果
+                if (right - left ...) {
+                    //更新结果数据
+                }
+                //对称结构
+                char c1 = s.charAt(left);
+                window.put(c1, window.get(c1) - 1);
+                left++;
+                if (need.containsKey(c1)) {
+                    if (window.get(c1) < need.get(c1)) {
+                        match--;
+                    }
+                }
+            }
+        }
+
+```
+
+
 
 ### 3、无重复字符的最长子串
 
 **题目链接：** [无重复字符的最长子串](https://leetcode-cn.com/problems/longest-substring-without-repeating-characters/)
 
-**解题思路：** 使用滑动窗口操作
+**解题思路：** 使用滑动窗口操作。注意：缩小窗口之后更新结果
 
 **实现代码：** 
 
@@ -1853,6 +2016,8 @@ class Solution {
 2. 不断增大窗口，往窗口里不断添加元素，当窗口覆盖辅助窗口时，停止增大窗口开始缩小窗口
 3. 在缩小窗口时开始更新结果数据，然后缩小窗口，直到窗口不能覆盖辅助窗口
 4. 返回结果值
+
+注意：缩小窗口时就要更新结果
 
 **代码实现**：
 
@@ -1909,6 +2074,224 @@ class Solution {
     }
 }
 ```
+
+
+
+### 438、找到字符串中所有字母异位词
+
+**题目链接**：[找到字符串中所有字母异位词](https://leetcode-cn.com/problems/find-all-anagrams-in-a-string/)
+
+**算法思路**：
+
+使用滑动窗口。需要使用HashMap辅助存储另一个字符串。使用一个变量match判断能否缩小窗口。
+
+注意：缩小窗口时就要更新结果。
+
+**代码实现**：
+
+```java
+class Solution {
+
+    public List<Integer> findAnagrams(String s, String p) {
+
+        //滑动窗口
+        HashMap<Character,Integer> window = new HashMap<>();
+        //辅助工具
+        HashMap<Character,Integer> need = new HashMap<>();
+        for (char c : p.toCharArray()) {
+            need.put(c, need.getOrDefault(c, 0) + 1);
+        }
+
+        int left = 0;
+        int right = 0;
+        int match = 0;
+
+        //存储结果
+        List<Integer> res = new ArrayList<>();
+
+        while (right < s.length()) {
+            char c = s.charAt(right);
+            window.put(c, window.getOrDefault(c, 0) + 1);
+            if(need.containsKey(c)){
+                if(window.get(c).equals(need.get(c))){
+                    match++;
+                }
+            }
+            right++;
+            while (match == need.size()) {
+                //更新结果
+                if (right - left == p.length()) {
+                    res.add(left);
+                }
+                char c1 = s.charAt(left);
+                window.put(c1,window.get(c1)-1);
+                if (need.containsKey(c1)) {     
+                    if (window.get(c1) < need.get(c1)) {
+                        match--;
+                    }
+                }
+                left++;
+
+            }
+        }
+        return res;
+    }
+}
+```
+
+
+
+### 567、字符串的排列
+
+**题目链接**：[字符串的排列](https://leetcode-cn.com/problems/permutation-in-string/)
+
+**算法思路**：
+
+使用滑动窗口。使用一个HashMap辅助存储一个字符串。使用变量match判断是否缩小窗口，当且仅当match等于辅助HashMap的大小时，开始缩小窗口。
+
+注意：缩小窗口时就需要更新结果数据
+
+**代码实现**：
+
+```java
+class Solution {
+    public boolean checkInclusion(String s1, String s2) {
+
+        //滑动窗口
+        HashMap<Character,Integer> window = new HashMap<>();
+        //辅助窗口
+        HashMap<Character,Integer> need = new HashMap<>();
+        for (char c : s1.toCharArray()) {
+            need.put(c, need.getOrDefault(c, 0) + 1);
+        }
+
+        int left = 0;
+        int right = 0;
+        int match = 0;
+        while (right < s2.length()) {
+            char c = s2.charAt(right);
+            window.put(c, window.getOrDefault(c, 0) + 1);
+            if (need.containsKey(c)) {
+                if(window.get(c).equals(need.get(c))){
+                    match++;
+                }
+            }
+            right++;
+            while (match == need.size()) {
+                //更新结果
+                if (right - left == s1.length()) {
+                    return true;
+                }
+                char c1 = s2.charAt(left);
+                window.put(c1, window.get(c1) - 1);
+                if(need.containsKey(c1)){ 
+                    if (window.get(c1) < need.get(c1)) {
+                        match--;
+                    }
+                }
+                left++;
+            }
+        }
+        return false;
+    }
+}
+```
+
+
+
+### 209、长度最小的子数组
+
+**题目链接**：[长度最小的子数组](https://leetcode-cn.com/problems/he-wei-sde-lian-xu-zheng-shu-xu-lie-lcof/)
+
+**算法思路**：
+
+使用滑动窗口。当sum累加到大于等于target时就要开始缩小窗口
+
+注意：缩小窗口时就要更新结果
+
+**代码实现**：
+
+```java
+class Solution {
+    public int minSubArrayLen(int target, int[] nums) {
+
+        int left = 0;
+        int right = 0;
+        int sum = 0;
+        int minLen = Integer.MAX_VALUE;
+
+        while (right < nums.length) {
+            int num = nums[right];
+            sum += num;
+            right++;
+            while (sum >= target) {
+                //更新结果
+                if (right - left < minLen) {
+                    minLen = right - left;
+                }
+                int num1 = nums[left];
+                sum -= num1;
+                left++;
+            }
+        }
+        return minLen==Integer.MAX_VALUE?0:minLen;
+    }
+}
+```
+
+
+
+
+
+### 剑指offer57、和为s的连续正数
+
+**题目链接**：[和为s的连续正数](https://leetcode-cn.com/problems/he-wei-sde-lian-xu-zheng-shu-xu-lie-lcof/)
+
+**算法思路**：
+
+1. 定义左右指针从1开始，不断地增大窗口，直到和的值大于等于目标值就开始缩小窗口
+2. while循环的结束条件是：target/2 +1。为什么呢？因为超过target/2 +1 的数字和必定大于 target。+1的目的是避免遗漏解，比如 9/2=4，就遗漏了5这个解。
+
+注意：缩小窗口时就要更新结果
+
+**代码实现**：
+
+```java
+class Solution {
+    public int[][] findContinuousSequence(int target) {
+
+        //存储结果
+        List<int[]> res = new ArrayList<>();
+
+        int left = 1;
+        int right = 1;
+        int sum = 0;
+        while (right <= (target / 2 + 1)) {
+            int num = right;
+            sum += right;
+            right++;
+            while (sum >= target) {
+                //更新结果
+                if (sum == target) {
+                    int[] temp = new int[right - left];
+                    for (int i = 0; i < temp.length; i++) {
+                        temp[i] = left + i;
+                    }
+                    res.add(temp);
+                }
+                int num1 = left;
+                sum -= num1;
+                left++;
+            }
+        }
+        return res.toArray(new int[res.size()][]);
+    }
+}
+```
+
+
+
+
 
 
 
