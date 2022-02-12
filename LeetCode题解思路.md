@@ -435,28 +435,33 @@ class Solution {
 2. 遇到 '(' ，将它的下标放入栈中
 3. 遇到 ')' ，先弹出栈顶元素表示匹配了当前右括号：如果栈为空，说明当前的右括号没有被匹配，我们将其下标放入栈中
 
+关键：栈存储的是数组下标；先放入-1；碰到左括号就添加到栈，注意放入的是下标；碰到右括号，先弹出栈顶元素，再取栈顶元素进行相减取最大
+
 **代码实现**：
 
 ```java
 class Solution {
     public int longestValidParentheses(String s) {
-        int maxLen = 0;
-        Stack<Integer> stack = new Stack<>();
-        //初始化先放一个-1。目的是让当前右括号的下标减去栈顶元素即为要求的长度
+        if(s.length()==0) return 0;
+        //存储结果
+        int res = 0;
+        //注意存储的是下标
+        Deque<Integer> stack = new ArrayDeque<>();
+        //先放入-1
         stack.push(-1);
-        for (int i = 0; i < s.length(); i++) {
-            //碰到'('，将其下标入栈
-            if (s.charAt(i) == '(') {
+        for(int i=0;i<s.length();i++){
+            if(s.charAt(i)=='('){
                 stack.push(i);
-            }else{//碰到 ')'，弹出栈顶，并计算长度
+            }else{
                 stack.pop();
-                if (stack.isEmpty()) {
+                //如果此时栈为空，要把右括号的下表放进去
+                if(stack.isEmpty()){
                     stack.push(i);
                 }
-                maxLen = Math.max(maxLen, i - stack.peek());
+                res = Math.max(res,i-stack.peek());
             }
         }
-        return maxLen;
+        return res;
     }
 }
 ```
@@ -478,8 +483,12 @@ class Solution {
 
 2、单调栈
 
+如何想到？因为要找出当前元素左边第一个小于它的元素，以及右边元素第一个小于它的元素，完全符合一个单调递增栈的效果
+
 1. 使用一个栈存储数组下标，里面元素是单调递增的；当进栈的元素严格小于栈顶元素时，栈顶元素出栈，求出矩阵的高，矩阵的宽度就是当前下标减去现在的栈顶元素下标再减1，求出矩阵面积；再比较最大的矩阵面积
 2. 注意，可以使用哨兵，可以强制使所有进栈元素都出栈，一种设计技巧
+
+关键：设计哨兵；栈存储的是下标；for循环里面的判断使用的是while循环
 
 
 
@@ -540,12 +549,11 @@ class Solution {
         int res = 0;
 
         for (int i = 0; i < newHeights.length; i++) {
-            //单调栈,存储的是数组下标
+            //单调栈,存储的是数组下标，注意是while循环
             while (!stack.isEmpty() && newHeights[stack.peek()] > newHeights[i]) {
-                int curHeight = stack.pop();
-                int left = stack.peek();
-                int width = i - left - 1;
-                res = Math.max(res, newHeights[curHeight] * width);
+                int curHeight = newHeights[stack.pop()];
+                int width = i - stack.peek() - 1;
+                res = Math.max(res,curHeight*width);
             }
             stack.push(i);
         }
@@ -1685,6 +1693,10 @@ class Solution {
 
 ## 六、字符串
 
+👍解决回文串的核心是双指针
+
+
+
 ### 5、最长回文子串
 
 **题目链接**：[最长回文子串](https://leetcode-cn.com/problems/longest-palindromic-substring/)
@@ -1710,6 +1722,7 @@ class Solution {
         return res;
     }
 
+    //取出回文串
     private String palindrome(String s,int left,int right){
         //防止索引越界
         while(left>=0 && right<=s.length()-1 && s.charAt(left)==s.charAt(right)){
