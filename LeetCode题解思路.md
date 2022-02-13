@@ -11,7 +11,7 @@
 **解题思路**：
 
 1. 遍历一遍数组，先把所有数存进hashmap中。以空间换时间
-   2. 再遍历一遍数组，在hashmap中查找target-nums[i]的值是否存在，若存在，返回i和map.get(target-nums[i])
+2. 再遍历一遍数组，在hashmap中查找target-nums[i]的值是否存在，若存在，返回i和map.get(target-nums[i])
 
 **实现代码**：
 
@@ -61,6 +61,47 @@ class Solution {
         }
         return new ArrayList<List<String>>(map.values());
 
+    }
+}
+```
+
+
+
+### 128、最长连续序列
+
+**题目链接**：[最长连续序列](https://leetcode-cn.com/problems/longest-consecutive-sequence/)
+
+**解题思路**：
+
+考虑到有重复元素的出现，可以使用HashSet进行去重。使用变量count记录最长连续序列的个数。
+
+注意：从当前元素开始，它的count是从1开始的
+
+**代码实现**：
+
+```java
+class Solution {
+    public int longestConsecutive(int[] nums) {
+        //边界条件
+        int len = nums.length;
+        if(len==0 || len==1) return len;
+        //关键对数组排序
+        Arrays.sort(nums);
+        HashSet<Integer> set = new HashSet<>();
+        set.add(nums[0]);
+        int count = 1;
+        int maxCount = 0;
+        for (int i = 1; i < len; i++) {
+            if(set.contains(nums[i])) continue;
+            if(set.contains(nums[i]-1)){
+                count++;
+            }else{
+                maxCount = Math.max(maxCount,count);
+                count = 1;
+            }
+            set.add(nums[i]);
+        }
+        return Math.max(maxCount, count);
     }
 }
 ```
@@ -2306,10 +2347,6 @@ class Solution {
 
 
 
-
-
-
-
 ## 二、排序
 
 👍**快排模板**
@@ -2370,7 +2407,69 @@ public class QuickSort {
 
 ```
 
+快排的特点
 
+```
+一旦找到mid这个数，则意味着在mid的左边的数都是小于它的，在mid的右边的数都是大于它的。
+有了这个特点，可以结合二分法，可以快速定位到要找的数是在左边还是右边
+```
+
+
+
+👍**归并排序模板**
+
+```java
+/**
+ * 归并排序
+ *
+ * @author: 小LeetCode~
+ **/
+public class MergeSort {
+
+    public static void main(String[] args) {
+        int[] nums = {7, 8, 5, 1,3, 4, 9, 6};
+        System.out.println(Arrays.toString(nums));
+        mergesort(nums, 0, nums.length - 1);
+        System.out.println(Arrays.toString(nums));
+    }
+
+    private static void mergesort(int[] nums, int left, int right) {
+        if (left >= right) {
+            return;
+        }
+        int mid = (left+right)/2;//2的1次方
+        mergesort(nums, left, mid);
+        mergesort(nums, mid + 1, right);
+        merge(nums, left, mid, right);
+    }
+
+    private static void merge(int[] nums, int left, int mid, int right) {
+        int temp[] = new int[right-left+1];
+        int i = left;
+        int j = mid + 1;
+        int k = 0;
+        while (i <= mid && j <= right) {
+            if (nums[i] <= nums[j]) {
+                temp[k++] = nums[i++];
+            }else{
+                temp[k++] = nums[j++];
+            }
+        }
+        while(i<=mid){
+            temp[k++] = nums[i++];
+        }
+        while(j<=right){
+            temp[k++] = nums[j++];
+        }
+
+        //把临时数组赋值给原来的数组
+        for (int x = 0; x < temp.length ; x++) {
+            nums[left+x] = temp[x];
+        }
+    }
+}
+
+```
 
 
 
@@ -2478,7 +2577,153 @@ class Solution {
 
 
 
+### 剑指offer40、最小的k个数
 
+**题目链接**：[最小的k个数](https://leetcode-cn.com/problems/zui-xiao-de-kge-shu-lcof/)
+
+**算法思路**：
+
+直接套用快排模板。快排的特点：一旦找到mid这个数，则意味着在mid的左边的数都是小于它的，在mid的右边的数都是大于它的。有了这个特点，可以结合二分法，可以快速定位到要找的数是在左边还是右边
+
+当mid==k时，说明当前mid前面的数都是最小的
+
+当mid>k时，说明需要往mid左边去寻找
+
+当mid<k时，说明需要往mid右边去寻找
+
+**代码实现**：
+
+```java
+class Solution {
+    public int[] getLeastNumbers(int[] arr, int k) {
+        int[] res = new int[k];
+        quicksort(arr,0,arr.length-1,k);
+        for(int i=0;i<k;i++){
+            res[i] = arr[i];
+        }
+        return res;
+    }
+
+    private void quicksort(int[] nums,int low,int high,int k){
+        if(low>=high) return;
+        int mid = partition(nums,low,high);
+        if(mid==k) return;
+        else if(mid<k) quicksort(nums,mid+1,high,k);
+        else quicksort(nums,low,mid-1,k);
+    }
+
+    private int partition(int[] nums,int low,int high){
+        int x = nums[low];
+        int i = low;
+        int j = high + 1;
+        while(true){
+            while(nums[++i]<x){
+                if(i>=high) break;
+            }
+            while(nums[--j]>x);
+            if(i>=j) break;
+            swap(nums,i,j);
+        }
+        swap(nums,low,j);
+        return j;
+    }
+
+    private void swap(int[] nums,int i,int j){
+        int tmp = nums[i];
+        nums[i] = nums[j];
+        nums[j] = tmp;
+    }
+}
+```
+
+
+
+
+
+### 剑指offer45、把数组排成最小的数
+
+**题目链接**：[把数组排成最小的数](https://leetcode-cn.com/problems/ba-shu-zu-pai-cheng-zui-xiao-de-shu-lcof/)
+
+**算法思路**：
+
+算法的关键在于 x + y > y + x，那么 x 排在 y后面，这里需要使用到排序。
+
+以上成立针对的是字符串，因此第一步需要将int数组转换成字符数组。
+
+然后对字符数组进行排序，使用自定义排序
+
+**代码实现**：
+
+```java
+class Solution {
+    public String minNumber(int[] nums) {
+        String[] s = new String[nums.length];
+        for(int i=0;i<nums.length;i++){
+            s[i] = String.valueOf(nums[i]);
+        }
+        //字符串的升序排序
+        //x+y>y+x，说明x在y后面
+        Arrays.sort(s,(x,y)->(x+y).compareTo(y+x));
+        return String.join("",s);
+    }
+}
+```
+
+
+
+### 剑指offer51、数组中的逆序对
+
+**题目链接**：[数组中的逆序对](https://leetcode-cn.com/problems/shu-zu-zhong-de-ni-xu-dui-lcof/)
+
+**算法思路**：
+
+直接使用归并排序模板。灵活使用了归并排序的特点
+
+**代码实现**：
+
+```java
+class Solution {
+
+    int res = 0;
+    public int reversePairs(int[] nums) {
+        //归并排序
+        mergeSort(nums,0,nums.length-1);
+        return res;
+    }
+
+    private void mergeSort(int[] nums,int low,int high){
+        if(low>=high) return;
+        int mid = low + ((high-low)>>1);
+        mergeSort(nums,low,mid);
+        mergeSort(nums,mid+1,high);
+        merge(nums,low,mid,high);
+    }
+
+    private void merge(int[] nums,int low,int mid,int high){
+
+        //拷贝数组
+        int[] tmp = new int[high-low+1];
+        int k = 0;
+        int i = low;
+        int j = mid+1;
+        while(i<=mid && j<=high){
+            if(nums[i]<=nums[j]){
+                tmp[k++] = nums[i++];
+            }else{
+                tmp[k++] = nums[j++];
+                res += mid - i + 1;//关键代码
+            }
+        }
+        while(i<=mid) tmp[k++] = nums[i++];
+        while(j<=high) tmp[k++] = nums[j++];
+
+        //更新原有的数组的排序位置
+        for(int x=0;x<tmp.length;x++){
+            nums[low+x] = tmp[x];
+        }
+    }
+}
+```
 
 
 
@@ -3678,6 +3923,10 @@ class Solution {
     }
 }
 ```
+
+
+
+## 十、位运算
 
 
 
