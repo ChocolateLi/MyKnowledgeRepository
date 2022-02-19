@@ -1242,6 +1242,43 @@ class Solution {
 
 
 
+### 113、路径总和
+
+**题目链接**：[路径总和](https://leetcode-cn.com/problems/path-sum-ii/)
+
+**解题思路**：
+
+1. 可以使用回溯法的思路框架进行编写代码
+2. 使用前序遍历框架，明白当前节点要做什么
+
+注意：在满足条件的时候，将list集合添加到res集合时，不能返回，不然答案不正确，因为要把最后一个元素弹出来后才能进行后面的操作
+
+**代码实现**：
+
+```java
+class Solution {
+    List<List<Integer>> res = new ArrayList<>();
+    public List<List<Integer>> pathSum(TreeNode root, int target) {
+        LinkedList<Integer> list = new LinkedList<>();
+        preOrder(root,target,list);
+        return res;
+    }
+
+    private void preOrder(TreeNode root,int target,LinkedList<Integer> list){
+        if(root==null) return;
+        target -= root.val;
+        list.add(root.val);
+        if(target==0 && root.left==null && root.right==null){
+            res.add(new ArrayList<>(list));
+            //不能写return返回语句不然答案不正确
+        }
+        preOrder(root.left,target,list);
+        preOrder(root.right,target,list);
+        list.removeLast();//回退操作
+    }
+}
+```
+
 
 
 ### 114、二叉树展开为链表
@@ -1276,8 +1313,6 @@ class Solution {
     }
 }
 ```
-
-
 
 
 
@@ -1926,6 +1961,77 @@ class Solution {
         return Arrays.copyOf(res, index + 1);
     }
 }
+```
+
+
+
+## 八、堆
+
+### 295、数据流中的中位数
+
+**题目链接**：[数据流中的中位数](https://leetcode-cn.com/problems/find-median-from-data-stream/)
+
+**算法思路**：
+
+初始化一个大顶堆和一个小顶堆
+
+小顶堆：存储所有元素中较大的一半，堆顶存储的是其中最小的元素
+大顶堆：存储所有元素中较小的一半，堆顶存储的是其中最大的元素
+相当于把元素分为大小二半，取中位数时，取各自的堆顶的元素即可
+如果num数值比小顶堆的堆顶元素大，则放在小顶堆
+否则放在大顶堆
+
+两个细节注意点：
+当小顶堆的元素个数-大顶堆的元素个数>1时，需要平衡两者的数量。
+当大顶堆的元素个数-小顶堆的元素个数>0时，需要平衡两者的数量。
+
+平衡数量的原则：小顶堆的个数 >= 大顶堆的个数，并且不超过1
+
+**代码实现**：
+
+```java
+class MedianFinder {
+
+    PriorityQueue<Integer> minQueue;//小顶堆
+    PriorityQueue<Integer> maxQueue;//大顶堆
+    public MedianFinder() {
+        minQueue = new PriorityQueue<>();
+        maxQueue = new PriorityQueue<>((a,b)->(b-a));
+    }
+    
+    public void addNum(int num) {
+        if(minQueue.isEmpty() || minQueue.peek()<=num){
+            minQueue.offer(num);
+            //当小顶堆的元素个数-大顶堆的元素个数>1时，需要平衡两者的数量
+            if(minQueue.size()-maxQueue.size()>1){
+                maxQueue.offer(minQueue.poll());
+            }
+        }else{
+            maxQueue.offer(num);
+            //当大顶堆的元素个数-小顶堆的元素个数>0时，需要平衡两者的数量
+            if(maxQueue.size()-minQueue.size()>0){
+                minQueue.offer(maxQueue.poll());
+            }
+        }
+    }
+    
+    public double findMedian() {
+        int minSize = minQueue.size();
+        int maxSize = maxQueue.size();
+        if(minSize>maxSize){
+            return minQueue.peek().doubleValue();
+        }else{
+            return (minQueue.peek()+maxQueue.peek())/2.0;
+        }
+    }
+}
+
+/**
+ * Your MedianFinder object will be instantiated and called as such:
+ * MedianFinder obj = new MedianFinder();
+ * obj.addNum(num);
+ * double param_2 = obj.findMedian();
+ */
 ```
 
 
@@ -3265,54 +3371,64 @@ class Solution {
 
 ```
 
-### 33、搜索旋转排序数组
+通用解法(还存在瑕疵)
 
-**题目链接**：[搜索旋转排序数组](https://leetcode-cn.com/problems/search-in-rotated-sorted-array/)
-
-**解题思路**：
-
-采用二分法的思路进行搜索。
-
-旋转数组后，从中间划分，一定有一边是有序的。
-
-由于一定有一边是有序的，可以根据有序的两个边界值来判断目标值在有序一边还是无序一边。
-
-注意：有序一边的边界值可能等于目标值，所以判断时别忘了等号
-
-**代码实现**：
+[一个函数秒杀 2Sum 3Sum 4Sum 问题](https://mp.weixin.qq.com/s/fSyJVvggxHq28a0SdmZm6Q)
 
 ```java
 class Solution {
-    public int search(int[] nums, int target) {
-        int left = 0;
-        int right = nums.length-1;
-        while (left <= right) {
-            int mid = left + ((right - left) >> 1);
-            if (nums[mid] == target) {
-                return mid;
+    public List<List<Integer>> threeSum(int[] nums) {
+        return threeSum(nums,0);
+    }
+
+    private List<List<Integer>> threeSum(int[] nums,int target){
+        int len = nums.length;
+        //先对数组排序，很关键
+        Arrays.sort(nums);
+        List<List<Integer>> res = new ArrayList<>();
+        for(int i=0;i<len;i++){
+            // 对 target - nums[i] 计算 twoSum
+            List<List<Integer>>  list = twoSum(nums,i+1,target-nums[i]);
+            // 如果存在满足条件的二元组，再加上 nums[i] 就是结果三元组
+            for(List<Integer> tuple:list){
+                tuple.add(nums[i]);
+                res.add(tuple);
             }
-            //右边有序
-            if(nums[mid]<nums[right]){
-                //目标值在右边
-                if(target>nums[mid] && target<=nums[right]){
-                    left = mid + 1;
-                }else{//目标值在左边
-                    right = mid - 1;
-                }
-            }else{//左边有序
-                //目标值在左边
-                if(target<nums[mid] && target>=nums[left]){
-                    right = mid - 1;
-                }else{//目标值在右边
-                    left = mid + 1;
-                }
+            // 跳过第一个数字重复的情况，否则会出现重复结果
+            while(i<len-1 && nums[i]==nums[i+1]) i++;
+        }
+        return res;
+    }
+
+    private List<List<Integer>> twoSum(int[] nums,int start,int target){
+        int left = start;
+        int right = nums.length-1;
+        List<List<Integer>> res = new ArrayList<>();       
+        while(left<right){
+            int sum = nums[left] + nums[right];
+            int leftNum = nums[left];
+            int rightNum = nums[right];
+            if(sum<target){
+                while(left<right && nums[left]==leftNum) left++;
+            }
+            else if(sum > target){
+                while(left<right && nums[right]==rightNum) right--;
+            }else{
+                List<Integer> list = new ArrayList<>();
+                list.add(left);
+                list.add(right);
+                res.add(list);
+                while(left<right && nums[left]==leftNum) left++;
+                while(left<right && nums[right]==rightNum) right--;
             }
             
         }
-        return -1;
+        return res;
     }
 }
 ```
+
+
 
 ### 42、接雨水
 
@@ -3344,7 +3460,7 @@ class Solution {
 
 三、双指针
 
-使用双指针边走边算
+使用双指针边走边算。一直更新记录最右两边的最值情况。
 
 时间复杂度：O(n)
 
@@ -3358,29 +3474,33 @@ class Solution {
 
 一、暴力解法
 
- ```java
- class Solution {
-     public int trap(int[] height) {
-         int maxResult = 0;
-         int n = height.length;
-         for(int i=1;i<n-1;i++){
-             int maxLeft = 0;
-             int maxRight = 0;
-             //找左边最高的柱子
-             for(int left=i;left >= 0;left--){
-                 maxLeft = Math.max(maxLeft, height[left]);
-             }
-             //找右边最高的柱子
-             for (int right = i; right < n; right++) {
-                 maxRight = Math.max(maxRight, height[right]);
-             }
-             maxResult += Math.min(maxLeft,maxRight) - height[i];
-         }
-         return maxResult;
-     }
- }
- 
- ```
+```java
+class Solution {
+    public int trap(int[] height) {
+        //注意n
+        int n = height.length;
+        int resMax = 0;
+        //第一个和最后一个都不用计算
+        for(int i=1;i<n-1;i++){
+            int leftMax = 0;
+            int rightMax = 0;
+            //求出左边的最高数
+            for(int left=i;left>=0;left--){
+                leftMax = Math.max(leftMax,height[left]);
+            }
+            //求出右边的最高数
+            for(int right=i;right<=n-1;right++){
+                rightMax = Math.max(rightMax,height[right]);
+            }
+            //容器能装多少水取决于较短的那根
+            resMax += Math.min(leftMax,rightMax) - height[i];
+        }
+        return resMax;
+    }
+}
+```
+
+
 
 二、备忘录
 
@@ -3400,7 +3520,7 @@ class Solution {
             leftMax[i] = Math.max(height[i],leftMax[i-1]);
         }
         //从右向左计算右边最高的柱子
-        //leftMax[i]表示第i位柱子的左边最高的柱子
+        //rightMax[i]表示第i位柱子的有边最高的柱子
         for (int i = n - 2; i >= 0; i--) {
             rightMax[i] = Math.max(height[i],rightMax[i+1]);
         }
@@ -3438,10 +3558,7 @@ class Solution {
         return maxResult;
     }
 }
-
 ```
-
-
 
 
 
@@ -3449,7 +3566,96 @@ class Solution {
 
 👍**算法模板**：[回溯框架团灭排列、组合、子集问题](https://blog.csdn.net/weixin_42870497/article/details/119443910)
 
-👍**矩阵搜索算法模板：**[DFS团灭矩阵中的搜索问题](https://blog.csdn.net/weixin_42870497/article/details/120048719)
+👍**矩阵搜索算法模板：**
+
+```java
+class Solution {
+
+    int m,n;
+    public T function(int[][] grid) {
+        //行
+        m = grid.length;
+        //列
+        n = grid[0].length;
+        //记录结点是否访问过
+        boolean[][] visited = new boolean[m][n];
+        for(int i=0;i<m;i++){
+            for(int j=0;j<n;j++){
+                 dfs(grid,i,j,visited);
+            }
+        }
+        return ..;
+    }
+
+    private void dfs(int[][] grid,int i,int j,boolean[][] visited){
+        //递归结束条件
+        if(i<0 || i>=m || j<0 || j>=n || grid[i][j]== || visited[i][j]){
+            return;
+        }
+        //满足题目条件时的操作
+        ...
+        //访问过置true
+        visite[i][j] = true;
+        //向上
+        dfs(grid,i+1,j,visited);
+        //向下
+        dfs(grid,i-1,j,visited);
+        //向左
+        dfs(grid,i,j-1,visited);
+        //向右
+        dfs(grid,i,j+1,visited);
+        visited[i][j] = false;//这个待定，看题目要求而定
+    }
+}
+
+---------------------------------------------------------------------------------
+// 二维矩阵遍历框架
+void dfs(int[][] grid, int i, int j, boolean[] visited) {
+    int m = grid.length, n = grid[0].length;
+    if (i < 0 || j < 0 || i >= m || j >= n) {
+        // 超出索引边界
+        return;
+    }
+    if (visited[i][j]) {
+        // 已遍历过 (i, j)
+        return;
+    }
+    // 进入节点 (i, j)
+    visited[i][j] = true;
+    dfs(grid, i - 1, j, visited); // 上
+    dfs(grid, i + 1, j, visited); // 下
+    dfs(grid, i, j - 1, visited); // 左
+    dfs(grid, i, j + 1, visited); // 右
+}
+
+---------------------------------------------------------------------------------
+// 方向数组，分别代表上、下、左、右
+int[][] dirs = new int[][]{{-1,0}, {1,0}, {0,-1}, {0,1}};
+
+void dfs(int[][] grid, int i, int j, boolean[] visited) {
+    int m = grid.length, n = grid[0].length;
+    if (i < 0 || j < 0 || i >= m || j >= n) {
+        // 超出索引边界
+        return;
+    }
+    if (visited[i][j]) {
+        // 已遍历过 (i, j)
+        return;
+    }
+
+    // 进入节点 (i, j)
+    visited[i][j] = true;
+    // 递归遍历上下左右的节点
+    for (int[] d : dirs) {
+        int next_i = i + d[0];
+        int next_j = j + d[1];
+        dfs(grid, next_i, next_j, visited);
+    }
+    // 离开节点 (i, j)
+}
+```
+
+
 
 ### 17、电话号码的字母组合
 
@@ -3514,6 +3720,10 @@ class Solution {
 
 **解题思路：**回溯法。关键点：start这个参数
 
+1. 使用回溯法的思路进行求解
+2. 需要先对数组进行排序，方便后续的剪枝操作
+3. start 参数的表示之前的元素已经使用过了，当前层的参数还可以继续重复使用。因为组合跟排列不同，[1,2] 和 [2,1]是不同的排列，但是却是相同的组合。
+
 **代码实现：**
 
 ```java
@@ -3538,12 +3748,157 @@ class Solution {
                 return;
             }
             list.add(nums[i]);
-            dfs(nums,target-nums[i],list,i);
+            dfs(nums,target-nums[i],list,i);//注意是i，因为数字可以无限制重复被选取
             list.removeLast();
 
         }
     }
 }
+```
+
+
+
+### 40、组合总和2
+
+**题目链接：**[组合总和2](https://leetcode-cn.com/problems/combination-sum-ii/)
+
+**解题思路：**回溯法。
+
+1. 使用回溯法的思路进行求解
+2. 需要先对数组进行排序，方便后续的剪枝操作
+3. start 参数的表示之前的元素已经使用过了，当前层的参数还可以继续重复使用。因为组合跟排列不同，[1,2] 和 [2,1]是不同的排列，但是却是相同的组合。在这里 start 还有一个含义，，表示进入下一层递归。
+4. 这里不需要再使用 visit数组判断元素是否使用过，因为 start 参数就决定了进入下一层就不会重复使用元素
+5. 大剪枝的作用是避免重复元素在同一个位置重复计算
+
+**代码实现：**
+
+```java
+class Solution {
+
+    List<List<Integer>> res = new ArrayList<>();
+    public List<List<Integer>> combinationSum2(int[] candidates, int target) {
+        LinkedList<Integer> list = new LinkedList<>();
+        Arrays.sort(candidates);
+        backtrack(candidates,target,list,0);
+        return res;
+    }
+
+    private void backtrack(int[] nums,int target,LinkedList<Integer> list,int start){
+        if(target==0){
+            res.add(new ArrayList<Integer>(list));
+            return;
+        }
+        for(int i=start;i<nums.length;i++){
+            //条件判断，剪枝
+            if(target<nums[i]) return;
+            //大剪枝。
+            if(i>start && nums[i-1]==nums[i]) continue;
+            list.add(nums[i]);
+            backtrack(nums,target-nums[i],list,i+1);//注意i+1，因为每个数字在每个组合中只能使用一次
+            list.removeLast();
+        }
+    }
+}
+
+```
+
+
+
+
+
+### 46、全排列
+
+**题目链接**：[全排列](https://leetcode-cn.com/problems/subsets/)
+
+**算法思路**：
+
+1. 使用回溯法的思路进行求解
+2. 使用 visit 数组的原因是每次进入下一层的递归都是从头开始遍历的，但是元素不能重复使用，所以需要进行剪枝
+
+**代码实现**：
+
+```java
+class Solution {
+
+    List<List<Integer>> res = new ArrayList<>();
+    public List<List<Integer>> permute(int[] nums) {
+        LinkedList<Integer> list = new LinkedList<>();
+        boolean [] visit = new boolean[nums.length];
+        backtrack(nums,list,visit);
+        return res;
+    }
+
+    private void backtrack(int[] nums,LinkedList<Integer> list,boolean[] visit){
+    	//结束条件
+        if(list.size()==nums.length){
+            res.add(new ArrayList(list));
+            return;
+        }
+        for(int i=0;i<nums.length;i++){
+            //小剪枝
+            if(visit[i]) continue;
+            //做选择
+            list.add(nums[i]);
+            visit[i] = true;
+            //递归
+            backtrack(nums,list,visit);
+            //撤销选择
+            visit[i] = false;
+            list.removeLast();
+        }
+    }
+}
+
+```
+
+### 47、全排列2
+
+**题目链接**：[全排列2](https://leetcode-cn.com/problems/permutations-ii/)
+
+**算法思路**：
+
+1. 使用回溯法的思路进行求解
+2. 首先对数组进行排序，排序的原因是数组存在重复的原因，经过排序后，重复的元素就会紧靠在一起，为后续的剪枝做操作
+3. 使用 visit 数组的原因是每次进入下一层的递归都是从头开始遍历的，但是元素不能重复使用，所以需要进行剪枝
+4. 大剪枝的原因是对重复元素在同一个位置的剪枝
+
+**代码实现**：
+
+```java
+class Solution {
+
+    List<List<Integer>> res = new ArrayList<>();
+    public List<List<Integer>> permuteUnique(int[] nums) {
+        LinkedList<Integer> list = new LinkedList<>();
+        boolean [] visit = new boolean[nums.length];
+        Arrays.sort(nums);//这个排序很关键
+        backtrack(nums,list,visit);
+        return res;
+    }
+
+    private void backtrack(int[] nums,LinkedList<Integer> list,boolean[] visit){
+        if(list.size()==nums.length){
+            res.add(new ArrayList(list));
+            return;
+        }
+
+        for(int i=0;i<nums.length;i++){
+        	//小剪枝
+            if(visit[i]) continue;
+            //大剪枝
+            if(i>0 && nums[i-1]==nums[i] && visit[i-1]) continue;
+            //做选择
+            list.add(nums[i]);
+            visit[i]=true;
+            //递归
+            backtrack(nums,list,visit);
+            //撤销选择
+            visit[i]=false;
+            list.removeLast();
+        }
+    }
+}
+
 ```
 
 
@@ -3590,48 +3945,169 @@ class Solution {
 
 1. 使用回溯法的思路进行矩阵的遍历
 2. 注意不能重复访问，所以需要visit变量记录。遍历的过程中，首先单词第一个元素必须匹配上，所以需要一个index变量进行记录
+3. 思路可以参考第200题
 
 **代码实现：**
 
 ```java
 class Solution {
 
-    int m, n;
-
+    int m,n;
     public boolean exist(char[][] board, String word) {
-
         m = board.length;
         n = board[0].length;
-
         boolean[][] visit = new boolean[m][n];
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
-                if (dfs(board, word, i, j,0, visit)) {
+        for(int i=0;i<m;i++){
+            for(int j=0;j<n;j++){
+                if(dfs(board,word,i,j,0,visit)){
                     return true;
                 }
             }
         }
-
         return false;
     }
 
-    private boolean dfs(char[][] board, String word, int i, int j, int index,boolean[][] visit) {
-
-        if (i < 0 || i >= m || j < 0 || j >= n || board[i][j]!=word.charAt(index)|| visit[i][j]) {
-            return false;
-        }
-
-        if (index == word.length()-1) {
-            return true;
-        }
-
+    private boolean dfs(char[][] board,String word,int i,int j,int index,boolean[][] visit){
+        if(i<0 || j<0 || i>=m || j>=n) return false;
+        if(board[i][j]!=word.charAt(index) || visit[i][j]) return false;
+        if(word.length()-1==index) return true;
         visit[i][j] = true;
-        boolean res = dfs(board, word, i - 1, j, index+1,visit) ||
-                        dfs(board, word, i + 1, j,index+1, visit) ||
-                        dfs(board, word, i, j - 1, index+1,visit) ||
-                        dfs(board, word, i, j + 1, index+1,visit);
+        boolean flag =  dfs(board,word,i-1,j,index+1,visit)
+                    || dfs(board,word,i+1,j,index+1,visit)
+                    || dfs(board,word,i,j-1,index+1,visit)
+                    || dfs(board,word,i,j+1,index+1,visit);
         visit[i][j] = false;
+        return flag;
+    }
+}
+```
+
+
+
+### 90、子集2
+
+**题目链接**：[子集2](https://leetcode-cn.com/problems/subsets-ii/)
+
+**算法思路**：
+
+1. 使用回溯法的思路进行求解
+2. 回溯前先进行排序，后续剪枝操作需要
+3. 注意参数start的作用，它是避免进入下一层递归时，添加到重复的元素
+
+**代码实现**：
+
+```java
+class Solution {
+
+    List<List<Integer>> res = new ArrayList<>();
+    public List<List<Integer>> subsetsWithDup(int[] nums) {
+        LinkedList<Integer> list = new LinkedList<>();
+        Arrays.sort(nums);
+        backtrack(nums,list,0);
         return res;
+    }
+
+    private void backtrack(int[] nums,LinkedList<Integer> list,int start){
+        res.add(new ArrayList(list));
+        for(int i=start;i<nums.length;i++){
+        	//剪枝判断
+            if(i>start && nums[i-1]==nums[i]) continue;
+            list.add(nums[i]);
+            backtrack(nums,list,i+1);
+            list.removeLast();
+        }
+    }
+}
+
+```
+
+
+
+### 200、岛屿数量
+
+**题目链接**：[岛屿数量](https://leetcode-cn.com/problems/number-of-islands/)
+
+**算法思路**：把岛屿「淹了」，主要是为了省事，避免维护 `visited` 数组。
+
+**代码实现**：
+
+```java
+class Solution {
+
+    int m,n;
+    public int numIslands(char[][] grid) {
+        m = grid.length;
+        n = grid[0].length;
+        int res = 0;
+        for(int i=0;i<m;i++){
+            for(int j=0;j<n;j++){
+                //每发现一个岛屿，岛屿数量+1
+                if(grid[i][j]=='1'){
+                    res++;
+                    // 然后使用 DFS 将岛屿淹了
+                    dfs(grid,i,j);
+                }
+            }
+        }
+        return res;
+    }
+
+    private void dfs(char[][] grid,int i,int j){
+        //边界条件
+        if(i<0 || j<0 || i>=m || j>=n){
+            return;
+        }
+        //已经是海水了
+        if(grid[i][j]=='0') return;
+        // 将 (i, j) 变成海水
+        grid[i][j] = '0';
+        // 淹没上下左右的陆地
+        dfs(grid,i-1,j);
+        dfs(grid,i+1,j);
+        dfs(grid,i,j-1);
+        dfs(grid,i,j+1);
+    }
+}
+```
+
+
+
+### 695、岛屿的最大面积
+
+**题目链接**：[岛屿的最大面积](https://leetcode-cn.com/problems/max-area-of-island/)
+
+**解题思路**：参考第200题思路
+
+**代码实现**：
+
+```java
+class Solution {
+
+    int m,n;
+    public int maxAreaOfIsland(int[][] grid) {
+        m = grid.length;
+        n = grid[0].length;
+        int res = 0;
+        for(int i=0;i<m;i++){
+            for(int j=0;j<n;j++){
+                if(grid[i][j]==1){
+                    // 淹没岛屿，并更新最大岛屿面积
+                    res = Math.max(res,dfs(grid,i,j));
+                }
+            }
+        }
+        return res;
+    }
+
+    private int dfs(int[][] grid,int i,int j){
+        if(i<0 || j<0 || i>=m || j>=n) return 0;
+        if(grid[i][j]==0) return 0;
+        grid[i][j] = 0;
+        return dfs(grid,i-1,j)
+            + dfs(grid,i+1,j)
+            + dfs(grid,i,j-1)
+            + dfs(grid,i,j+1)
+            + 1; 
     }
 }
 ```
@@ -3640,9 +4116,119 @@ class Solution {
 
 
 
+### 1254、统计封闭岛屿的数量
+
+**题目链接**：[统计封闭岛屿的数量](https://leetcode-cn.com/problems/number-of-closed-islands/)
+
+**算法思路**：
+
+还是使用第200题的一样的思路。
+
+只要处理掉边上的岛屿数量，剩下的就是封闭岛屿的数量
+
+**代码实现**：
+
+```java
+class Solution {
+
+    int m,n;
+    public int closedIsland(int[][] grid) {
+        m = grid.length;
+        n = grid[0].length;
+        int res = 0;
+
+        //把靠边的岛屿排除掉，剩下的就是岛屿的数量
+        //去掉左右两边的岛屿
+        for(int i=0;i<m;i++){
+            dfs(grid,i,0);
+            dfs(grid,i,n-1);
+        }
+        //去掉上下两边的岛屿
+        for(int j=0;j<n;j++){
+            dfs(grid,0,j);
+            dfs(grid,m-1,j);
+        }
+
+        //剩下的就是岛屿的数量
+        for(int i=0;i<m;i++){
+            for(int j=0;j<n;j++){
+                //每发现一个岛屿，岛屿数量+1
+                if(grid[i][j]==0){
+                    res++;
+                    // 然后使用 DFS 将岛屿淹了
+                    dfs(grid,i,j);
+                }
+            }
+        }
+        return res;
+    }
+
+    private void dfs(int[][] grid,int i,int j){
+        //边界条件
+        if(i<0 || j<0 || i>=m || j>=n){
+            return;
+        }
+        //已经是海水了
+        if(grid[i][j]==1) return;
+        // 将 (i, j) 变成海水
+        grid[i][j] = 1;
+        // 淹没上下左右的陆地
+        dfs(grid,i-1,j);
+        dfs(grid,i+1,j);
+        dfs(grid,i,j-1);
+        dfs(grid,i,j+1);
+    }
+}
+```
 
 
 
+### 剑指offer13、机器人的运动范围
+
+**题目链接**：[机器人的运动范围](https://leetcode-cn.com/problems/ji-qi-ren-de-yun-dong-fan-wei-lcof/)
+
+**解题思路**：
+
+使用回溯法进行求解；
+
+注意：下标是从(0,0)开始的；题目要求的是机器人能到达多少个格子，所以它的是它的上下左右能到达格子的总和；
+
+**代码实现**：
+
+```java
+class Solution {
+
+    
+    public int movingCount(int m, int n, int k) {
+        if(k==0) return 1;
+        boolean [][] visit = new boolean[m][n];
+        return dfs(m,n,k,0,0,visit);
+    }
+
+    private int dfs(int m,int n,int k,int i,int j,boolean [][] visit){
+        if(i<0 || j<0 || i>=m || j>=n) return 0;
+        if(sum(i,j)>k || visit[i][j]) return 0;
+        visit[i][j] = true;
+        //只能向下走或者向左走
+        return dfs(m,n,k,i+1,j,visit)
+             + dfs(m,n,k,i,j+1,visit)
+             + 1;
+    }
+
+    private int sum(int a,int b){
+        int sum = 0;
+        while(a>0){
+            sum += a%10;
+            a /= 10;
+        }
+        while(b>0){
+            sum += b%10;
+            b /= 10;
+        }
+        return sum;
+    }
+}
+```
 
 
 
@@ -3775,6 +4361,179 @@ class Solution {
 
 👍**二分查找模板**：[二分查找模板](https://blog.csdn.net/weixin_42870497/article/details/119728363)
 
+```java
+package com.search;
+
+/**
+ * 二分查找
+ * @author: 小LeetCode~
+ **/
+public class BinarySearch {
+
+    public static void main(String[] args) {
+        //最基本的二分查找
+//        int[] nums = {1,2,3,4,5,6};
+//        int result_mid = binarySearch_mid(nums,7);
+//        System.out.println(result_mid);
+
+        int[] nums = {1,2,2,2,3,4};
+        //查找中间边界的2
+        int result_mid = binarySearch_mid(nums,2);//查找到索引为2
+        System.out.println(result_mid);
+        //查找左侧边界的索引
+        int result_left = binarySearch_left(nums,2);//查找到的索引为1
+        System.out.println(result_left);
+        //查找右侧边界的索引
+        int result_right = binarySearch_right(nums,2);//查找到的索引为3
+        System.out.println(result_right);
+
+    }
+
+    /**
+     * 最基本的二分查找
+     * @param nums
+     * @return
+     */
+    private static int binarySearch_mid(int[] nums,int target){
+        int left = 0;
+        int right = nums.length - 1;//注意
+        //left=right+1结束循环
+        while (left <= right) {
+            int mid = left + ((right-left)>>1);
+            if (nums[mid] < target) {
+                left = mid + 1;
+            } else if (nums[mid] > target) {
+                right = mid - 1;
+            }else{
+                return mid;//直接返回
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * 查找左侧边界
+     * @param nums
+     * @return
+     */
+    private static int binarySearch_left(int[] nums,int target){
+        int left = 0;
+        int right = nums.length - 1;//注意
+        //left=right+1结束循环
+        while (left <= right) {
+            int mid = left + ((right-left)>>1);
+            if (nums[mid] < target) {
+                left = mid + 1;
+            } else if (nums[mid] > target) {
+                right = mid - 1;
+            }else{
+                right = mid-1;//向左收缩边界
+            }
+        }
+
+        //条件判断
+        if(left>=nums.length || nums[left]!=target){
+            return -1;
+        }
+
+        //这里返回值是根据num[mid]==target来返回的，此时right=mid-1
+        //相当于mid = right+1
+        //而结束条件right+1=left
+        //相当于mid = left
+        //所以返回left或者right+1都可以
+        return left;
+    }
+
+    /**
+     * 查找右侧边界
+     * @param nums
+     * @return
+     */
+    private static int binarySearch_right(int[] nums,int target){
+        int left = 0;
+        int right = nums.length - 1;//注意
+        while (left <= right) {
+            int mid = left + ((right-left)>>1);
+            if (nums[mid] < target) {
+                left = mid + 1;
+            } else if (nums[mid] > target) {
+                right = mid - 1;
+            }else{
+                left = mid + 1;//向右侧收缩边界
+            }
+        }
+
+        //条件判断
+        if (right < 0 || nums[right] != target) {
+            return -1;
+        }
+
+        //这里返回值是根据num[mid]==target来返回的，此时left=mid+1
+        //相当于mid = left-1
+        //而结束条件right+1=left,right-left-1
+        //相当于mid=right
+        //所以返回left-1或者right都可以
+        return right;
+    }
+}
+```
+
+
+
+### 33、搜索旋转排序数组
+
+**题目链接**：[搜索旋转排序数组](https://leetcode-cn.com/problems/search-in-rotated-sorted-array/)
+
+**解题思路**：
+
+采用二分法的思路进行搜索。
+
+旋转数组后，从中间划分，一定有一边是有序的。
+
+由于一定有一边是有序的，可以根据有序的两个边界值来判断目标值在有序一边还是无序一边。
+
+注意：有序一边的边界值可能等于目标值，所以判断时别忘了等号
+
+**代码实现**：
+
+```java
+class Solution {
+    public int search(int[] nums, int target) {
+        int left = 0;
+        int right = nums.length-1;
+        while(left<=right){
+            int mid = left + ((right-left)>>1);
+            if(nums[mid]==target) return mid;
+            //右边的数组有序
+            if(nums[mid]<nums[right]){
+                //目标值在右边有序数组中?
+                if(nums[mid]<target && nums[right]>=target){
+                    left = mid + 1;
+                }else{//不在有边那就在左边
+                    right = mid - 1;
+                }
+            }
+            //左边的数组有序
+            else{
+                //目标值在左边数组中？
+                if(nums[left]<=target && nums[mid]>target){
+                    right = mid - 1;
+                }else{//不在左边那就在右边
+                    left = mid + 1;
+                }
+            }
+            
+        }
+        return -1;
+        
+    }
+}
+```
+
+
+
+
+
 ### 34、在排序数组中查找元素的第一个和最后一个位置
 
 **题目链接**：[在排序数组中查找元素的第一个和最后一个位置](https://leetcode-cn.com/problems/find-first-and-last-position-of-element-in-sorted-array/)
@@ -3835,6 +4594,41 @@ class Solution {
 
 }
 ```
+
+
+
+### 剑指offer11、旋转数组的最小数字
+
+**题目描述**：[旋转数组的最小数字](https://leetcode-cn.com/problems/xuan-zhuan-shu-zu-de-zui-xiao-shu-zi-lcof/)
+
+**算法思路**：[旋转数组的最小数字](https://blog.csdn.net/weixin_42870497/article/details/118582577)
+
+**代码实现**：
+
+```java
+class Solution {
+    public int minArray(int[] numbers) {
+        int left = 0;
+        int right = numbers.length - 1;
+        while(left<=right){
+            int mid = left + ((right-left)>>1);
+            if(numbers[mid]<numbers[right]){
+                right = mid;
+            }
+            else if(numbers[mid]>numbers[right]){
+                left = mid+1;
+            }
+            else{
+                right = right-1;
+            }
+        }
+        //找到最小值的那个数时，right会减1，所以返回left
+        return numbers[left];
+    }
+}
+```
+
+
 
 
 
