@@ -2840,8 +2840,105 @@ class Solution {
 👍思考
 
 ```tex
-1.动态规划的本质就是穷举状态，然后在选择中选择最优
+动态规划特点：
+1.重叠子问题	2.最优子结构 3.状态转移方程(最关键)
+
+题型：求最值
+
+核心：穷举。动态规划的本质就是穷举状态，然后在选择中选择最优
+
+解题套路：
+1.明确状态（即在函数中会改变变化的参数）
+2.明确选择（即在一个状态中有多少种选择，穷举这个选择，选最优）
+3.明确dp数组/函数的定义（即这个dp数组/函数表示什么意思）
+3.明确初始化状态（即不能通过状态转移方程得到的）
+
+寻找状态转移方程
+1.明白dp数组的含义
+2.假设dp[0...i-1]都求出来了，如何求dp[i](即找规律)
 ```
+
+👍动态规划代码框架
+
+```java
+# 初始化 base case
+dp[0][0][...] = base
+# 进行状态转移
+for 状态1 in 状态1的所有取值：
+    for 状态2 in 状态2的所有取值：
+        for ...
+            dp[状态1][状态2][...] = 求最值(选择1，选择2...)
+```
+
+👍算法技巧
+
+```
+把一个大问题细化到一个点，先研究在这个小点上该如何处理问题，再通过递归或者迭代的方式扩展到整个问题
+```
+
+
+
+👍**子序列类型**
+
+[最长递增子序列](https://leetcode-cn.com/problems/longest-increasing-subsequence/)
+
+[编辑距离](https://leetcode-cn.com/problems/edit-distance/)
+
+[最长公共子序列](https://leetcode-cn.com/problems/longest-common-subsequence/)
+
+[最大子数组和](https://leetcode-cn.com/problems/maximum-subarray/)
+
+
+
+**子序列模板**
+
+一维数组型
+
+```java
+int n = array.length;
+
+//dp数组含义：在子数组array[0..i]中，以array[i]结尾的目标子序列（最长递增子序列）的长度是dp[i]。
+int[] dp = new int[n];
+
+for (int i = 1; i < n; i++) {
+    for (int j = 0; j < i; j++) {
+        dp[i] = 最值(dp[i], dp[j] + ...)
+    }
+}
+```
+
+二维数组
+
+```java
+int n = arr.length;
+/**
+2.1 涉及两个字符串/数组时（比如最长公共子序列），dp 数组的含义如下：
+在子数组arr1[0..i]和子数组arr2[0..j]中，我们要求的子序列（最长公共子序列）长度为dp[i][j]。
+
+2.2 只涉及一个字符串/数组时（比如本文要讲的最长回文子序列），dp 数组的含义如下：
+在子数组array[i..j]中，我们要求的子序列（最长回文子序列）的长度为dp[i][j]。
+**/
+int[][] dp = new dp[n][n];
+
+for (int i = 0; i < n; i++) {
+    for (int j = 1; j < n; j++) {
+        if (arr[i] == arr[j]) 
+            dp[i][j] = dp[i][j] + ...
+        else
+            dp[i][j] = 最值(...)
+    }
+}
+```
+
+
+
+
+
+👍**背包类型**
+
+
+
+👍**其他类型**
 
 
 
@@ -2885,6 +2982,62 @@ class Solution {
                 || (firstIsMatch && isMatch(s.substring(1),p)); //匹配多次或者一次的情况
         }else{
             return firstIsMatch && isMatch(s.substring(1),p.substring(1));
+        }
+    }
+}
+```
+
+递归
+
+```java
+class Solution {
+    public boolean isMatch(String s, String p) {
+        return dp(s,0,p,0);
+    }
+
+    /**
+    若dp(s,i,p,j) = true，则表示s[i..]可以匹配p[j..]；
+    若dp(s,i,p,j) = false，则表示s[i..]无法匹配p[j..]
+     */
+    private boolean dp(String s,int i,String p,int j){
+        int m = s.length();
+        int n = p.length();
+        //j==p.length()意味着模式串p已经被匹配完了，那么应该看看文本串s匹配到哪里了，如果s也恰好被匹配完，则说明匹配成功
+        if(j==n) return i==m;
+        //当i走到s末尾的时候，j并没有走到p的末尾，但是p依然可以匹配s
+        //因为p带'*'可以匹配0次以达到匹配s
+        if(i==m){
+            // 如果能匹配空串，一定是字符和 * 成对儿出现
+            if((n-j)%2==1) return false;
+            else{
+                // 检查是否为 x*y*z* 这种形式
+                for(;j+1<p.length();j+=2){
+                    if(p.charAt(j+1)!='*'){
+                        return false;
+                    }
+                }
+                return true;
+            }
+        }
+        if(s.charAt(i)==p.charAt(j) || p.charAt(j)=='.'){
+            //匹配
+            //看j后面是否带'*'
+            if(j<p.length()-1 && p.charAt(j+1)=='*'){
+                //通配符'*'匹配0次或多次
+                return dp(s,i,p,j+2) || dp(s,i+1,p,j);
+            }else{
+                //通配符'.'匹配一次
+                return dp(s,i+1,p,j+1);
+            } 
+        }else{
+            //不匹配
+            if(j<p.length()-1 && p.charAt(j+1)=='*'){
+                //通配符匹配0次
+                return dp(s,i,p,j+2);
+            }else{
+                //无法继续匹配
+                return false;
+            }
         }
     }
 }
@@ -3088,6 +3241,67 @@ class Solution {
 
 **代码实现**：
 
+递归(超时)
+
+```java
+class Solution {
+    public int minDistance(String word1, String word2) {
+        return dp(word1,word2,word1.length()-1,word2.length()-1);
+    }
+
+    private int dp(String s1,String s2,int i,int j){
+        //递归结束条件
+        if(i==-1) return j+1;
+        if(j==-1) return i+1;
+        if(s1.charAt(i)==s2.charAt(j)){
+            //什么也不做，跳过
+            return dp(s1,s2,i-1,j-1);
+        }else{
+            return min(dp(s1,s2,i,j-1),//插入
+                       dp(s1,s2,i-1,j),//删除
+                       dp(s1,s2,i-1,j-1))+1;//替换
+        } 
+    }
+
+    private int min(int a,int b,int c){
+        return Math.min(a,Math.min(b,c));
+    }
+}
+```
+
+带备忘录的递归
+
+```java
+class Solution {
+    public int minDistance(String word1, String word2) {
+        int[][] memo = new int[word1.length()][word2.length()];
+        return dp(word1,word2,word1.length()-1,word2.length()-1,memo);
+    }
+
+    private int dp(String s1,String s2,int i,int j,int[][] memo){
+        //递归结束条件
+        if(i==-1) return j+1;
+        if(j==-1) return i+1;
+        if(memo[i][j]!=0) return memo[i][j];
+        if(s1.charAt(i)==s2.charAt(j)){
+            //什么也不做，跳过
+            memo[i][j] = dp(s1,s2,i-1,j-1,memo);
+        }else{
+            memo[i][j] = min(dp(s1,s2,i,j-1,memo),//插入
+                             dp(s1,s2,i-1,j,memo),//删除
+                             dp(s1,s2,i-1,j-1,memo))+1;//替换
+        }
+        return memo[i][j]; 
+    }
+
+    private int min(int a,int b,int c){
+        return Math.min(a,Math.min(b,c));
+    }
+}
+```
+
+动态规划(自顶向下)
+
 ```java
 class Solution {
     public int minDistance(String word1, String word2) {
@@ -3288,6 +3502,156 @@ class Solution {
 ```
 
 
+
+### 300、最长递增子序列
+
+**题目链接**：[最长递增子序列](https://leetcode-cn.com/problems/longest-increasing-subsequence/)
+
+**解题思路**：
+
+1. 定义dp数组含义，以num[i]结尾的最长递增子序列
+2. 初始化dp数组，每个元素都是一个以自己为递增的子序列，所以长度为1
+3. 定义状态转移方程。假设知道了dp[0...i-1]的值，如何确定dp[i]？只要知道了num[0..i-1]中小于num[i]的值，就可以知道dp[i] = Math.max(dp[i],dp[j]+1)
+
+**代码实现**：
+
+```java
+class Solution {
+    public int lengthOfLIS(int[] nums) {
+        //1.定义dp数组
+        //以nums[i]结尾的最长子序列的长度
+        int[] dp = new int[nums.length];
+        //2.初始化dp数组
+        //每个元素都是一个以自己为递增的子序列，所以长度为1
+        Arrays.fill(dp,1);
+        //3.定义状态转移方程
+        for(int i=0;i<nums.length;i++){
+            //穷举所有可能的取值
+            for(int j=0;j<i;j++){
+                if(nums[j]<nums[i]){
+                    dp[i] = Math.max(dp[i],dp[j]+1);
+                }               
+            }
+        }
+
+        int res = 0;
+        for(int x:dp){
+            res = Math.max(res,x);
+        }
+
+        return res;
+    }
+}
+```
+
+
+
+### 1143、最长公共子序列
+
+**题目链接**：[最长公共子序列](https://leetcode-cn.com/problems/longest-common-subsequence/)
+
+**解题思路**：
+
+递归：
+
+1.定义dp函数表示最长公共子序列
+
+2.把整个大问题细化到小问题上，求整个字符串细化到每一个字符。
+
+**代码实现**：
+
+递归（超时）
+
+```java
+class Solution {
+    public int longestCommonSubsequence(String text1, String text2) {
+        return dp(text1,0,text2,0);
+    }
+
+    private int dp(String s1,int i,String s2,int j){
+        //递归结束条件
+        if(i==s1.length() || j==s2.length()) return 0;
+        if(s1.charAt(i)==s2.charAt(j)){
+            return dp(s1,i+1,s2,j+1) + 1;
+        }else{
+            return max(dp(s1,i+1,s2,j),//s1[i]不在lcs中
+                       dp(s1,i,s2,j+1),//s2[j]不在lcs中
+                       dp(s1,i+1,s2,j+1));//s1[i]和s2[j]都不在lcs中
+        }
+    }
+
+    private int max(int a,int b,int c){
+        return Math.max(a,Math.max(b,c));
+    }
+}
+```
+
+带备忘录的递归
+
+```java
+class Solution {
+    public int longestCommonSubsequence(String text1, String text2) {
+        int[][] memo = new int[text1.length()][text2.length()];
+        return dp(text1,0,text2,0,memo);
+    }
+
+    private int dp(String s1,int i,String s2,int j,int[][] memo){
+        //递归结束条件
+        if(i==s1.length() || j==s2.length()) return 0;
+        if(memo[i][j]!=0) return memo[i][j];
+        if(s1.charAt(i)==s2.charAt(j)){
+            memo[i][j] = dp(s1,i+1,s2,j+1,memo) + 1;
+        }else{
+            memo[i][j] = max(dp(s1,i+1,s2,j,memo),//s1[i]不在lcs中
+                             dp(s1,i,s2,j+1,memo),//s2[j]不在lcs中
+                             dp(s1,i+1,s2,j+1,memo));//s1[i]和s2[j]都不在lcs中
+        }
+        return memo[i][j];
+    }
+
+    private int max(int a,int b,int c){
+        return Math.max(a,Math.max(b,c));
+    }
+}
+```
+
+动态规划
+
+```java
+class Solution {
+    public int longestCommonSubsequence(String text1, String text2) {
+        int m = text1.length();
+        int n = text2.length();
+        //1.定义dp数组
+        //dp[i][j]表示长度为i的text1和长度为j的text2的最长公共子序列长度
+        int[][] dp = new int[m+1][n+1];
+        //2.初始化dp数组
+        for(int i=0;i<=m;i++){
+            dp[i][0] = 0;
+        }
+        for(int j=0;j<=n;j++){
+            dp[0][j] = 0;
+        }
+        //3.状态转移方程
+        for(int i=1;i<=m;i++){
+            for(int j=1;j<=n;j++){
+                if(text1.charAt(i-1)==text2.charAt(j-1)){
+                    dp[i][j] = dp[i-1][j-1] + 1;
+                }else{
+                    dp[i][j] = max(dp[i-1][j],dp[i][j-1],dp[i-1][j-1]);
+                }
+            }
+        }
+
+        return dp[m][n];
+
+    }
+
+    private int max(int a,int b,int c){
+        return Math.max(a,Math.max(b,c));
+    }
+}
+```
 
 
 
