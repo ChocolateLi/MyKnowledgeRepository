@@ -108,6 +108,76 @@ class Solution {
 
 
 
+### 146、LRU缓存
+
+**题目链接**：[LRU缓存](https://leetcode-cn.com/problems/lru-cache/)
+
+**算法思路**：
+
+关键点：
+
+1、在makeRecently()使用方法中，先获取到key对应的value，再删除key，最后再插入key
+
+2、get()方法中，先判断key在不在，如果在，先将调用makeRecently()方法，然后再获取
+
+3、在put()方法中，先判断key在不在，如果在就直接put进行覆盖，然后调用makeRecently()方法进行返回；如果不在则先判断石否已经达到容量，如果已经达到容量了，则先删除头部元素(也就是最近最久未使用)，最后再执行插入操作
+
+**代码实现**：
+
+```java
+class LRUCache {
+    int cap;
+    LinkedHashMap<Integer, Integer> cache = new LinkedHashMap<>();
+    public LRUCache(int capacity) { 
+        this.cap = capacity;
+    }
+    
+    public int get(int key) {
+        if (!cache.containsKey(key)) {
+            return -1;
+        }
+        // 将 key 变为最近使用
+        makeRecently(key);
+        return cache.get(key);
+    }
+    
+    public void put(int key, int val) {
+        if (cache.containsKey(key)) {
+            // 修改 key 的值
+            cache.put(key, val);
+            // 将 key 变为最近使用
+            makeRecently(key);
+            return;
+        }
+        
+        if (cache.size() >= this.cap) {
+            // 链表头部就是最久未使用的 key
+            int oldestKey = cache.keySet().iterator().next();
+            cache.remove(oldestKey);
+        }
+        // 将新的 key 添加链表尾部
+        cache.put(key, val);
+    }
+    
+    private void makeRecently(int key) {
+        int val = cache.get(key);
+        // 删除 key，重新插入到队尾
+        cache.remove(key);
+        cache.put(key, val);
+    }
+}
+
+
+/**
+ * Your LRUCache object will be instantiated and called as such:
+ * LRUCache obj = new LRUCache(capacity);
+ * int param_1 = obj.get(key);
+ * obj.put(key,value);
+ */
+```
+
+
+
 
 
 ## 二、链表
