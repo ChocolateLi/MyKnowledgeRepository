@@ -1946,6 +1946,48 @@ Arrays.sort(nums,(v1,v2) -> v1[0]-v2[0])
 
 
 
+### 31、下一个排列
+
+**题目链接**：[下一个排列](https://leetcode-cn.com/problems/next-permutation/)
+
+**解题思路**：
+
+1. 定义 i=nums.length-1，从后向前寻找第一个满足nums[i]>nums[i-1]的数，其中nums[i-1]就是要交换的数
+2. 对 i 到 nums.length范围的数进行排序
+3. 排序后，在 i 到 nums.length中寻找第一个nuns[j] > nums[i-1]的数，其中nums[j] 就是要交换的数
+4. 交换nums[i-1] 和 nums[j] ，返回
+
+**代码实现**：
+
+```java
+class Solution {
+    public void nextPermutation(int[] nums) {
+
+        int len = nums.length;
+        for(int i=len-1;i>0;i--){
+          	//1.从后往前寻找第一个nums[i]>nums[i-1]的数
+            if (nums[i] > nums[i - 1]) {
+                //i后面的元素排序
+                Arrays.sort(nums,i,len);
+                //在后面元素中查找第一个大于nums[i-1]的元素进行交换
+                for(int j=i;i<len;j++){
+                    if(nums[j]>nums[i-1]){
+                        int tmp = nums[i-1];
+                        nums[i-1] = nums[j];
+                        nums[j] = tmp;
+                        return;
+                    }
+                }
+            }
+        }
+        Arrays.sort(nums);
+        return;
+    }
+}
+```
+
+
+
 
 
 ### 48、旋转图像
@@ -5108,53 +5150,116 @@ class Solution {
 
 
 
+## 九、位运算
+
+👍**算法常用操作**
+
+`n & (n-1)`  作用是消除数字n的二进制表示中的最后一个1
+
+一个数和它本身做异或运算结果为 0，即 `a ^ a = 0`；
+
+一个数和 0 做异或运算的结果为它本身，即 `a ^ 0 = a`
 
 
-## 九、其他
 
-### 31、下一个排列
+### 136、只出现一次的数字
 
-**题目链接**：[下一个排列](https://leetcode-cn.com/problems/next-permutation/)
+**题目链接**：[只出现一次的数字](https://leetcode-cn.com/problems/single-number/)
 
 **解题思路**：
 
-1. 定义 i=nums.length-1，从后向前寻找第一个满足nums[i]>nums[i-1]的数，其中nums[i-1]就是要交换的数
-2. 对 i 到 nums.length范围的数进行排序
-3. 排序后，在 i 到 nums.length中寻找第一个nuns[j] > nums[i-1]的数，其中nums[j] 就是要交换的数
-4. 交换nums[i-1] 和 nums[j] ，返回
+一个数和它本身做异或运算结果为 0，即 `a ^ a = 0`；
+
+一个数和 0 做异或运算的结果为它本身，即 `a ^ 0 = a`
 
 **代码实现**：
 
 ```java
 class Solution {
-    public void nextPermutation(int[] nums) {
-
-        int len = nums.length;
-        for(int i=len-1;i>0;i--){
-          	//1.从后往前寻找第一个nums[i]>nums[i-1]的数
-            if (nums[i] > nums[i - 1]) {
-                //i后面的元素排序
-                Arrays.sort(nums,i,len);
-                //在后面元素中查找第一个大于nums[i-1]的元素进行交换
-                for(int j=i;i<len;j++){
-                    if(nums[j]>nums[i-1]){
-                        int tmp = nums[i-1];
-                        nums[i-1] = nums[j];
-                        nums[j] = tmp;
-                        return;
-                    }
-                }
-            }
+    public int singleNumber(int[] nums) {
+        int res = 0;
+        for(int x:nums){
+            res ^= x;
         }
-        Arrays.sort(nums);
-        return;
+        return res;
     }
 }
 ```
 
 
 
-## 十、位运算
+### 剑指offer 56、数组中只出现一次的两个数字
+
+**题目链接**：[数组中只出现一次的两个数字](https://leetcode-cn.com/problems/shu-zu-zhong-shu-zi-chu-xian-de-ci-shu-lcof/)
+
+**解题思路**：
+
+一个数和它本身做异或运算结果为 0，即 `a ^ a = 0`；
+
+一个数和 0 做异或运算的结果为它本身，即 `a ^ 0 = a`
+
+
+
+我们可以遍历数组，将数组中的数字一起做异或，则相同的数字会约简掉,最后会得到不相同的数字，比如 1 ^ 4 ^ 1 ^ 6 = 4 ^ 6 = 0100 ^ 0110 = 0010
+
+
+
+根据异或的性质，说明最后异或出来的那个数至少有一位是1，不然x ^ y就相等等于0
+
+这时候可以通过辅助变量m来保存最后数字中哪一位是1（可能有多个1，但只需要找到最后一个1就行）
+
+```cs
+举个例子：z = 10 ^ 2 = 1010 ^ 0010 = 1000,第四位为1
+我们将m初始化为1，如果（z & m）的结果等于0说明z的最低为是0
+//我们每次将m左移一位然后跟z做与操作，直到结果不为0.
+此时m应该等于1000，同z一样，第四位为1
+```
+
+
+
+然后我们再遍历一遍数组，将每个数跟m进行与操作，结果为0的作为一组，结果不为0的作为一组
+
+```
+例如对于数组：[1,2,10,4,1,4,3,3]，我们把每个数字跟1000做与操作，可以分为下面两组：
+nums1存放结果为0的: [1, 2, 4, 1, 4, 3, 3]
+nums2存放结果不为0的: [10] (碰巧nums2中只有一个10，如果原数组中的数字再大一些就不会这样了)
+
+此时我们发现问题已经退化为数组中有一个数字只出现了一次
+分别对nums1和nums2遍历异或就能得到我们预期的x和y
+```
+
+
+
+**代码实现**：
+
+```java
+class Solution {
+    public int[] singleNumbers(int[] nums) {
+        int z = 0;
+        //遍历数组，做异或运算
+        for(int n:nums){
+            z ^= n;
+        }
+        //找到z中最后一位为1的数
+        int m = 1;
+        while((z & m) == 0) m <<= 1;
+        //再遍历数组，跟m做&运算，可以分为两组，等于0和不等于0
+        int x=0,y=0;
+        for(int n:nums){
+            if((n & m)!=0){
+                x ^= n;
+            }else{
+                y ^= n;
+            }
+        }
+        return new int[]{x,y};
+
+    }
+}
+
+```
+
+
 
 
 
