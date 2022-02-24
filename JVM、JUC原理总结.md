@@ -336,7 +336,7 @@ public ThreadPoolExecutor(int corePoolSize,
 
 **Running**
 
-线程池处于running状态时，能够接收新的任务，并且对已添加的任务进行处理
+接收新任务，也能处理阻塞队列里的任务
 
 线程池初始状态为running状态
 
@@ -344,7 +344,7 @@ public ThreadPoolExecutor(int corePoolSize,
 
 **ShutDown**
 
-线程池处于shutdown状态时，不接收新的任务，但能处理已添加的任务
+不接收新的任务，但是处理阻塞队列里的任务
 
 调用shutdown接口，线程池由running -> shutdown
 
@@ -352,7 +352,7 @@ public ThreadPoolExecutor(int corePoolSize,
 
 **Stop**
 
-线程池处于stop状态，不接收新任务，不处理已添加的任务，并且会中断正在处理的任务
+不接收新任务，不处理阻塞队列里的任务，并且会中断正在处理的任务
 
 调用shutdownnow接口，线程池 由running或shutdown -> stop
 
@@ -360,7 +360,7 @@ public ThreadPoolExecutor(int corePoolSize,
 
 **Tidying**
 
-当所有的任务已终止，线程池会变为tidying状态
+当所有的任务已经执行完，当前线程池已经没有工作线程，这时线程池会变为tidying状态，并且调用terminated()
 
 当线程池处于shutdown状态，阻塞队列为空，并且线程池中执行的任务也为空，就会由shutdown -> tidying
 

@@ -432,6 +432,182 @@ class Solution {
 
 
 
+### 141、环形链表
+
+**题目链接**：[环形链表](https://leetcode-cn.com/problems/linked-list-cycle/)
+
+**解题思路**：
+
+定义两个快慢指针，当两个指针相遇时，说明有环。
+
+注意：fast的初始值是 head.next;while循环条件是fast!=null && fast.next!=null
+
+**代码实现**：
+
+```java
+public class Solution {
+    public boolean hasCycle(ListNode head) {
+        if(head==null || head.next==null){
+            return false;
+        }
+        ListNode slow = head;
+        ListNode fast = head.next;//注意
+        while(fast!=null && fast.next!=null){
+            slow = slow.next;
+            fast = fast.next.next;
+            if(slow==fast){
+                return true;
+            }
+        }
+        return false;
+    }
+}
+```
+
+
+
+### 142、环形链表2
+
+**题目链接**：[环形链表2](https://leetcode-cn.com/problems/linked-list-cycle-ii/)
+
+**解题思路**：
+
+定义两个快慢指针，当两者相遇时，让慢指针回到起点，两个指针同时往前走一步，当两个指针再次相遇时，这个节点就是环形的入口。
+
+注意：fast的初始化是head，不是head.next;
+
+**代码实现**：
+
+```java
+public class Solution {
+    public ListNode detectCycle(ListNode head) {
+        if(head==null || head.next==null){
+            return null;
+        }
+        ListNode slow = head;
+        ListNode fast = head;//注意
+        while(fast!=null && fast.next!=null){
+            slow = slow.next;
+            fast = fast.next.next;
+            if(slow==fast){
+                slow = head;
+                while(slow!=fast){
+                    slow = slow.next;
+                    fast = fast.next;
+                }
+                return slow;
+            }
+        }
+        return null;
+    }
+}
+```
+
+
+
+### 148、排序链表
+
+**题目链接**：[排序链表](https://leetcode-cn.com/problems/sort-list/)
+
+**解题思路**：
+
+使用归并排序的思想。
+
+1.先定义快慢指针，找到链表的中点
+
+2.从中点处断开，分别对头节点和中点使用递归（归并排序）
+
+3.最后合并两个有序链表
+
+
+
+注意：fast的初始值为head.next；
+
+**代码实现**：
+
+```java
+class Solution {
+    public ListNode sortList(ListNode head) {
+        if(head==null || head.next==null){
+            return head;
+        }
+        ListNode slow = head;
+        ListNode fast = head.next;//注意
+        
+        //寻找中间节点
+        while(fast!=null && fast.next!=null){
+            slow = slow.next;
+            fast = fast.next.next;
+        }
+
+        //找到中间节点
+        ListNode mid = slow.next;
+        slow.next = null;
+
+        //归并排序。树的后续遍历
+        ListNode l1 = sortList(head);
+        ListNode l2 = sortList(mid);
+        return merge(l1,l2);
+
+    }
+
+    //合并两个有序链表
+    private ListNode merge(ListNode l1,ListNode l2){
+        if(l1==null) return l2;
+        if(l2==null) return l1;
+
+        if(l1.val<=l2.val){
+            l1.next = merge(l1.next,l2);
+            return l1;
+        }else{
+            l2.next = merge(l1,l2.next);
+            return l2;
+        }
+    }
+}
+```
+
+
+
+### 160、相交链表
+
+**题目链接**：[相交链表](https://leetcode-cn.com/problems/intersection-of-two-linked-lists/)
+
+**解题思路**：
+
+1.定义两个指针，他们同时往前，当指针不为空时，指向它们的下一个节点，当指针为空时，指向另一个链表的头节点
+
+2.直到两个指针相等时跳出循环，此时的节点就是两个链表相交的节点
+
+
+
+注意：循环里面是p==null而不是p.next==null
+
+**代码实现**：
+
+```java
+public class Solution {
+    public ListNode getIntersectionNode(ListNode headA, ListNode headB) {
+        if(headA==null || headB==null) return null;
+
+        ListNode p1 = headA;
+        ListNode p2 = headB;
+
+        while(p1!=p2){
+            p1 = (p1==null)?headB:p1.next;
+            p2 = (p2==null)?headA:p2.next;
+        }
+        return p1;
+    }
+}
+```
+
+
+
+
+
+
+
 ## 三、栈
 
 👍**单调栈算法模板：**
