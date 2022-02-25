@@ -3636,6 +3636,8 @@ class Solution {
 
 
 
+
+
 ### 股票买卖问题
 
 👍动态规划解题步骤
@@ -3721,7 +3723,7 @@ dp[i][k][1] = max(dp[i-1][k][1], dp[i-1][k-1][0] - prices[i])
                 
 ```
 
-### 121.买卖股票的最佳时机（k=1）
+#### 121.买卖股票的最佳时机（k=1）
 
 **题目链接**：[买卖股票的最佳时机](https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock/)
 
@@ -3785,6 +3787,49 @@ class Solution {
             dp[i][1] = Math.max(dp[i-1][1],-prices[i]);
         }
         return dp[n-1][0];
+    }
+}
+```
+
+
+
+### 152、乘积最大子数组
+
+**题目链接**：[乘积最大子数组](https://leetcode-cn.com/problems/maximum-product-subarray/)
+
+**解题思路**：
+
+跟53题思路一样，但需要注意的是，对于乘法，负数 * 负数会变成正数，所以解这题时，我们需要维护两个dp数组，当前的最大值和最小值。
+
+**代码实现**：
+
+```java
+class Solution {
+    public int maxProduct(int[] nums) {
+        //定义max_dp数组，max_dp[i]表示以nums[i]结尾的最大乘积
+        int[] max_dp = new int[nums.length];
+        //定义min_dp数组，min_dp[i]表示以nums[i]结尾的最大乘积
+        int[] min_dp = new int[nums.length];
+        //初始化dp数组
+        max_dp[0] = nums[0];
+        min_dp[0] = nums[0];
+        //定义状态转移方程
+        int res = max_dp[0];
+        for(int i=1;i<nums.length;i++){
+            max_dp[i] = max(nums[i],max_dp[i-1]*nums[i],min_dp[i-1]*nums[i]);
+            min_dp[i] = min(nums[i],max_dp[i-1]*nums[i],min_dp[i-1]*nums[i]);
+            res = Math.max(res,max_dp[i]);
+        }
+
+        return res;
+    }
+
+    private int max(int a,int b,int c){
+        return Math.max(a,Math.max(b,c));
+    }
+
+    private int min(int a,int b,int c){
+        return Math.min(a,Math.min(b,c));
     }
 }
 ```

@@ -220,8 +220,9 @@ Full GC：回收老年代和新生代。老年代对象存活时间长，因此F
 
 ### 2、Runnable和Callable的区别
 
-1. Runnable接口没有返回值，Callable接口有返回值
-2. Runnable接口的方法没有抛出异常，Callable接口的方法抛出异常
+1. Callable接口方法是call()，Runnable的方法是run()
+2. Runnable接口没有返回值，Callable接口有返回值
+3. Runnable接口的方法没有抛出异常，Callable接口的方法抛出异常
 
 
 
@@ -513,21 +514,130 @@ CountDownLatch是一个同步工具，它允许一条或多条线程等待其他
 
 
 
+**CyclicBarrier**
+
+CyclicBarrier(同步屏障)，可以使一定数量的线程全部等待到某一个状态，然后这组线程再同时执行。
+
+适用场景：用于多线程计算数据，最后合并计算结果的场景。
 
 
 
+**CyclicBarrier和CountDownLatch区别**
+
+两者都能实现线程之间的等待。
+
+CountDownLatch用于某个线程等待其他线程执行完任务再执行。CyclicBarrier用于一组线程互相等待到某个状态，然后这组线程再同时执行。
+
+CountDownLatch的计数器只能使用一次，而CyclicBarrier的计数器可以使用reset()方法重置，可用于处理更为复杂的业务场景。
 
 
 
+**Semaphore**
+
+Semaphore类似于锁，它维护了一定数量的“许可证”，当有线程访问共享资源的时候，首先就要去获得“许可证”，如果许可证不够了，线程就会等待，直到获得许可证。线程使用完资源会释放“许可证”
 
 
 
+### 15、ThreadLocal
+
+线程本地变量。当使用ThreadLocal维护变量时，ThreadLocal为每个使用该变量的线程提供了独立的变量副本，所以每个线程都可以独立地改变自己的副本，而不会影响其他线程
 
 
 
+**原理**
+
+每个线程都有一个ThreadLocalMap，Map中的元素的键为ThreadLocal，值对应线程的变量副本。
+
+调用threadlocal.set() -> 调用getMap(Thread) -> 返回当前线程的ThreadLocalMap<ThreadLocal,value> -> 如果ThreadLocalMap不为空，则调用map.set(this,value)，this就是ThreadLocal；如果ThreadLocalMap为空，则创建ThreadLocalMap
+
+源码：
+
+```java
+public void set(T value) {
+    Thread t = Thread.currentThread();
+    ThreadLocalMap map = getMap(t);
+    if (map != null)
+        map.set(this, value);
+    else
+        createMap(t, value);
+}
+
+ThreadLocalMap getMap(Thread t) {
+    return t.threadLocals;
+}
+
+void createMap(Thread t, T firstValue) {
+    t.threadLocals = new ThreadLocalMap(this, firstValue);
+}
+```
 
 
 
+**ThreadLocal内存泄漏的原因**
+
+每个ThreadLocal有一个内部类ThreadLocalMap，map的key是ThreadLocal，定义为弱引用，value是强引用。弱引用的话，GC的时候会自动回收，而强应用的回收取决于对象的生命周期。这就导致GC的时候会自动回收key，而value会跟随Thread的生命周期。一般线程是通过线程池的方式来复用，这也导致Thread生命周期比较长（Thread --> ThreadLocalMap-->Entry-->Value），随着任务的执行，value就有可能越来越多且无法释放，最终导致内存泄漏。
+
+解决办法：每次使⽤完ThreadLocal就调⽤它的remove()⽅法，手动将对应的键值对删除，从⽽避免内存泄漏。
+
+
+
+**适用场景**
+
+当我们只想在本身的线程内使用的变量，并且变量是和线程的生命周期相关联，可以用ThreadLocal来实现。
+
+ThreadLocal 不是为了解决线程间的共享变量问题的，如果是多线程都需要访问的数据，那需要用全局变量加同步机制。
+
+比如Java web应用中，每个线程有自己单独的 Session 实例，就可以使用ThreadLocal来实现
+
+
+
+### 16、锁
+
+**公平锁和非公平锁**
+
+synchronized 是非公平锁， Lock 默认是非公平锁，可以设置为公平锁。
+
+
+
+公平锁：按照请求锁的顺序分配，拥有稳定获得锁的机会，但是性能可能比非公平锁低
+
+非公平锁：不按照请求锁的顺序分配，不一定拥有获得锁的机会，但是性能可能比公平锁高
+
+
+
+非公平锁意味着后请求锁的线程，可能在前面的休眠线程恢复前拿到锁，这样就可能提高并发的性能，这是因为通常情况下，你去唤醒一个挂起的线程，线程切换之间会产生短暂的延时，非公平锁就可以利用这段时间来完成操作，这也就是为什么非公平锁在一些情况下比公平锁性能高的原因。
+
+
+
+**共享锁和独占锁**
+
+它们之间最大的区别：同一时刻独占锁只能有一个线程获取同步状态，而共享锁在同一时刻可以有多个线程获取同步状态
+
+
+
+**悲观锁和乐观锁**
+
+悲观锁，每次访问资源都会加锁，执行完同步代码释放锁，synchronized 和 ReentrantLock 属于悲观锁。
+
+乐观锁，不会锁定资源，所有的线程都能访问并修改同一个资源，如果没有冲突就修改成功并退出，否则就会继续循环尝试。乐观锁最常见的实现就是CAS。
+
+
+
+适用场景：悲观锁适合写操作比较多的时候，乐观锁适合读操作多的时候。
+
+
+
+乐观锁有什么缺点？
+
+乐观锁最常见的实现就是CAS，所以CAS存在的问题也是目前乐观锁存在的问题。
+
+乐观锁避免了悲观锁独占对象的现象，提高了并发性能，但它也有缺点：
+
+1.乐观锁只能保证一个共享变量的原子操作。如果有多个共享变量，乐观锁会显得力不从心
+
+2.乐观锁如果长时间自旋，会导致cpu开销大
+
+3.造成ABA的问题
 
 
 
