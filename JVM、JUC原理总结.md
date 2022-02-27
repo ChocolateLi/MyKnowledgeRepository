@@ -220,7 +220,7 @@ Full GC：回收老年代和新生代。老年代对象存活时间长，因此F
 
 ### 2、Runnable和Callable的区别
 
-1. Callable接口方法是call()，Runnable的方法是run()
+1. Runnable的方法是run()，Callable接口方法是call()
 2. Runnable接口没有返回值，Callable接口有返回值
 3. Runnable接口的方法没有抛出异常，Callable接口的方法抛出异常
 

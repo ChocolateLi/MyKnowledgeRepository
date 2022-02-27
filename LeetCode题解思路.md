@@ -2253,6 +2253,29 @@ class Solution {
 
 
 
+### 169、多数元素
+
+**题目链接**：[多数元素](https://leetcode-cn.com/problems/majority-element/)
+
+**解题思路**：
+
+既然多数元素是指在数组中出现次数大于n/2次的元素，也就是求它众数，只要对数组排序，数组的中间的中位数就是众数
+
+**代码实现**：
+
+```java
+class Solution {
+    public int majorityElement(int[] nums) {
+        Arrays.sort(nums);
+        return nums[nums.length/2];
+    }
+}
+```
+
+
+
+
+
 ## 八、堆
 
 ### 295、数据流中的中位数
@@ -2323,6 +2346,184 @@ class MedianFinder {
 ```
 
 
+
+## 九、图
+
+👍**图的表示**
+
+图的基本表示
+
+```java
+// 邻接表
+// graph[x] 存储 x 的所有邻居节点
+List<Integer>[] graph;
+
+// 邻接矩阵
+// matrix[x][y] 记录 x 是否有一条指向 y 的边
+boolean[][] matrix;
+```
+
+
+
+有向加权图
+
+```java
+// 邻接表
+// graph[x] 存储 x 的所有邻居节点以及对应的权重
+List<int[]>[] graph;
+
+// 邻接矩阵
+// matrix[x][y] 记录 x 指向 y 的边的权重，0 表示不相邻
+int[][] matrix;
+
+```
+
+
+
+
+
+👍**图的遍历框架**
+
+如果图包含环，遍历框架就要一个 `visited` 数组进行辅助
+
+visited是标记是否访问过，以免重复访问。
+
+onpath是做选择，是否选择这条路径。
+
+```java
+// 记录被遍历过的节点
+boolean[] visited;
+// 记录从起点到当前节点的路径
+boolean[] onPath;
+
+/* 图遍历框架 */
+void traverse(Graph graph, int s) {
+    if (visited[s]) return;
+    // 经过节点 s，标记为已遍历
+    visited[s] = true;
+    // 做选择：标记节点 s 在路径上
+    onPath[s] = true;
+    for (int neighbor : graph.neighbors(s)) {
+        traverse(graph, neighbor);
+    }
+    // 撤销选择：节点 s 离开路径
+    onPath[s] = false;
+}
+
+```
+
+
+
+## 207、课程表
+
+**题目链接**：[课程表](https://leetcode-cn.com/problems/course-schedule/)
+
+**解题思路**：看到依赖问题，首先把问题转换到有向图这种数据结构，只要图中存在环，那就说明有循环依赖。
+
+首先将题目的输入转化成图，然后遍历图判断是否有环。常用的存储方式是使用邻接表
+
+`List<Integer>[] graph`,graph[s]是邻接表，存储着所有s指向的节点。
+
+**代码实现**：
+
+```java
+class Solution {
+
+    boolean[] visted;
+    boolean[] path;
+    boolean hasCycle = false;
+    public boolean canFinish(int numCourses, int[][] prerequisites) {
+        List<Integer>[] graph = buildGraph(numCourses,prerequisites);
+        visted = new boolean[numCourses];
+        path = new boolean[numCourses];
+        //遍历图中所有节点
+        for(int i=0;i<numCourses;i++){
+            traverse(graph,i);
+        }
+        //只要没有循环依赖就可以完成课程
+        return !hasCycle;
+    }
+
+    //先构建有向图
+    private List<Integer>[] buildGraph(int numCourses,int[][] prerequisites){
+        List<Integer>[] graph = new LinkedList[numCourses];
+        for(int i=0;i<numCourses;i++){
+            graph[i] = new LinkedList<>();
+        }
+        for(int[] edge:prerequisites){
+            //添加一条from指向to的有向边
+            int from = edge[0];
+            int to = edge[1];
+            // 边的方向是「被依赖」关系，即修完课程 from 才能修课程 to
+            graph[from].add(to);
+        }
+        return graph;
+    }
+
+    private void traverse(List<Integer>[] graph,int s){
+        if(path[s]){
+            //出现环
+            hasCycle = true;
+        }
+        if(visted[s] || hasCycle){
+            //如果已经找到了环，那么也不用再遍历了
+            return;
+        }
+        //前序代码位置
+        visted[s] = true;
+        path[s] = true;
+        for(int v:graph[s]){
+            traverse(graph,v);
+        }
+        //后序代码位置
+        path[s] = false;
+    }
+}
+```
+
+
+
+### 797、所有可能的路径
+
+**题目链接**：[所有可能的路径](https://leetcode-cn.com/problems/all-paths-from-source-to-target/)
+
+**解题思路**：
+
+套用图的遍历框架，因为是有向无环图，所以可以不使用visit数组。
+
+注意达到终点时，要移除最后一个节点，不然会出错。
+
+**代码实现**：
+
+```java
+class Solution {
+
+    List<List<Integer>> res = new ArrayList<>();
+    public List<List<Integer>> allPathsSourceTarget(int[][] graph) {
+        LinkedList<Integer> list = new LinkedList<>();
+        traverse(graph,0,list);
+        return res;
+    }
+
+    private void traverse(int[][] graph,int idx,LinkedList<Integer> list){
+        list.add(idx);
+        //递归结束条件
+        if(idx == graph.length-1){
+            //到达终点
+            res.add(new ArrayList<>(list));
+            //移除最后一个节点
+            list.removeLast();//注意
+            return;
+        }
+        //递归遍历相邻节点
+        for(int v:graph[idx]){
+            traverse(graph,v,list);
+        }
+        //从路径移除节点s
+        list.removeLast();
+    }
+}
+```
 
 
 
@@ -3790,6 +3991,92 @@ class Solution {
     }
 }
 ```
+
+
+
+### 198、打家劫舍
+
+**题目链接**：[打家劫舍](https://leetcode-cn.com/problems/house-robber/)
+
+**解题思路**：
+
+有两种选择：抢与不抢。跟状态有关，动态规划！
+
+**代码实现**：
+
+暴力递归
+
+```java
+// 主函数
+public int rob(int[] nums) {
+    return dp(nums, 0);
+}
+// 返回 nums[start..] 能抢到的最大值
+private int dp(int[] nums, int start) {
+    if (start >= nums.length) {
+        return 0;
+    }
+
+    int res = Math.max(
+            // 不抢，去下家
+            dp(nums, start + 1), 
+            // 抢，去下下家
+            nums[start] + dp(nums, start + 2)
+        );
+    return res;
+}
+```
+
+备忘录递归
+
+注意：备忘录要初始化小于0
+
+```java
+class Solution {
+    public int rob(int[] nums) {
+        int[] memo = new int[nums.length];
+        Arrays.fill(memo,-1);//注意
+        return dp(nums,0,memo);
+    }
+
+    private int dp(int[] nums,int idx,int[] memo){
+        if(idx>=nums.length){
+            return 0;
+        }
+        if(memo[idx]!=-1){
+            return memo[idx];
+        }
+        //两种选择，偷还是不偷
+        int res = Math.max(dp(nums,idx+1,memo),
+                dp(nums,idx+2,memo)+nums[idx]);
+        memo[idx] = res;
+        return res;
+    }
+}
+
+```
+
+动态规划
+
+```java
+class Solution {
+    public int rob(int[] nums) {
+        if(nums.length == 0){
+            return 0;
+        }
+        int n = nums.length;
+        int dp[] = new int[n+1];
+        dp[0] = 0;
+        dp[1] = nums[0];
+        for(int i=2;i<=n;i++){
+            dp[i] = Math.max(dp[i-1],dp[i-2]+nums[i-1]);
+        }
+        return dp[n];
+    }
+}
+```
+
+
 
 
 
