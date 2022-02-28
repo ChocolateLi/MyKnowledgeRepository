@@ -178,6 +178,24 @@ class LRUCache {
 
 
 
+### 208、实现Trie(前缀树)
+
+👍前缀树算法模板：[前缀树算法模板](https://labuladong.gitee.io/algo/2/20/46/)
+
+👍图解前缀树：[图解前缀树](https://blog.csdn.net/m0_46202073/article/details/107253959)
+
+**题目链接**：[实现Trie(前缀树)](https://leetcode-cn.com/problems/implement-trie-prefix-tree/)
+
+**解题思路**：
+
+**代码实现**：
+
+```
+
+```
+
+
+
 
 
 ## 二、链表
@@ -2414,7 +2432,7 @@ void traverse(Graph graph, int s) {
 
 
 
-## 207、课程表
+### 207、课程表
 
 **题目链接**：[课程表](https://leetcode-cn.com/problems/course-schedule/)
 
