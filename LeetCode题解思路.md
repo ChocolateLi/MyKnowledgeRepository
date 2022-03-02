@@ -622,6 +622,212 @@ public class Solution {
 
 
 
+### 206、反转链表
+
+👍[递归反转链表](https://labuladong.gitee.io/algo/2/17/17/)
+
+**题目链接**：[反转链表](https://leetcode-cn.com/problems/reverse-linked-list/)
+
+**解题思路**：
+
+递归是最简单的实现。相当于树的后序遍历。定义递归函数，表示反转链表。当链表反转完成之后，当前节点要做什么。
+
+![递归反转链表](https://labuladong.gitee.io/algo/images/%e5%8f%8d%e8%bd%ac%e9%93%be%e8%a1%a8/5.jpg)
+
+**代码实现**：
+
+递归
+
+```java
+class Solution {
+    public ListNode reverseList(ListNode head) {
+        //递归结束条件
+        if(head==null || head.next==null) return head;
+        //相当于树的后序遍历
+        ListNode last = reverseList(head.next);
+        //当前节点要做的事
+        head.next.next = head;//就是让当前的1的next的2的next指向1，即2.next = 1;
+        head.next = null;//1.next=null
+        return last;
+    }
+}
+```
+
+迭代
+
+```java
+class Solution {
+    public ListNode reverseList(ListNode head) {
+        //定义三个指针，分别表示前置指针、当前指针、后继指针
+        ListNode pre = null;
+        ListNode cur = head;
+        ListNode nxt = head;
+        while(cur!=null){
+            nxt = cur.next;
+            //逐个节点反转
+            cur.next = pre;
+            //更新指针位置
+            pre = cur;
+            cur = nxt;
+        }
+        //返回反转后的头节点
+        return pre;
+
+    }
+}
+```
+
+
+
+
+
+**扩展：递归反转链表的前n个节点**
+
+解决思路和反转链表差不多
+
+![](https://labuladong.gitee.io/algo/images/%e5%8f%8d%e8%bd%ac%e9%93%be%e8%a1%a8/7.jpg)
+
+```java
+ListNode successor = null; // 后驱节点
+
+// 反转以 head 为起点的 n 个节点，返回新的头结点
+ListNode reverseN(ListNode head, int n) {
+    if (n == 1) {
+        // 记录第 n + 1 个节点
+        successor = head.next;
+        return head;
+    }
+    // 以 head.next 为起点，需要反转前 n - 1 个节点
+    ListNode last = reverseN(head.next, n - 1);
+
+    head.next.next = head;
+    // 让反转之后的 head 节点和后面的节点连起来
+    head.next = successor;
+    return last;
+}
+
+```
+
+**扩展：反转以a为头节点的链表，就是反转a到null之间的节点，那么反转a到b之间的节点呢?**
+
+```java
+/** 反转区间 [a, b) 的元素，注意是左闭右开 */
+ListNode reverse(ListNode a, ListNode b) {
+    ListNode pre, cur, nxt;
+    pre = null; cur = a; nxt = a;
+    // while 终止的条件改一下就行了
+    while (cur != b) {
+        nxt = cur.next;
+        cur.next = pre;
+        pre = cur;
+        cur = nxt;
+    }
+    // 返回反转后的头结点
+    return pre;
+}
+
+```
+
+
+
+### 92、反转链表2
+
+**题目链接**：[反转链表2](https://leetcode-cn.com/problems/reverse-linked-list-ii/)
+
+**解题思路**：
+
+1.首先明白反转链表前n个节点的操作
+
+2.基于上面操作，只要让base case等于上面操作就行
+
+3.接下来就是交给递归函数来做就行。如果 `m != 1` 怎么办？如果我们把 `head` 的索引视为 1，那么我们是想从第 `m` 个元素开始反转对吧；如果把 `head.next` 的索引视为 1 呢？那么相对于 `head.next`，反转的区间应该是从第 `m - 1` 个元素开始的；那么对于 `head.next.next` 就是m-2，以此类推...
+
+**代码实现**：
+
+```java
+class Solution {
+    public ListNode reverseBetween(ListNode head, int m, int n) {
+        // base case
+        if (m == 1) {
+            return reverseN(head, n);
+        }
+        // 前进到反转的起点触发 base case
+        head.next = reverseBetween(head.next, m - 1, n - 1);
+        return head;
+    }
+
+    ListNode successor = null; // 后驱节点
+    // 反转以 head 为起点的 n 个节点，返回新的头结点
+    ListNode reverseN(ListNode head, int n) {
+        if (n == 1) {
+            // 记录第 n + 1 个节点
+            successor = head.next;
+            return head;
+        }
+        // 以 head.next 为起点，需要反转前 n - 1 个节点
+        ListNode last = reverseN(head.next, n - 1);
+
+        head.next.next = head;
+        // 让反转之后的 head 节点和后面的节点连起来
+        head.next = successor;
+        return last;
+    }
+}
+```
+
+
+
+### 25、k个一组反转链表
+
+👍[如何K个一组反转链表](https://labuladong.gitee.io/algo/2/17/18/)
+
+**题目链接**：[K个一组反转链表](https://leetcode-cn.com/problems/reverse-nodes-in-k-group/)
+
+**解题思路**：
+
+1.首先明白反转节点a到节点b该怎么反转
+
+2.每k个一组进行反转
+
+3.递归连接k个一组反转的链表
+
+**代码实现**：
+
+```java
+class Solution {
+    public ListNode reverseKGroup(ListNode head, int k) {
+        if(head==null) return null;
+        //区间(a,b],包含k个待反转元素
+        ListNode a = head;
+        ListNode b = head;
+        for(int i=0;i<k;i++){
+            if(b==null) return head;
+            b = b.next;
+        }
+        //反转前k个元素
+        ListNode newHead = reverse(a,b);
+        //递归反转后续链表并链接
+        a.next = reverseKGroup(b,k);
+        return newHead;
+    }
+
+    //反转节点a到节点b之间的链表节点，包含头，但不包含尾.[a,b)
+    private ListNode reverse(ListNode a,ListNode b){
+
+        ListNode pre = null;
+        ListNode cur = a;
+        ListNode nxt = a;
+        while(cur!=b){
+            nxt = cur.next;
+            cur.next = pre;
+            pre = cur;
+            cur = nxt;
+        }
+        return pre;
+    }
+}
+```
+
 
 
 
@@ -2296,6 +2502,38 @@ class Solution {
 
 ## 八、堆
 
+### 215、数组中的第K个最大元素
+
+**题目链接**：[数组中的第K个最大元素](https://leetcode-cn.com/problems/kth-largest-element-in-an-array/)
+
+**解题思路**：使用二叉堆。
+
+**代码实现**：
+
+```java
+class Solution {
+    public int findKthLargest(int[] nums, int k) {
+        //小顶堆
+        PriorityQueue<Integer> pq = new PriorityQueue<>();
+        for(int x:nums){
+            //每个元素都要过一遍二叉堆
+            pq.offer(x);
+            //堆中元素大于k时，删除堆顶元素
+            if(pq.size()>k){
+                pq.poll();
+            }
+        }
+        // pq 中剩下的是 nums 中 k 个最大元素，
+        // 堆顶是最小的那个，即第 k 个最大元素
+        return pq.peek();
+    }
+}
+```
+
+
+
+
+
 ### 295、数据流中的中位数
 
 **题目链接**：[数据流中的中位数](https://leetcode-cn.com/problems/find-median-from-data-stream/)
@@ -3967,26 +4205,26 @@ dp[i][1] = max(dp[i-1][1], -prices[i])
 ```java
 class Solution {
     public int maxProfit(int[] prices) {
-        //dp[i]表示第i天股票卖出获取的最大利润
+        //定义dp数组，dp[i]表示以nums[i]结尾能获取的最大利润
         int[] dp = new int[prices.length];
+        //初始化dp数组,第一天最大利润就是不买
         dp[0] = 0;
-        int minPrice = prices[0];
+        int minPreice = prices[0];
+        //定义最大利润
+        int res = 0;
         for(int i=1;i<prices.length;i++){
-            if(prices[i]<minPrice){
-                minPrice = prices[i];
+            if(prices[i]<minPreice){
+                minPreice = prices[i];
                 dp[i] = 0;
             }else{
-                dp[i] = prices[i] - minPrice;
+                dp[i] = prices[i] - minPreice;
+                res = Math.max(res,dp[i]);
             }
         }
-        int res = Integer.MIN_VALUE;
-        for (int x:dp){
-            res = Math.max(res,x);
-        }
         return res;
+
     }
 }
-
 ```
 
 通用版本
@@ -4379,51 +4617,55 @@ class Solution {
 
 ```java
 class Solution {
+
+    LinkedList<Integer> tmp = new LinkedList<>();
     public List<List<Integer>> threeSum(int[] nums) {
-        return threeSum(nums,0);
-    }
-
-    private List<List<Integer>> threeSum(int[] nums,int target){
-        int len = nums.length;
-        //先对数组排序，很关键
+        //注意：调用nSum之前一定要给数组排序
         Arrays.sort(nums);
-        List<List<Integer>> res = new ArrayList<>();
-        for(int i=0;i<len;i++){
-            // 对 target - nums[i] 计算 twoSum
-            List<List<Integer>>  list = twoSum(nums,i+1,target-nums[i]);
-            // 如果存在满足条件的二元组，再加上 nums[i] 就是结果三元组
-            for(List<Integer> tuple:list){
-                tuple.add(nums[i]);
-                res.add(tuple);
-            }
-            // 跳过第一个数字重复的情况，否则会出现重复结果
-            while(i<len-1 && nums[i]==nums[i+1]) i++;
-        }
-        return res;
+        return nSum(nums, 3, 0, 0);
     }
 
-    private List<List<Integer>> twoSum(int[] nums,int start,int target){
-        int left = start;
-        int right = nums.length-1;
-        List<List<Integer>> res = new ArrayList<>();       
-        while(left<right){
-            int sum = nums[left] + nums[right];
-            int leftNum = nums[left];
-            int rightNum = nums[right];
-            if(sum<target){
-                while(left<right && nums[left]==leftNum) left++;
+    private List<List<Integer>> nSum(int[] nums, int n, int start, int target) {
+        int len = nums.length;
+        List<List<Integer>> res = new ArrayList<>();
+        //至少是2Sum，且数组大小不能小于n
+        if (n < 2 || len < n) {
+            return res;
+        }
+        //2Sum是最基本情况
+        if (n == 2) {
+            //双指针
+            int low = start;
+            int high = len - 1;
+            while (low < high) {
+                int sum = nums[low] + nums[high];
+                int left = nums[low];
+                int right = nums[high];
+                if (sum < target) {
+                    while (low < high && nums[low] == left) low++;
+                } else if (sum > target) {
+                    while (low < high && nums[high] == right) right--;
+                }else{
+                    tmp.add(left);
+                    tmp.add(right);
+                    res.add(tmp);
+                    tmp.removeLast();
+                    tmp.removeLast();
+                    left++;
+                    right--;
+                }
             }
-            else if(sum > target){
-                while(left<right && nums[right]==rightNum) right--;
-            }else{
-                List<Integer> list = new ArrayList<>();
-                list.add(left);
-                list.add(right);
-                res.add(list);
-                while(left<right && nums[left]==leftNum) left++;
-                while(left<right && nums[right]==rightNum) right--;
+        }else{
+            //n>2时，递归计算(n-1)Sum
+            for(int i=start;i<len;i++){
+                List<List<Integer>> arrs = nSum(nums, n - 1, i + 1, target - nums[i]);
+                for(List<Integer> arr:arrs){
+                    arr.add(nums[i]);
+                    res.add(arr);
+                }
+                while(i<len-1 && nums[i]==nums[i+1]) i++;
             }
-            
+
         }
         return res;
     }
