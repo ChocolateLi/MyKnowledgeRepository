@@ -1447,7 +1447,7 @@ class Solution {
 
 
 
-### 96、不同的二叉搜索树
+### 96、不同的二叉搜索树（不熟练）
 
 **题目链接**：[不同的二叉搜索树](https://leetcode-cn.com/problems/unique-binary-search-trees/)
 
@@ -1455,6 +1455,8 @@ class Solution {
 
 1. 穷举每一个节点作为根节点的情况，它的左右子树使用递归去计算
 2. 如何计算该根节点的所能构造的二叉搜索树的个数？固定根节点，计算左右节点的组合数，左右节点的组合数相乘就是该节点的个数
+
+注意：空子树也是一种情况，所以要技术为1
 
 **代码实现**：
 
@@ -1520,7 +1522,7 @@ class Solution {
 }
 ```
 
-### 98、验证二叉搜索树
+### 98、验证二叉搜索树（不熟练）
 
 **题目链接**：[验证二叉搜索树](https://leetcode-cn.com/problems/validate-binary-search-tree/)
 
@@ -1530,7 +1532,7 @@ class Solution {
 
 明确了根节点要干什么了，就是跟左右子树比较。
 
-注意：根节点不只是比较自己的左右节点，而是比较所有左右节点。根节点就是左子树的最大值，右子树的最小值，可以通过添加两个参数
+注意：根节点不只是比较自己的左右节点，而是比较所有左右节点。根节点就是左子树的最大值，右子树的最小值，可以通过添加两个参数（最大值和最小值）
 
 **代码实现**：
 
@@ -1576,11 +1578,13 @@ class Solution {
 
 
 
-### 101、对称二叉树
+### 101、对称二叉树（不熟练）
 
 **题目链接**：[对称二叉树](https://leetcode-cn.com/problems/symmetric-tree/)
 
 **解题思路**：
+
+错误思路：如果只是按照前序遍历，只是比较根节点的左右子树是否相同，那么就会出现只比较到了左子树、右子树内部是否对称，而没有比较到外部是否对称。比如left.right要和right.left比较，left.left要和right.right比较
 
 **代码实现**：
 
@@ -1588,16 +1592,66 @@ class Solution {
 class Solution {
     public boolean isSymmetric(TreeNode root) {
         if(root==null) return true;
+        //检查两颗子树是否相同
         return isSymmetric(root.left, root.right);
     }
 
     private boolean isSymmetric(TreeNode left, TreeNode right) {
         if(left==null || right==null) return left==right;
+        //两个根节点需要相同
         if(left.val!=right.val) return false;
+        //左右节点需要对称相同
         return isSymmetric(left.right,right.left) && isSymmetric(left.left,right.right);
     }
 }
 ```
+
+
+
+### 103、二叉树的锯齿形层次遍历
+
+**题目链接**：[二叉树的锯齿层次遍历](https://leetcode-cn.com/problems/binary-tree-zigzag-level-order-traversal/)
+
+**解题思路**：思路依旧是层次遍历框架。唯一不同的是需要定义一个变量，表示是否要反向遍历
+
+**代码实现**：
+
+```java
+class Solution {
+    public List<List<Integer>> zigzagLevelOrder(TreeNode root) {
+        List<List<Integer>> res = new ArrayList<>();
+        if(root==null) return res;
+        Queue<TreeNode> q = new LinkedList<>();
+        q.offer(root);
+        //定义一个变量，表示是否要反向
+        boolean flag = true;
+        while(!q.isEmpty()){
+            LinkedList<Integer> list = new LinkedList<>();
+            int size = q.size();
+            for(int i=0;i<size;i++){
+                TreeNode node = q.poll();
+                if(flag){//正向遍历
+                    list.addLast(node.val);
+                }else{//反向遍历
+                    list.addFirst(node.val);
+                }
+                if(node.left!=null){
+                    q.offer(node.left);
+                }
+                if(node.right!=null){
+                    q.offer(node.right);
+                }
+            }
+            //别忘了改变变量值
+            flag = !flag;
+            res.add(list);
+        }
+        return res;
+    }
+}
+```
+
+
 
 
 
@@ -1622,18 +1676,13 @@ class Solution {
 ```java
 class Solution {
 
-    int maxDepth = 0;
     public int maxDepth(TreeNode root) {
-        return travel(root);
-    }
-
-    private int travel(TreeNode root){
         if(root == null){
             return 0;
         }
-        int leftDepth = travel(root.left);
-        int rightDepth = travel(root.right);
-        return Math.max(leftDepth,rightDepth) + 1;       
+        int leftDepth = maxDepth(root.left);
+        int rightDepth = maxDepth(root.right);
+        return Math.max(leftDepth,rightDepth) + 1;
     }
 }
 ```
@@ -1832,7 +1881,7 @@ class Solution {
 
 
 
-### 124、二叉树中的最大路径和
+### 124、二叉树中的最大路径和（不熟练）
 
 **题目链接**：[二叉树中的最大路径和](https://leetcode-cn.com/problems/binary-tree-maximum-path-sum/)
 
@@ -1841,6 +1890,8 @@ class Solution {
 后序遍历。求出根节点的最大单边路径和
 
 后序代码的时候去更新最大路径和
+
+注意：要重新定义一个递归函数，表示从根节点起的最大单边路径。
 
 **代码实现**：
 
@@ -1863,15 +1914,11 @@ class Solution {
         //更新最大路径和
         int pathSum = root.val + leftSum + rightSum;
         res = Math.max(res,pathSum);
-        //实现定义，每个节点只能经过一次
+        //实现定义，每个节点只能经过一次，所以左右子树只能选出一个
         return Math.max(leftSum,rightSum) + root.val;
     }
 }
 ```
-
-
-
-
 
 
 
@@ -1942,7 +1989,7 @@ class Solution {
 
 2、后序遍历
 
-先交换了左右子树，再交换左右节点
+先交换了左右子树，再交换根节点的左右节点
 
 **代码实现**：
 
@@ -2017,7 +2064,66 @@ class Solution {
 
 
 
-### 450、删除二叉搜索树中的节点
+### 236、二叉树的最近公共祖先（困难，不熟练）
+
+**题目链接**：[二叉树的最近公共祖先](https://leetcode-cn.com/problems/lowest-common-ancestor-of-a-binary-tree/)
+
+**解题思路**：
+
+首先清楚递归函数三个问题
+
+```
+1.明白函数的定义
+2.明白函数的参数变量
+3.得到递归结果该干什么
+```
+
+1.函数的定义：就是返回节点p和节点q最近公共节点。
+
+2.参数变量只能是root，他才是会变化的，可以缩小规模的。那什么时候才结束递归呢？
+
+情况一：如果root为null，那肯定得返回null
+
+情况二：如果root为p或者root为q，那么不管另一方是否为空，都是返回root
+
+3.得到递归结果，也分为以下情况。
+
+情况一：如果p、q都在以root为根的树中，那么p、q一定分别是left和right
+
+情况二：如果p、q都不在以root为根的树中，那么返回null
+
+情况三：如果有一方不在树中，则直接返回不为null的一方
+
+**代码实现**：
+
+```java
+class Solution {
+    public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+        
+        //递归结束条件，明白函数中参数的变量是哪个
+        if(root == null) return null;
+        if(root==p || root==q) return root;
+
+        //递归函数调用，一定要明白函数的定义
+        TreeNode left = lowestCommonAncestor(root.left,p,q);
+        TreeNode right = lowestCommonAncestor(root.right,p,q);
+
+        //得到了递归调用的结果
+        //1.情况一：如果p、q都在以root为根的树中，那么p、q一定分别是left和right
+        if(left!=null && right!=null) return root;
+        //2.情况二：如果p、q都不在以root为根的树中，那么返回null
+        if(left==null && right==null) return null;
+        //3.情况三：如果有一方不在树中，则直接返回不为null的一方
+        return left==null?right:left;
+    }
+}
+```
+
+
+
+
+
+### 450、删除二叉搜索树中的节点（不熟练）
 
 **题目链接**：[删除二叉搜索树中的节点](https://leetcode-cn.com/problems/delete-node-in-a-bst/)
 
@@ -2063,8 +2169,6 @@ class Solution {
 
 
 
-
-
 ### 543、二叉树的直径
 
 **题目链接**：[二叉树的直径](https://leetcode-cn.com/problems/diameter-of-binary-tree/)
@@ -2073,7 +2177,7 @@ class Solution {
 
 后序遍历，知道左右子树的最大直径，就可以求出当前节点的直径，当前节点的直径=左子树最大深度+右子树最大深度。
 
-就是在106题中，添加一行代码就可以实现
+就是在104题中，添加一行代码就可以实现
 
 **代码实现**：
 
@@ -2098,7 +2202,7 @@ class Solution {
 
 
 
-### 652、寻找重复的子树
+### 652、寻找重复的子树（不熟练）
 
 **题目链接**：[寻找重复的子树](https://leetcode-cn.com/problems/find-duplicate-subtrees/submissions/)
 
@@ -2149,8 +2253,6 @@ class Solution {
 
 
 
-
-
 ### 654、最大二叉树
 
 **题目链接**：[最大二叉树](https://leetcode-cn.com/problems/maximum-binary-tree/)
@@ -2171,6 +2273,17 @@ class Solution {
 
     private TreeNode constructMaximumBinaryTree(int[] nums,int low,int high){
         if(low>high) return null;
+        //找出最大值的索引
+        int maxIndex = findMaxIndex(nums,low,high);
+        int maxValue = nums[maxIndex];
+        //构建根节点
+        TreeNode root = new TreeNode(maxValue);
+        root.left = constructMaximumBinaryTree(nums,low,maxIndex-1);
+        root.right = constructMaximumBinaryTree(nums,maxIndex+1,high);
+        return root;
+    }
+
+    private int findMaxIndex(int[] nums,int low,int high){
         int maxValue = Integer.MIN_VALUE;
         int maxIndex = -1;
         for(int i=low;i<=high;i++){
@@ -2179,10 +2292,7 @@ class Solution {
                 maxIndex = i;
             }
         }
-        TreeNode root = new TreeNode(maxValue);
-        root.left = constructMaximumBinaryTree(nums,low,maxIndex-1);
-        root.right = constructMaximumBinaryTree(nums,maxIndex+1,high);
-        return root;
+        return maxIndex;
     }
 }
 ```
@@ -2287,7 +2397,7 @@ class Solution {
 
 **主对角线反转矩阵(按照左上到右下的对角线进行镜像对称)**
 
-![主对角线](/Users/chenli75/Desktop/MyFile/github/MyKnowledgeRepository/picture/主对角线镜像.jpg)
+![主对角线](D:\github\MyKnowledgeRepository\picture\主对角线镜像.jpg)
 
 ```java
 public void rotate(int[][] matrix) {
@@ -2306,7 +2416,7 @@ public void rotate(int[][] matrix) {
 
 **反对角线反转矩阵**
 
-![反对角线](/Users/chenli75/Desktop/MyFile/github/MyKnowledgeRepository/picture/反对角线镜像.jpg)
+![反对角线](D:\github\MyKnowledgeRepository\picture\反对角线镜像.jpg)
 
 ```java
 public void rotate(int[][] matrix) {
@@ -4899,6 +5009,15 @@ void dfs(int[][] grid, int i, int j, boolean[] visited) {
 }
 ```
 
+👍回溯算法疑惑
+
+```
+如果满足结束条件，就把track加入result，有的时候需要在这里取消选择，有的时候又不需要？
+关键是看你结束递归的 base case。
+如果 base case 在叶子节点上结束，因为叶子结点也是一个节点，所以 base case 里面也要进行「选择」和「撤销选择」。
+如果 base case 在空节点上结束，那就不用考虑这些，直接 return 就好。
+```
+
 
 
 ### 17、电话号码的字母组合
@@ -5554,6 +5673,14 @@ void traverse(ListNode head) {
     traverse(head.next);
     // 后序位置
 }
+```
+
+👍**递归三问**
+
+```
+1.这个函数是干什么的
+2.这个函数的参数中，变量是什么？即缩小规模的变量
+3.得到递归结果，应该干什么
 ```
 
 
