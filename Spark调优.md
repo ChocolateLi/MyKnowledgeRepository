@@ -1193,7 +1193,7 @@ repartition算子，你用Spark SQL这一步的并行度和task数量，肯定�
 
 
 
-#### 5、算子调优之reduceByKey本地聚合
+### 5、算子调优之reduceByKey本地聚合
 
 reduceByKey，相较于普通的shuffle操作（比如groupByKey），它的一个特点，就是说，会进行map端的本地聚合。
 

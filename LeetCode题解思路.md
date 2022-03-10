@@ -120,7 +120,7 @@ class Solution {
 
 2、get()方法中，先判断key在不在，如果在，先将调用makeRecently()方法，然后再获取
 
-3、在put()方法中，先判断key在不在，如果在就直接put进行覆盖，然后调用makeRecently()方法进行返回；如果不在则先判断石否已经达到容量，如果已经达到容量了，则先删除头部元素(也就是最近最久未使用)，最后再执行插入操作
+3、在put()方法中，先判断key在不在，如果在就直接put进行覆盖，然后调用makeRecently()方法进行返回；如果不在则先判断是否已经达到容量，如果已经达到容量了，则先删除头部元素(也就是最近最久未使用)，最后再执行插入操作
 
 **代码实现**：
 
@@ -238,45 +238,37 @@ while ( A 没完 || B 没完)
 **实现代码**：
 
 ```java
-/**
- * Definition for singly-linked list.
- * public class ListNode {
- *     int val;
- *     ListNode next;
- *     ListNode() {}
- *     ListNode(int val) { this.val = val; }
- *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }
- * }
- */
 class Solution {
     public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
-        ListNode newHead = new ListNode();
-        ListNode sumNode = newHead;
+        //两条链表上的指针
+        ListNode p1 = l1,p2 = l2;
+        //虚拟头节点
+        ListNode dummy = new ListNode();
+        //指针p负责构建新链表
+        ListNode p = dummy;
+        //记录进位
         int carry = 0;
-        while(l1!=null || l2!=null){
-            //取出当前位
-            int x = l1!=null?l1.val:0;
-            int y = l2!=null?l2.val:0;
-            //求和
-            int sum = x + y + carry;
-            if(sum>=10){
-                carry = 1;
-                sum = sum%10;
-            }else{
-                carry = 0;
+        while(p1!=null || p2!=null || carry!=0){
+            //先加上上次的进位
+            int val = carry;
+            if(p1!=null){
+                val += p1.val;
+                p1 = p1.next;
             }
-            sumNode.next = new ListNode(sum);
-            //三个指针一起动
-            l1 = l1!=null?l1.next:null;
-            l2 = l2!=null?l2.next:null;
-            sumNode = sumNode.next;
+            if(p2!=null){
+                val += p2.val;
+                p2 = p2.next;
+            }
+            //处理进位情况
+            carry = val/10;
+            val = val%10;
+            //构建新的节点
+            ListNode newNode = new ListNode(val);
+            p.next = newNode;
+            p = p.next;
         }
-        //两数都加完后，最后判断一下进位 carry, 进位不为 0 的话加在前面
-        if(carry!=0){
-            sumNode.next = new ListNode(carry);
-        }
-        return newHead.next;
-
+        // 返回结果链表的头结点（去除虚拟头结点）
+        return dummy.next;
     }
 }
 ```
@@ -311,7 +303,7 @@ class Solution {
         }
         //快慢指针分别指向头节点
         ListNode fast = head;
-        ListNode slow = head;
+        ListNode slow = head;//注意
         //快指针先移动n步
         while (n > 0) {
             fast = fast.next;
@@ -327,7 +319,7 @@ class Solution {
             slow = slow.next;
         }
         //删除慢指针后继节点
-        slow.next = slow.next.next;
+        slow.next = slow.next.next;//注意
         return head;
     }
 }
@@ -725,7 +717,6 @@ ListNode reverse(ListNode a, ListNode b) {
     // 返回反转后的头结点
     return pre;
 }
-
 ```
 
 
@@ -2741,7 +2732,6 @@ List<int[]>[] graph;
 // 邻接矩阵
 // matrix[x][y] 记录 x 指向 y 的边的权重，0 表示不相邻
 int[][] matrix;
-
 ```
 
 
@@ -3216,7 +3206,7 @@ class Solution {
 
 ### 209、长度最小的子数组
 
-**题目链接**：[长度最小的子数组](https://leetcode-cn.com/problems/he-wei-sde-lian-xu-zheng-shu-xu-lie-lcof/)
+**题目链接**：[长度最小的子数组](https://leetcode-cn.com/problems/minimum-size-subarray-sum/)
 
 **算法思路**：
 
