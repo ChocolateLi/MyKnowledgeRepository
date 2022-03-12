@@ -33,6 +33,84 @@ class Solution {
 }
 ```
 
+### 41、缺失的第一个正数
+
+**题目链接**：[缺失的第一个正数](https://leetcode-cn.com/problems/first-missing-positive/)
+
+**解题思路**：
+
+思路一：
+
+1.可以使用hashset对数据进行存储
+
+2.遍历1到数组长度，如果不在hashset里面说明就是缺失的第一个正数
+
+3.如果到数组最末尾，则返回数组长度+1
+
+思路二：
+
+1.把数组当成哈希表来使用，遍历每一个元素，把这个元素移动到它减1的索引下标位置。比如数值3移动到index为2的位置
+
+2.直到所有元素排好序，再遍历一遍数组，找出num[i]!=i+1的值
+
+**代码实现**：
+
+实现一：时间复杂度O(n)空间复杂度O(n)
+
+```java
+class Solution {
+    public int firstMissingPositive(int[] nums) {
+        int len = nums.length;
+        HashSet<Integer> set = new HashSet<>();
+        for(int x:nums){
+            set.add(x);
+        }
+        for(int i=1;i<=len;i++){
+            if(!set.contains(i)){
+                return i;
+            }
+        }
+        return len+1;
+    }
+}
+```
+
+实现二
+
+```java
+class Solution {
+    public int firstMissingPositive(int[] nums) {
+        int len = nums.length;
+        //把数组当哈希表使用。把数值3放到索引为2的位置上
+        for(int i=0;i<len;i++){
+            //使用while的原因是交换后还不知道num[i]的位置因此还需要继续           
+            while(nums[i]>=1 && nums[i]<=len){  
+                //nums[i]!=nums[nums[i]-1]表示要交换的元素就是那个位置的话就没要交换了
+                if(nums[i]!=nums[nums[i]-1]){
+                    swap(nums,i,nums[i]-1);
+                }else{
+                    break;
+                }           
+                
+            }
+        }
+        //最后遍历数组
+        for(int i=0;i<nums.length;i++){
+            if(nums[i]!=i+1){
+                return i+1;
+            }
+        }
+        return len+1;
+    }
+
+    private void swap(int[] nums,int i,int j){
+        int tmp = nums[i];
+        nums[i] = nums[j];
+        nums[j] = tmp;
+    }
+}
+```
+
 
 
 ### 49、字母异位词分组
@@ -815,6 +893,65 @@ class Solution {
             cur = nxt;
         }
         return pre;
+    }
+}
+```
+
+
+
+### 143、重排链表
+
+**题目链接**：[重排链表](https://leetcode-cn.com/problems/reorder-list/)
+
+**解题思路**：
+
+1. 先找出链表的中间节点，将其一分两段
+2. 反转后序链表
+3. 将两个链表进行合并
+
+**代码实现**：
+
+```java
+class Solution {
+    public void reorderList(ListNode head) {
+        //1.先找到中间链表的节点
+        ListNode slow = head;
+        ListNode fast = head.next;
+        while(fast!=null && fast.next!=null){
+            slow = slow.next;
+            fast = fast.next.next;
+        }
+        ListNode mid = slow.next;
+        slow.next = null;//注意slow.next要置为空，不然会出现循环
+        //2.反转第二个链表的位置
+        ListNode tail = reverse(mid);
+        //3.合并两个链表
+        mergeList(head,tail);
+    }
+
+    //递归反转链表的操作
+    private ListNode reverse(ListNode head){
+        if(head==null || head.next==null){
+            return head;
+        }
+        ListNode last = reverse(head.next);
+        head.next.next = head;
+        head.next = null;
+        return last;
+    }
+
+    //合并两个链表
+    private void mergeList(ListNode l1,ListNode l2){
+        ListNode p1;
+        ListNode p2;
+        while(l1!=null && l2!=null){
+            p1 = l1.next;
+            p2 = l2.next;
+            l1.next = l2;
+            l1 = p1;
+            l2.next = l1;
+            l2 = p2;
+        }
     }
 }
 ```
@@ -2382,6 +2519,50 @@ class Solution {
 }
 ```
 
+### 415、字符串相加
+
+**题目链接**：[字符串相加](https://leetcode-cn.com/problems/add-strings/)
+
+**解题思路**：
+
+1. 使用双指针，分别指向两个字符串的最后一位索引
+2. 从后往前相加。注意char字符减'0'是一个整数。注意进位的表示
+3. 最后面对所得字符串进行反转就是所得结果了
+
+**代码实现**：
+
+```java
+class Solution {
+    public String addStrings(String num1, String num2) {
+        
+        //使用双指针
+        int i = num1.length()-1;
+        int j = num2.length()-1;
+        //进位
+        int carry = 0;
+        //存储结果
+        StringBuilder sb = new StringBuilder();
+        while(i>=0 || j>=0){
+            int a = (i>=0)?num1.charAt(i)-'0':0;
+            int b = (j>=0)?num2.charAt(j)-'0':0;
+            //按照加法原则，从后往前加
+            int tmp = a + b + carry;
+            carry = tmp/10;
+            sb.append(tmp%10);
+            //别忘了减操作
+            i--;
+            j--;
+        }
+        //最后判断一下进位是否为1，如果是要加上
+        if(carry==1){
+            sb.append(carry);
+        }
+        //最后对所得的字符串进行反转
+        return sb.reverse().toString();
+    }
+}
+```
+
 
 
 ## 七、数组
@@ -2457,6 +2638,8 @@ Arrays.sort(nums,(v1,v2) -> v1[0]-v2[0])
 2. 对 i 到 nums.length范围的数进行排序
 3. 排序后，在 i 到 nums.length中寻找第一个nuns[j] > nums[i-1]的数，其中nums[j] 就是要交换的数
 4. 交换nums[i-1] 和 nums[j] ，返回
+
+注意：注意是取nums[i]还是取nums[i-1]
 
 **代码实现**：
 
@@ -4494,28 +4677,24 @@ class Solution {
 ```java
 class Solution {
     public int lengthOfLIS(int[] nums) {
-        //1.定义dp数组
-        //以nums[i]结尾的最长子序列的长度
+        //1.定义dp数组,dp[i]表示以nums[i]结尾的最长子序列
         int[] dp = new int[nums.length];
-        //2.初始化dp数组
-        //每个元素都是一个以自己为递增的子序列，所以长度为1
-        Arrays.fill(dp,1);
-        //3.定义状态转移方程
+        //2.初始化dp数组,每一个数都是以自己为最长递增子序列
         for(int i=0;i<nums.length;i++){
-            //穷举所有可能的取值
+            dp[i] = 1;
+        }
+        //3.定义状态转移方程
+        int res = dp[0];
+        for(int i=1;i<nums.length;i++){
             for(int j=0;j<i;j++){
-                if(nums[j]<nums[i]){
+                if(nums[i]>nums[j]){
                     dp[i] = Math.max(dp[i],dp[j]+1);
-                }               
+                }
             }
+            res = Math.max(res,dp[i]);
         }
-
-        int res = 0;
-        for(int x:dp){
-            res = Math.max(res,x);
-        }
-
         return res;
+        
     }
 }
 ```

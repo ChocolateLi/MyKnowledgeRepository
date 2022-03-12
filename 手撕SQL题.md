@@ -669,7 +669,7 @@ lateral view explode(split(test.name,'|')) as name
 
 
 
-## 常见面试题
+## 面试题汇总
 
 ### 1、字节跳动一面题
 
@@ -881,7 +881,172 @@ from
 where rank<=10;
 ```
 
+### 5、腾讯面试题
 
+**如何对手机号码、身份证号、银行号脱敏?**
+
+concat()、left()、right()字符串函数组合使用
+
+concat(str1,str2,...)：返回结果为连接参数产生的字符串
+
+left(str,len)：返回从字符串str开始的len最左字符
+
+right(str,len)：返回从字符串str开始的len最右字符
+
+```sql
+SELECT 
+    CONCAT(LEFT(phone,3), '****' ,RIGHT(phone,4)) AS 手机号
+FROM phone;
+```
+
+### 6、万物心选面试题
+
+查询一个表（tb1）的字段记录不在另一个表（tb2）中 
+
+```sql
+select tb1.* from tb1
+left join tb2
+on tb1.id=tb2.id
+where tb2.id is null;
+```
+
+
+
+## 常见面试题
+
+### SQL第一题
+
+score表结构：uid,subject_id,score，问题：找出所有科目成绩都大于某一学科平均成绩的学生
+
+```
+1001 01 90
+1001 02 85
+...
+```
+
+思路：
+
+1.先求出每个学科的平均分；t1表
+
+2.使用if()函数判断学科成绩是否大于平均分，大于则记为0，否则记为1；t2表
+
+3.根据学生id进行分组统计flag的和，和为0，说明所有学科都大于平均成绩
+
+
+
+知识点：
+
+SQL中增加having子句的原因是，where关键字无法与聚合函数一起使用。having子句可以让我们筛选分组后的各组数据
+
+```sql
+--1.先求出每个学科的平均分
+select uid,score,
+avg(score) over(partition by subject_id) avg_score
+from score;t1
+
+--2.根据是否大于平均成绩 记录flag，大于记为0否则记为1
+select uid,if(score>avg_score,0,1) flag from t1;t2
+
+--3.根据学生id进行分组统计flag的和，和为0，说明所有学科都大于平均成绩
+select uid from t2
+group by uid
+having sum(flag)=0;
+```
+
+
+
+### SQL第二题
+
+有如下用户访问数据，action表
+
+```
+userid	visitDate	visitCount
+u01		2017/1/21	5
+u02		2017/1/23	6
+u01		2017/1/23	6
+...
+```
+
+问题：要求使用SQL统计出每个用户的累积访问次数，如下表
+
+```
+userid	月份	  小计	累积
+u01		2017-1	11	   11
+u01		2017-2	12	   23
+...
+```
+
+思路：
+
+1.先对数据进行相应格式转换
+
+2.计算出每人每月的访问量
+
+3.按月访问进行累加
+
+```sql
+--1.先对数据进行格式转化
+select 
+userid,date_format(regexp_replace(visitDate,'/','-'),'yyyy-mm') as visitDate,visitCount
+from action;
+
+--2.计算出每人每月的访问量
+select 
+	userid,visitDate,sum(visitCount) as DateCount
+from
+	t1
+group by userid,visitDate;t2
+
+--3.对每个用户按月访问进行累加
+select 
+	userid,visttDate,DateCount,
+	sum(DateCount) over(partition by userid order by visitDate)
+from
+	t2;
+```
+
+
+
+### SQL第三题
+
+已知一个order表，有date,order_id,user_id,amount。请给出sql进行统计。
+
+样例：2017-1-1，2012000，452115005，34
+
+**1、给出2017年每个月的订单数、用户数、成交金额**
+
+格式：2017-1  orderCount userCount amount
+
+思路：
+
+1.先进行格式转化
+
+2.求出订单数、用户数(注意去重)、成交金额，注意where筛选条件为2017年，还要注意对每月进行分组
+
+```sql
+select 
+	date_format(date,'yyyy-mm') as dt,--1.先进行格式转化
+	count(order_id) as orderCount,
+	count(distinct user_id) as userCount,
+	sum(amount)
+where
+	date_format(date,'yyyy')='2017'
+group by
+	date_format(date,'yyyy-mm')
+```
+
+**2、给出2017年11月的新客数（指在11月才有第一笔订单）**
+
+```sql
+select 
+	count(distinct userid)
+from 
+	`order`
+group by
+	userid
+having
+	date_format(min(date),'yyyy-mm')='2017-11'
+```
 
 
 
