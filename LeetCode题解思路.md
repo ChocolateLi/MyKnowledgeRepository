@@ -75,7 +75,7 @@ class Solution {
 }
 ```
 
-实现二
+实现二：时间复杂度O(n)空间复杂度O(1)
 
 ```java
 class Solution {
@@ -1887,41 +1887,86 @@ class Solution {
 }
 ```
 
+### 112、路径总和
 
-
-### 113、路径总和
-
-**题目链接**：[路径总和](https://leetcode-cn.com/problems/path-sum-ii/)
+**题目链接**：[路径总和](https://leetcode-cn.com/problems/path-sum/)
 
 **解题思路**：
 
 1. 可以使用回溯法的思路框架进行编写代码
 2. 使用前序遍历框架，明白当前节点要做什么
 
-注意：在满足条件的时候，将list集合添加到res集合时，不能返回，不然答案不正确，因为要把最后一个元素弹出来后才能进行后面的操作
+**代码实现**：
+
+```java
+class Solution {
+
+    boolean res = false;
+    public boolean hasPathSum(TreeNode root, int targetSum) {
+        LinkedList<Integer> list = new LinkedList<>();
+        traverse(root,targetSum,list);
+        return res;
+    }
+
+    //回溯法
+    private void traverse(TreeNode root,int targetSum,LinkedList<Integer> list){
+        if(root==null) return;
+        //添加节点
+        list.add(root.val);
+        targetSum -= root.val;
+        //判断是否符合条件，如果符合，直接返回
+        if(targetSum==0 && root.left==null && root.right==null){
+            res = true;
+            return;
+        }
+
+        traverse(root.left,targetSum,list);
+        traverse(root.right,targetSum,list);
+        //还原节点
+        int value = list.removeLast();
+        targetSum += value;
+    }
+}
+```
+
+
+
+### 113、路径总和2
+
+**题目链接**：[路径总和2](https://leetcode-cn.com/problems/path-sum-ii/)
+
+**解题思路**：
+
+1. 可以使用回溯法的思路框架进行编写代码
+2. 使用前序遍历框架，明白当前节点要做什么
 
 **代码实现**：
 
 ```java
 class Solution {
+
     List<List<Integer>> res = new ArrayList<>();
-    public List<List<Integer>> pathSum(TreeNode root, int target) {
+    public List<List<Integer>> pathSum(TreeNode root, int targetSum) {
         LinkedList<Integer> list = new LinkedList<>();
-        preOrder(root,target,list);
+        traverse(root,targetSum,list);
         return res;
     }
 
-    private void preOrder(TreeNode root,int target,LinkedList<Integer> list){
+    //回溯法
+    private void traverse(TreeNode root,int targetSum,LinkedList<Integer> list){
         if(root==null) return;
-        target -= root.val;
+        //添加节点
         list.add(root.val);
-        if(target==0 && root.left==null && root.right==null){
+        targetSum -= root.val;
+        //判断是否满足条件
+        if(targetSum==0 && root.left==null && root.right==null){
             res.add(new ArrayList<>(list));
-            //不能写return返回语句不然答案不正确
         }
-        preOrder(root.left,target,list);
-        preOrder(root.right,target,list);
-        list.removeLast();//回退操作
+        traverse(root.left,targetSum,list);
+        traverse(root.right,targetSum,list);
+        //还原节点
+        int value = list.removeLast();
+        targetSum += value;
     }
 }
 ```
@@ -2037,6 +2082,7 @@ class Solution {
     private int postOrder(TreeNode root){
         if(root==null) return 0;
         //后序遍历
+        //注意如果leftSum或者rightSum小于0时，则返回0
         int leftSum = Math.max(0,postOrder(root.left));
         int rightSum = Math.max(0,postOrder(root.right));
         //更新最大路径和
@@ -2047,6 +2093,48 @@ class Solution {
     }
 }
 ```
+
+
+
+### 129、求根节点到叶子节点数字之和
+
+**题目链接**：[求根节点到叶子节点数字之和](https://leetcode-cn.com/problems/sum-root-to-leaf-numbers/)
+
+**解题思路**：
+
+1.使用前序遍历即可得到结果
+
+2.像这种字符串拼接得到数字结果的可以考虑使用StringBuilder作为容器
+
+**代码实现**：
+
+```java
+class Solution {
+
+    StringBuilder path = new StringBuilder();
+    int res = 0;
+    public int sumNumbers(TreeNode root) {
+        //遍历二叉树就能出结果
+        traverse(root);
+        return res;
+    }
+
+    private void traverse(TreeNode root){
+        if(root==null) return;
+        //前序遍历
+        path.append(root.val);
+        //判断是否可以加到结果集里
+        if(root.left==null && root.right==null){
+            res += Integer.parseInt(path.toString());
+        }
+        traverse(root.left);
+        traverse(root.right);
+        path.deleteCharAt(path.length()-1);
+    }
+}
+```
+
+
 
 
 
@@ -2759,6 +2847,34 @@ class Solution {
 }
 ```
 
+```java
+class Solution {
+    public int[][] merge(int[][] intervals) {
+        
+        int len = intervals.length;
+        //根据第一个元素的大小对数组排序
+        Arrays.sort(intervals,(a,b)->a[0]-b[0]);
+        //存储结果集，先初始化len
+        int[][] res = new int[len][2];
+        //结果集第一位数先存储数组第一位
+        int index = 0;
+        res[index] = intervals[0];
+        //下标从1开始，以后的每一个
+        for(int i=1;i<len;i++){
+            //以后的每一个元素都和结果集比较
+            //第一个元素比结果集的第二个元素还大，存储到新的结果集中
+            if(intervals[i][0]>res[index][1]){
+                index++;
+                res[index] = intervals[i];
+            }else{//否则更新结果集大小
+                res[index][1] = Math.max(intervals[i][1],res[index][1]);
+            }
+        }
+        return Arrays.copyOf(res,index+1);
+    }
+}
+```
+
 
 
 ### 169、多数元素
@@ -3205,7 +3321,7 @@ class Solution {
 3. 在缩小窗口时开始更新结果数据，然后缩小窗口，直到窗口不能覆盖辅助窗口
 4. 返回结果值
 
-注意：缩小窗口时就要更新结果
+注意：缩小窗口时就要更新结果。
 
 **代码实现**：
 
@@ -3235,6 +3351,7 @@ class Solution {
             char c = s.charAt(right);
             window.put(c, window.getOrDefault(c, 0) + 1);
             right++;
+            //这一步关键
             if (window.get(c).equals(need.get(c))) {
                 match++;
             }
@@ -3250,6 +3367,7 @@ class Solution {
                 char c1 = s.charAt(left);
                 window.put(c1, window.get(c1) - 1);
                 left++;
+                //这一步关键
                 if (need.containsKey(c1)) {
                     if (window.get(c1) < need.get(c1)) {
                         match--;

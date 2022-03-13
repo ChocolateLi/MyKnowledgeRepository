@@ -671,7 +671,7 @@ lateral view explode(split(test.name,'|')) as name
 
 ## 面试题汇总
 
-### 1、字节跳动一面题
+### 1、字节跳动面试题
 
 ```
 第一道，有一个成绩表数据t1
@@ -728,7 +728,7 @@ from
 	stu_score
 ```
 
-### 2、字节跳动二面
+### 2、字节跳动面试题
 
 ```
 两张表，第一张表是用户看某个视频的播放量，比如用户A看视频Java看了10次
@@ -771,9 +771,11 @@ on v.video=t.video;tmp
 --3.使用排序函数排序
 select 
 	video_id,video_name,video_url,total_play_cnt,
-	row_number()over(order by total_play_cnt desc)
+	row_number()over(order by total_play_cnt desc) as rank
 from
 	tmp
+where 
+	rank<=500
 ```
 
 ### 3、京东面试题
@@ -1050,15 +1052,180 @@ having
 
 
 
+### SQL第四题
+
+请用sql写出所有用户中在今年10月份第一次购买商品的金额，表order字段:user_id,money,paymenttime(2017-10-01 16:04:01),orderid
+
+思路：
+
+1.先找出所有用户10月份第一次购买的记录
+
+2.再两表join找到金额
+
+```sql
+--1.先找出所有用户10月份第一次购买的记录
+select
+	user_id,min(paymenttime) as paymenttime
+from
+	`table`
+where
+	date_format(paymenttime,'yyyy-mm')='2017-10'
+group by
+	user_id;t1
+	
+--2.再两表join找到金额
+select
+	t1.user_id,t1.paymenttime,t2.money
+from
+	(select user_id,paymenttime from t1)t1
+join
+	(select user_id,money from t2)t2
+on t1.user_id=t2.user_id and t1.paymenttime=t2.paymenttime
+```
+
+### SQL第五题
+
+有一个线上服务器访问日志格式如下 tabel
+
+```
+时间						接口						IP地址
+2016-11-09 14:22:05		/api/user/login			110.03.523
+...
+```
+
+求11月9号下午 14点（14-15点），访问/api/user/login接口的top10的ip地址
+
+```sql
+select 
+	ip,count(*) as visit_count
+from
+	`table`
+where
+	date_format(time,'yyyy-mm-dd HH')>='2016-11-09 14' and
+	date_format(time,'yyyy-mm-dd HH')<='2016-11-09 15' and
+	interface = '/api/user/login'
+group by ip
+order by visit_count desc
+limit 10;
+
+```
+
+**知识点**
+
+limit子句用于限制查询结果返回的数量。
+
+用法：`select * from tableName limit i,n`
+
+参数：i 表示查询结果的索引值(默认从0开始，从0开始可以省略)
+
+n表示查询结果返回的数量
+
+**总结**
+
+跟字节跳动面试题对比，如果需要加上排名的话，那么要考虑使用窗口函数，如果不加的话，可以考虑使用order by排序 limit取前几位
 
 
 
+### SQL第六题
 
+用一条SQL语句查询出每门课程都大于80分的学生姓名
 
+```sql
+select
+	name
+from
+ 	student
+group by
+	name
+having
+	min(score)>=80;--最小的分数都大于80分了，则所有的课程都大于80分
+```
 
+### SQL第七题
 
+有下面的表
 
+```
+year month amount
+1991	1	1.1
+1991	2	1.2
+1991	3	1.3
+1991	4	1.4
+1992	1	2.1
+1992	2	2.2
+1992	3	2.3
+1992	4	2.4
+...
+```
 
+查询结果为这样
+
+```
+year	m1	m2	m3	m4
+1991	1.1	1.2	1.3	1.4
+1992	2.1	2.2	2.3	2.4
+```
+
+知识点：使用case when
+
+```sql
+select
+	year,
+	max(case when month='1' then amount end) as m1,
+	max(case when month='2' then amount end) as m2,
+	max(case when month='3' then amount end) as m3,
+	max(case when month='4' then amount end) as m4
+from
+	`table`
+group by year;
+```
+
+### SQL第八题
+
+一个info表
+
+```
+date	result
+2005-05-09	win
+2005-05-09	lose
+2005-05-09	lose
+2005-05-09	win
+2005-05-10	win
+2005-05-10	lose
+2005-05-10	lose
+```
+
+统计成这样
+
+```
+date 		win lose
+2005-05-09	2	2
+2005-05-10	1	2
+```
+
+知识点：使用sum和case when(或者if)
+
+```sql
+--case when
+select
+	date,
+	sum(case when result='win' then 1 else 0 end) as win,
+	sum(case when result='lose' then 1 else 0 end) as lose
+from
+	`table`
+group by
+	date;
+	
+--if
+select
+	date,
+	sum(if(result='win',1,0)) as win,
+	sum(if(result='lose',1,0)) as lose
+from
+	`table`
+group by
+	date;
+```
 
 
 
