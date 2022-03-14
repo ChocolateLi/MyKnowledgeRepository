@@ -9,6 +9,8 @@
 3. 点开Thread类源码发现，其实Thread类继承了Runnable接口，看Thread类的run()方法，本质都是一样的
 
    ```java
+   private Runnable target;
+   
    @Override
    public void run(){
        if(target!=null){

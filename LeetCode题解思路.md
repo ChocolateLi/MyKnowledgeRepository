@@ -520,6 +520,26 @@ class Solution {
 
 
 
+### 82、删除排序链表中的重复元素2
+
+**题目链接**：[删除排序链表中的重复元素2](https://leetcode-cn.com/problems/remove-duplicates-from-sorted-list-ii/)
+
+**算法思路**：
+
+**代码实现**：
+
+
+
+### 83、删除排序链表中的重复元素1
+
+**题目链接**：[删除排序链表中的重复元素1](https://leetcode-cn.com/problems/remove-duplicates-from-sorted-list/submissions/)
+
+**算法思路**：
+
+**代码实现**：
+
+
+
 ### 141、环形链表
 
 **题目链接**：[环形链表](https://leetcode-cn.com/problems/linked-list-cycle/)
@@ -1068,6 +1088,32 @@ class Solution {
 
 方法一：动态规划
 
+1.定义dp数组，dp[i]表示以s[i-1]为结尾的字符串最长有效括号
+
+2.定义栈存储左括号的下标，遍历数组，碰到左括号，进栈，并且当前下标的dp[i+1]为0；碰到右括号，则出栈，计算有效括号的长度，当前有效括号的长度 = i - leftIndex +1 + dp[leftIndex]；之前的dp[leftIndex]不能丢
+
+3.最后遍历dp数组，找出最长的有效括号次数
+
+注意：为什么dp数组要为s.length()+1？用dp[i+1]取存储下标为i的值
+
+以括号 )()()( 为例
+
+1.dp[] = new int[s.length()+1],dp[i+1]的情况（正确答案）
+
+| dp[0] | dp[1] | dp[2] | dp[3] | dp[4] | dp[5] | dp[6] |
+| ----- | ----- | ----- | ----- | ----- | ----- | ----- |
+|       | 0     | 0     | 2     | 0     | 4     | 0     |
+
+2.dp[] = new int[s.length()],dp[i]的情况（错误答案）
+
+| dp[0] | dp[1] | dp[2] | dp[3] | dp[4] | dp[5] |
+| ----- | ----- | ----- | ----- | ----- | ----- |
+| 0     | 0     | 2     | 0     | 2     | 0     |
+
+
+
+
+
 方法二：栈
 
 1. 定义一个栈，先放入-1。这样做的目的是，让当前右括号的下标减去栈顶元素即为要求的长度，也为了保持统一。
@@ -1077,6 +1123,46 @@ class Solution {
 关键：栈存储的是数组下标；先放入-1；碰到左括号就添加到栈，注意放入的是下标；碰到右括号，先弹出栈顶元素，再取栈顶元素进行相减取最大
 
 **代码实现**：
+
+动态规划
+
+```java
+class Solution {
+    public int longestValidParentheses(String s) {
+        //定义数组，dp[i]表示以s[i-1]结尾的字符串的最长有效括号
+        int[] dp = new int[s.length()+1];
+        //定义栈，存储左括号的下标索引
+        Stack<Integer> stack = new Stack<>();
+        for(int i=0;i<s.length();i++){
+            if(s.charAt(i)=='('){
+                stack.push(i);
+                //既然是左括号，当前位置的字符串最长有效括号肯定为0
+                dp[i+1] = 0;
+            }else{
+                //遇到右括,栈不为空才能取出左括号索引
+                if(!stack.isEmpty()){
+                    int leftIndex = stack.pop();
+                    int len = i - leftIndex + 1 + dp[leftIndex];
+                    dp[i+1] = len;
+                }else{
+                    dp[i+1] = 0;
+                }
+            }
+        }
+
+        int res = 0;
+        for(int x:dp){
+            res = Math.max(res,x);
+        }
+
+        return res;
+    }
+}
+```
+
+
+
+栈
 
 ```java
 class Solution {
@@ -1101,6 +1187,80 @@ class Solution {
             }
         }
         return res;
+    }
+}
+```
+
+
+
+### 921、使括号有效的最少添加
+
+**题目链接**：[使括号有效的最少添加](https://leetcode-cn.com/problems/minimum-add-to-make-parentheses-valid/)
+
+**解题思路**：
+
+判断括号有效性的算法
+
+```java
+bool isValid(string str) {
+
+    // 待匹配的左括号数量
+    int left = 0;
+    for (int i = 0; i < str.size(); i++) {
+        if (s[i] == '(') {
+            left++;
+        } else {
+            // 遇到右括号
+            left--;
+        }
+        // 右括号太多
+        if (left == -1)
+            return false;
+    }
+    // 是否所有的左括号都被匹配了
+    return left == 0;
+}
+
+```
+
+这题思路差不多：
+
+1.使用两个变量分别表示需要多少括号的次数
+
+2.遍历字符串，每碰到左括号则右括号需要的次数加1，碰到右括号则右括号需要的次数减1。如果右括号多了，则左括号需要加1
+
+3.最后返回左右括号相加
+
+**代码实现**：
+
+```java
+class Solution {
+    public int minAddToMakeValid(String s) {
+
+        //记录左括号需要的次数
+        int leftNeed = 0;
+        //记录右括号需要的次数
+        int rightNeed = 0;
+
+        for(int i=0;i<s.length();i++){
+            if(s.charAt(i)=='('){
+                rightNeed++;
+            }
+            if(s.charAt(i)==')'){
+                rightNeed--;
+            }
+            //右括号太多
+            if(rightNeed==-1){
+                //添加左括号
+                leftNeed++;
+                //达到平衡
+                rightNeed = 0;
+            }
+        }
+
+        //最后返回左括号需要的次数 + 右括号需要的次数
+        return leftNeed + rightNeed;
+
     }
 }
 ```
@@ -1678,8 +1838,6 @@ boolean isValidBST(TreeNode root) {
         && isValidBST(root.right);
 }
 ```
-
-
 
 正确代码，通过添加参数完成最小值和最大值的记录
 
@@ -2713,6 +2871,16 @@ Arrays.sort(nums, new Comparator<int[]>() {
 //只根据第一位进行排序
 Arrays.sort(nums,(v1,v2) -> v1[0]-v2[0])
 ```
+
+
+
+### 26、删除有序数组的重复项
+
+**题目链接**：[删除有序数组的重复项](https://leetcode-cn.com/problems/remove-duplicates-from-sorted-array/)
+
+**算法思路**：
+
+**代码实现**：
 
 
 
@@ -4496,159 +4664,6 @@ class Solution {
 
 
 
-### 股票买卖问题
-
-👍动态规划解题步骤
-
-```java
-1.定义dp数组
-2.初始化
-3.状态转移方程
-
-动态规划的本质就是穷举状态，然后在状态选择中选择最优
-for 状态1 in 状态1的所有取值：
-    for 状态2 in 状态2的所有取值：
-        for ...
-            dp[状态1][状态2][...] = 择优(选择1，选择2...)
-```
-
-[本题讲解思路](https://labuladong.gitee.io/algo/1/12/)
-
-```java
-/*
-每天都有三种「选择」：买入、卖出、无操作，我们用 buy, sell, rest 表示这三种选择
-条件：因为 sell 必须在 buy 之后，buy 必须在 sell 之后。那么 rest 操作还应该分两种状态，一种是 buy 之后的 rest（持有了股票），一种是 sell 之后的 rest（没有持有股票）。而且别忘了，我们还有交易次数 k 的限制，就是说你 buy 还只能在 k > 0 的前提下操作。
-
-「状态」有三个，第一个是天数，第二个是允许交易的最大次数，第三个是当前的持有状态（即之前说的 rest 的状态，我们不妨用 1 表示持有，0 表示没有持有）。考虑用三维数组
-dp[i][k][0 or 1]
-0 <= i <= n - 1, 1 <= k <= K
-n 为天数，大 K 为交易数的上限，0 和 1 代表是否持有股票。
-此问题共 n × K × 2 种状态，全部穷举就能搞定。
-*/
-for 0 <= i < n:
-    for 1 <= k <= K:
-        for s in {0, 1}:
-            dp[i][k][s] = max(buy, sell, rest)
-            
-//最终答案是 dp[n - 1][K][0]，即最后一天，最多允许 K 次交易，最多获得多少利润。
-                
-1.定义dp数组
-dp数组为dp[i][k][0 or 1]。记住数组表示的能获得的最大利润
-                
-2.状态转移方程
-dp[i][k][0] = max(dp[i-1][k][0], dp[i-1][k][1] + prices[i])
-              max( 今天选择 rest,        今天选择 sell       )
-/*
-解释：今天我没有持有股票，有两种可能，我从这两种可能中求最大利润：
-1、我昨天就没有持有，且截至昨天最大交易次数限制为 k；然后我今天选择 rest，所以我今天还是没有持有，最大交易次数限制依然为 k。
-2、我昨天持有股票，且截至昨天最大交易次数限制为 k；但是今天我 sell 了，所以我今天没有持有股票了，最大交易次数限制依然为 k。
-*/
-                
-dp[i][k][1] = max(dp[i-1][k][1], dp[i-1][k-1][0] - prices[i])
-              max( 今天选择 rest,         今天选择 buy         )
-/*
-解释：今天我持有着股票，最大交易次数限制为 k，那么对于昨天来说，有两种可能，我从这两种可能中求最大利润：
-1、我昨天就持有着股票，且截至昨天最大交易次数限制为 k；然后今天选择 rest，所以我今天还持有着股票，最大交易次数限制依然为 k。
-2、我昨天本没有持有，且截至昨天最大交易次数限制为 k - 1；但今天我选择 buy，所以今天我就持有股票了，最大交易次数限制为 k。
-*/
-
-3.初始化
-dp[-1][...][0] = 0
-//解释：因为 i 是从 0 开始的，所以 i = -1 意味着还没有开始，这时候的利润当然是 0。
-
-dp[-1][...][1] = -infinity
-//解释：还没开始的时候，是不可能持有股票的。
-//因为我们的算法要求一个最大值，所以初始值设为一个最小值，方便取最大值。
-
-dp[...][0][0] = 0
-//解释：因为 k 是从 1 开始的，所以 k = 0 意味着根本不允许交易，这时候利润当然是 0。
-
-dp[...][0][1] = -infinity
-//解释：不允许交易的情况下，是不可能持有股票的。
-//因为我们的算法要求一个最大值，所以初始值设为一个最小值，方便取最大值。
-
-                
-//最终代码
-//1.定义dp数组
-dp[i][k][0 or 1]
-//2.初始化
-dp[-1][...][0] = dp[...][0][0] = 0
-dp[-1][...][1] = dp[...][0][1] = -infinity
-
-//3.状态转移方程
-dp[i][k][0] = max(dp[i-1][k][0], dp[i-1][k][1] + prices[i])
-dp[i][k][1] = max(dp[i-1][k][1], dp[i-1][k-1][0] - prices[i])
-                
-```
-
-#### 121.买卖股票的最佳时机（k=1）
-
-**题目链接**：[买卖股票的最佳时机](https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock/)
-
-**解题思路**：
-
-```java
-dp[i][1][0] = max(dp[i-1][1][0], dp[i-1][1][1] + prices[i])
-dp[i][1][1] = max(dp[i-1][1][1], dp[i-1][0][0] - prices[i]) 
-            = max(dp[i-1][1][1], -prices[i])
-//解释：k = 0 的 base case，所以 dp[i-1][0][0] = 0。
-
-//现在发现 k 都是 1，不会改变，即 k 对状态转移已经没有影响了。
-//可以进行进一步化简去掉所有 k：
-dp[i][0] = max(dp[i-1][0], dp[i-1][1] + prices[i])
-dp[i][1] = max(dp[i-1][1], -prices[i])
-```
-
-**代码实现**：
-
-自己的版本，不通用
-
-```java
-class Solution {
-    public int maxProfit(int[] prices) {
-        //定义dp数组，dp[i]表示以nums[i]结尾能获取的最大利润
-        int[] dp = new int[prices.length];
-        //初始化dp数组,第一天最大利润就是不买
-        dp[0] = 0;
-        int minPreice = prices[0];
-        //定义最大利润
-        int res = 0;
-        for(int i=1;i<prices.length;i++){
-            if(prices[i]<minPreice){
-                minPreice = prices[i];
-                dp[i] = 0;
-            }else{
-                dp[i] = prices[i] - minPreice;
-                res = Math.max(res,dp[i]);
-            }
-        }
-        return res;
-
-    }
-}
-```
-
-通用版本
-
-```java
-class Solution {
-    public int maxProfit(int[] prices) {
-        int n = prices.length;
-        //1.定义dp数组,k=1可以省略
-        int [][] dp = new int[n][2];
-        //2.初始化
-        dp[0][0] = 0;//第一天没有持有股票，利润为0
-        dp[0][1] = -prices[0];//第一天就持有股票，利润当然是负的啦
-        //3.状态转移方程
-        for(int i=1;i<n;i++){
-            dp[i][0] = Math.max(dp[i-1][0],dp[i-1][1] + prices[i]);
-            dp[i][1] = Math.max(dp[i-1][1],-prices[i]);
-        }
-        return dp[n-1][0];
-    }
-}
-```
-
 
 
 ### 198、打家劫舍
@@ -4922,6 +4937,217 @@ class Solution {
 
     private int max(int a,int b,int c){
         return Math.max(a,Math.max(b,c));
+    }
+}
+```
+
+### 221、最大正方形
+
+**题目链接**：[最大正方形](https://leetcode-cn.com/problems/maximal-square/)
+
+**解题思路**：
+
+求最值问题，首先想到动态规划问题。
+
+状态转移方程：
+
+```java
+// 伪代码
+if (matrix(i - 1, j - 1) == '1') {
+    dp(i, j) = min(dp(i - 1, j), dp(i, j - 1), dp(i - 1, j - 1)) + 1;
+}
+```
+
+
+
+**代码实现**：
+
+```java
+class Solution {
+    public int maximalSquare(char[][] matrix) {
+        int m = matrix.length;
+        int n = matrix[0].length;
+        //存储最大的边
+        int maxSize = 0;
+        //1.定义dp数组，dp[i][j]表示以matric[i-1][j-1]为右下角的最大正方形的边长
+        //多设置一行一列的原因在于方便计算边上的值
+        int[][] dp = new int[m+1][n+1];
+        //2.初始化dp数组，默认dp[m][0]和dp[0][n]的值都为0
+        //3.定义状态转移方程
+        for(int i=0;i<m;i++){
+            for(int j=0;j<n;j++){
+                if(matrix[i][j]=='1'){
+                    //只跟左边、上边、左上角的数值有关，并且取值最小的那个
+                    //木桶理论
+                    dp[i+1][j+1] = min(dp[i+1][j],dp[i][j+1],dp[i][j])+1;
+                    maxSize = Math.max(maxSize,dp[i+1][j+1]);
+                }
+            }
+        }
+
+        return maxSize * maxSize;
+
+    }
+
+    private int min(int a,int b,int c){
+        return Math.min(a,Math.min(b,c));
+    }
+}
+```
+
+
+
+
+
+### 股票买卖问题
+
+👍动态规划解题步骤
+
+```java
+1.定义dp数组
+2.初始化
+3.状态转移方程
+
+动态规划的本质就是穷举状态，然后在状态选择中选择最优
+for 状态1 in 状态1的所有取值：
+    for 状态2 in 状态2的所有取值：
+        for ...
+            dp[状态1][状态2][...] = 择优(选择1，选择2...)
+```
+
+[本题讲解思路](https://labuladong.gitee.io/algo/1/12/)
+
+```java
+/*
+每天都有三种「选择」：买入、卖出、无操作，我们用 buy, sell, rest 表示这三种选择
+条件：因为 sell 必须在 buy 之后，buy 必须在 sell 之后。那么 rest 操作还应该分两种状态，一种是 buy 之后的 rest（持有了股票），一种是 sell 之后的 rest（没有持有股票）。而且别忘了，我们还有交易次数 k 的限制，就是说你 buy 还只能在 k > 0 的前提下操作。
+
+「状态」有三个，第一个是天数，第二个是允许交易的最大次数，第三个是当前的持有状态（即之前说的 rest 的状态，我们不妨用 1 表示持有，0 表示没有持有）。考虑用三维数组
+dp[i][k][0 or 1]
+0 <= i <= n - 1, 1 <= k <= K
+n 为天数，大 K 为交易数的上限，0 和 1 代表是否持有股票。
+此问题共 n × K × 2 种状态，全部穷举就能搞定。
+*/
+for 0 <= i < n:
+    for 1 <= k <= K:
+        for s in {0, 1}:
+            dp[i][k][s] = max(buy, sell, rest)
+            
+//最终答案是 dp[n - 1][K][0]，即最后一天，最多允许 K 次交易，最多获得多少利润。
+                
+1.定义dp数组
+dp数组为dp[i][k][0 or 1]。记住数组表示的能获得的最大利润
+                
+2.状态转移方程
+dp[i][k][0] = max(dp[i-1][k][0], dp[i-1][k][1] + prices[i])
+              max( 今天选择 rest,        今天选择 sell       )
+/*
+解释：今天我没有持有股票，有两种可能，我从这两种可能中求最大利润：
+1、我昨天就没有持有，且截至昨天最大交易次数限制为 k；然后我今天选择 rest，所以我今天还是没有持有，最大交易次数限制依然为 k。
+2、我昨天持有股票，且截至昨天最大交易次数限制为 k；但是今天我 sell 了，所以我今天没有持有股票了，最大交易次数限制依然为 k。
+*/
+                
+dp[i][k][1] = max(dp[i-1][k][1], dp[i-1][k-1][0] - prices[i])
+              max( 今天选择 rest,         今天选择 buy         )
+/*
+解释：今天我持有着股票，最大交易次数限制为 k，那么对于昨天来说，有两种可能，我从这两种可能中求最大利润：
+1、我昨天就持有着股票，且截至昨天最大交易次数限制为 k；然后今天选择 rest，所以我今天还持有着股票，最大交易次数限制依然为 k。
+2、我昨天本没有持有，且截至昨天最大交易次数限制为 k - 1；但今天我选择 buy，所以今天我就持有股票了，最大交易次数限制为 k。
+*/
+
+3.初始化
+dp[-1][...][0] = 0
+//解释：因为 i 是从 0 开始的，所以 i = -1 意味着还没有开始，这时候的利润当然是 0。
+
+dp[-1][...][1] = -infinity
+//解释：还没开始的时候，是不可能持有股票的。
+//因为我们的算法要求一个最大值，所以初始值设为一个最小值，方便取最大值。
+
+dp[...][0][0] = 0
+//解释：因为 k 是从 1 开始的，所以 k = 0 意味着根本不允许交易，这时候利润当然是 0。
+
+dp[...][0][1] = -infinity
+//解释：不允许交易的情况下，是不可能持有股票的。
+//因为我们的算法要求一个最大值，所以初始值设为一个最小值，方便取最大值。
+
+                
+//最终代码
+//1.定义dp数组
+dp[i][k][0 or 1]
+//2.初始化
+dp[-1][...][0] = dp[...][0][0] = 0
+dp[-1][...][1] = dp[...][0][1] = -infinity
+
+//3.状态转移方程
+dp[i][k][0] = max(dp[i-1][k][0], dp[i-1][k][1] + prices[i])
+dp[i][k][1] = max(dp[i-1][k][1], dp[i-1][k-1][0] - prices[i])
+                
+```
+
+#### 121.买卖股票的最佳时机（k=1）
+
+**题目链接**：[买卖股票的最佳时机](https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock/)
+
+**解题思路**：
+
+```java
+dp[i][1][0] = max(dp[i-1][1][0], dp[i-1][1][1] + prices[i])
+dp[i][1][1] = max(dp[i-1][1][1], dp[i-1][0][0] - prices[i]) 
+            = max(dp[i-1][1][1], -prices[i])
+//解释：k = 0 的 base case，所以 dp[i-1][0][0] = 0。
+
+//现在发现 k 都是 1，不会改变，即 k 对状态转移已经没有影响了。
+//可以进行进一步化简去掉所有 k：
+dp[i][0] = max(dp[i-1][0], dp[i-1][1] + prices[i])
+dp[i][1] = max(dp[i-1][1], -prices[i])
+```
+
+**代码实现**：
+
+自己的版本，不通用
+
+```java
+class Solution {
+    public int maxProfit(int[] prices) {
+        //定义dp数组，dp[i]表示以nums[i]结尾能获取的最大利润
+        int[] dp = new int[prices.length];
+        //初始化dp数组,第一天最大利润就是不买
+        dp[0] = 0;
+        int minPreice = prices[0];
+        //定义最大利润
+        int res = 0;
+        for(int i=1;i<prices.length;i++){
+            if(prices[i]<minPreice){
+                minPreice = prices[i];
+                dp[i] = 0;
+            }else{
+                dp[i] = prices[i] - minPreice;
+                res = Math.max(res,dp[i]);
+            }
+        }
+        return res;
+
+    }
+}
+```
+
+通用版本
+
+```java
+class Solution {
+    public int maxProfit(int[] prices) {
+        int n = prices.length;
+        //1.定义dp数组,k=1可以省略
+        int [][] dp = new int[n][2];
+        //2.初始化
+        dp[0][0] = 0;//第一天没有持有股票，利润为0
+        dp[0][1] = -prices[0];//第一天就持有股票，利润当然是负的啦
+        //3.状态转移方程
+        for(int i=1;i<n;i++){
+            dp[i][0] = Math.max(dp[i-1][0],dp[i-1][1] + prices[i]);
+            dp[i][1] = Math.max(dp[i-1][1],-prices[i]);
+        }
+        return dp[n-1][0];
     }
 }
 ```

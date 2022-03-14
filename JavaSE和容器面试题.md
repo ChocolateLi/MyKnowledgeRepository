@@ -125,12 +125,6 @@ Queue是队列集合。
 
 Map代表的是存储key-value对的集合，可根据元素的key来访问value。
 
-
-
-#### 2、
-
-
-
 ### HashMap
 
 #### 1、HashMap原理
