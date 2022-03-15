@@ -497,7 +497,7 @@ new SparkConf()
 
 JVM基本结构图
 
-![](https://github.com/ChocolateLi/spark-project/blob/master/spark_picture/JVM%E7%BB%93%E6%9E%84.png?raw=true)
+![JVM结构](D:\MyFile\求职面试\spark_picture\JVM结构.png)
 
 
 

@@ -528,6 +528,33 @@ class Solution {
 
 **代码实现**：
 
+```java
+class Solution {
+    public ListNode deleteDuplicates(ListNode head) {
+        if(head==null || head.next==null) return head;
+        //因为头节点可能重复，所以构建虚拟节点
+        ListNode newHead = new ListNode();
+        ListNode pre = newHead;
+        ListNode cur = head;
+        pre.next = cur;
+        while(cur!=null && cur.next!=null){
+            if(cur.val==cur.next.val){
+                while(cur.next!=null && cur.val==cur.next.val){
+                    cur = cur.next;
+                }
+                pre.next = cur.next;
+            }else{
+                pre = cur;
+            }
+            cur = cur.next;
+        }
+        return newHead.next;
+    }
+}
+```
+
+
+
 
 
 ### 83、删除排序链表中的重复元素1
@@ -536,7 +563,34 @@ class Solution {
 
 **算法思路**：
 
+1.使用快慢指针，快指针的值不等于慢指针的值，即可让慢指针的下一位等于快指针
+
+注意：删除重复元素，但并不是把所有重复元素删除，可以考虑使用快慢指针来实现
+
 **代码实现**：
+
+```java
+class Solution {
+    public ListNode deleteDuplicates(ListNode head) {
+        if(head==null || head.next==null) return head;
+        //使用快慢指针
+        ListNode slow = head;
+        ListNode fast = head;
+        while(fast!=null){
+            if(fast.val!=slow.val){
+                slow.next = fast;
+                slow = slow.next;
+            }
+            fast = fast.next;
+        }
+        //最后要把链断开
+        slow.next = null;
+        return head;
+    }
+}
+```
+
+
 
 
 
@@ -2880,7 +2934,31 @@ Arrays.sort(nums,(v1,v2) -> v1[0]-v2[0])
 
 **算法思路**：
 
+1.使用快慢指针，快指针往前找，找到跟慢指针不相同的值，将慢指针加1，并且慢指针的值设为快指针的值
+
 **代码实现**：
+
+```java
+class Solution {
+    public int removeDuplicates(int[] nums) {
+        //使用快慢指针
+        int slow = 0;
+        int fast = 0;
+        while(fast<nums.length){
+            //找到跟慢指针不相等的数据
+            if(nums[fast]!=nums[slow]){
+                //慢指针加1并且等于快指针的值
+                nums[++slow] = nums[fast];
+            }
+            //快指针继续往前推进
+            fast++;
+        }
+        return slow+1;
+    }
+}
+```
+
+
 
 
 
@@ -6511,12 +6589,6 @@ class Solution {
     }
 }
 ```
-
-
-
-
-
-
 
 
 
