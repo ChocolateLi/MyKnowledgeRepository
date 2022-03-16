@@ -912,6 +912,45 @@ on tb1.id=tb2.id
 where tb2.id is null;
 ```
 
+### 7、字节跳动面试题
+
+求11月份的新用户次日留存率
+
+牛客网：[2021年11月每天新用户的次日留存率](https://www.nowcoder.com/practice/1fc0e75f07434ef5ba4f1fb2aa83a450?tpId=268&tqId=2285344&ru=/exam/oj&qru=/ta/sql-factory-interview/question-ranking&sourceUrl=%2Fexam%2Foj%3Ftab%3DSQL%25E7%25AF%2587%26topicId%3D268)
+
+```
+id login_time 
+1	2021-11-01 12：00：01	
+2	2021-11-01 12：00：01	
+3	2021-11-01 12：00：01	
+1	2021-11-02 12：00：01	
+2	2021-11-02 12：00：01	
+4	2021-11-02 12：00：01	
+...
+比如这张表的新用户留存率为66.7%
+11.1 有三个新用户 1 2 3
+11.2 两个新用户留下来了 1 2
+所以新用户留存率为 2/3=66.7%
+```
+
+```sql
+--1.第一步，求出每天新用户登录的日期
+select id,date_format(min(login_time),'yyyy-mm-dd') as login_time
+from t_login
+group by id;new_user
+
+--2.将新用户登录的表和登录表进行left join
+select t1.id as id1,t1.login_time as time1,t2.id as id2,t2.login_time as time2
+from
+(select id,login_time from new_user)t1
+left join
+(select id,date_format(login_time,'yyyy-mm-dd') from t_login)t2
+on t1.id=t2.id and t1.login_time = date_sub(t2.login_time,1);
+
+--3.求根据用户id求和
+
+```
+
 
 
 ## 常见面试题
