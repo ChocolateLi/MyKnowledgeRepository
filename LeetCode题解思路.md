@@ -3054,6 +3054,129 @@ class Solution {
 
 
 
+### 54、螺旋矩阵
+
+**题目链接**：[螺旋矩阵](https://leetcode-cn.com/problems/spiral-matrix/)
+
+**算法思路**：
+
+1.定义上下左右边界，按照上右下左的顺序进行遍历
+
+2.每遍历完一行或者一列元素，都要进行边界的缩小。每次遍历前都要先判断边界是否合法
+
+**代码实现**：
+
+```java
+class Solution {
+    public List<Integer> spiralOrder(int[][] matrix) {
+        ArrayList<Integer> res = new ArrayList<>();
+        int m = matrix.length;
+        int n = matrix[0].length;
+        //四个边界
+        int up = 0;
+        int down = m-1;
+        int left = 0;
+        int right = n-1;
+        while(res.size() < m * n){
+            //遍历上方
+            if(up<=down){
+                for(int i=left;i<=right;i++){
+                    res.add(matrix[up][i]);
+                }
+                //遍历完，上边界下移
+                up++;
+            }
+            //遍历右方
+            if(left<=right){
+                for(int i=up;i<=down;i++){
+                    res.add(matrix[i][right]);
+                }
+                //遍历完，右边界左移
+                right--;
+            }
+            //遍历下方
+            if(up<=down){
+                for(int i=right;i>=left;i--){
+                    res.add(matrix[down][i]);
+                }
+                //遍历完，下边界上移
+                down--;
+            }
+            //遍历左方
+            if(left<=right){
+                for(int i=down;i>=up;i--){
+                    res.add(matrix[i][left]);
+                }
+                //遍历完，左边界右移
+                left++;
+            }
+        }
+        return res; 
+    }
+}
+```
+
+### 59、螺旋矩阵2
+
+**题目链接**：[螺旋矩阵2](https://leetcode-cn.com/problems/spiral-matrix-ii/)
+
+**解题思路**：跟上题一样的思路
+
+**代码实现**：
+
+```java
+class Solution {
+    public int[][] generateMatrix(int n) {
+        int[][] matrix = new int[n][n];
+    int upper_bound = 0, lower_bound = n - 1;
+    int left_bound = 0, right_bound = n - 1;
+    // 需要填入矩阵的数字
+    int num = 1;
+    
+    while (num <= n * n) {
+        if (upper_bound <= lower_bound) {
+            // 在顶部从左向右遍历
+            for (int j = left_bound; j <= right_bound; j++) {
+                matrix[upper_bound][j] = num++;
+            }
+            // 上边界下移
+            upper_bound++;
+        }
+        
+        if (left_bound <= right_bound) {
+            // 在右侧从上向下遍历
+            for (int i = upper_bound; i <= lower_bound; i++) {
+                matrix[i][right_bound] = num++;
+            }
+            // 右边界左移
+            right_bound--;
+        }
+        
+        if (upper_bound <= lower_bound) {
+            // 在底部从右向左遍历
+            for (int j = right_bound; j >= left_bound; j--) {
+                matrix[lower_bound][j] = num++;
+            }
+            // 下边界上移
+            lower_bound--;
+        }
+        
+        if (left_bound <= right_bound) {
+            // 在左侧从下向上遍历
+            for (int i = lower_bound; i >= upper_bound; i--) {
+                matrix[i][left_bound] = num++;
+            }
+            // 左边界右移
+            left_bound++;
+        }
+    }
+    return matrix;
+    }
+}
+```
+
+
+
 ### 56、合并区间
 
 **题目链接**：[合并区间](https://leetcode-cn.com/problems/merge-intervals/)

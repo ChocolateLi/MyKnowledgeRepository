@@ -918,6 +918,40 @@ where tb2.id is null;
 
 牛客网：[2021年11月每天新用户的次日留存率](https://www.nowcoder.com/practice/1fc0e75f07434ef5ba4f1fb2aa83a450?tpId=268&tqId=2285344&ru=/exam/oj&qru=/ta/sql-factory-interview/question-ranking&sourceUrl=%2Fexam%2Foj%3Ftab%3DSQL%25E7%25AF%2587%26topicId%3D268)
 
+牛课网题解
+
+```sql
+select 
+    dt1,
+    round(count(uid2)/count(uid1),2)
+from
+(
+select a.uid as uid1,a.dt as dt1,b.uid as uid2,b.dt as dt2
+from
+(select 
+     uid,
+     min(date(in_time)) dt
+ from tb_user_log  
+ group by uid) a
+left join 
+(select 
+     uid , 
+     date(in_time) dt
+  from tb_user_log
+  union 
+  select uid , date(out_time)
+  from tb_user_log) b
+on a.uid = b.uid 
+   and a.dt = date_sub(b.dt, INTERVAL 1 day)
+where date_format(a.dt,'%Y-%m') = '2021-11'
+    )last_table
+group by dt1
+order by dt1
+
+```
+
+
+
 ```
 id login_time 
 1	2021-11-01 12：00：01	
@@ -935,20 +969,36 @@ id login_time
 
 ```sql
 --1.第一步，求出每天新用户登录的日期
-select id,date_format(min(login_time),'yyyy-mm-dd') as login_time
+select id,min(to_date(login_time)) as login_time
 from t_login
 group by id;new_user
 
 --2.将新用户登录的表和登录表进行left join
-select t1.id as id1,t1.login_time as time1,t2.id as id2,t2.login_time as time2
+select t1.id as id1,t1.login_time as time1,t2.login_time as time2
 from
 (select id,login_time from new_user)t1
 left join
-(select id,date_format(login_time,'yyyy-mm-dd') from t_login)t2
-on t1.id=t2.id and t1.login_time = date_sub(t2.login_time,1);
+(select id,to_date(login_time) from t_login)t2
+on t1.id=t2.id and t1.login_time = date_sub(t2.login_time,1);last_table
 
---3.求根据用户id求和
+--表的形式变成这样 join_table
+id1	time1 id2 time2
+1	2021-11-01	1	2021-11-02
+2	2021-11-01	2	2021-11-02
+3	2021-11-01	null	null
+4	2021-11-02	null	null
+...
 
+--3.求根据时间分组用户id求和
+select 
+	time1,
+	count(id2)/count(id1) as rate
+from
+	last_table
+group by
+	time1
+order by
+	time1
 ```
 
 
@@ -1266,9 +1316,135 @@ group by
 	date;
 ```
 
+### SQL第九题
+
+求日新增用户(DNU)、日活(DAU)、周活(WAU)、月活(MAU)
+
+用户登录表 t_login
+
+```
+uid	login_time
+1	2022-1-12 12:01:05
+...
+```
+
+日新增用户
+
+```sql
+--1.先求出每个用户首次登录访问的日期
+select 
+	uid,min(to_date(login_time)) as first_time
+from
+	t_login
+group by 
+	uid;first_login
+	
+--2.根据上述表，求出每天的用户数量
+select 
+	first_time,count(*)
+from
+	first_login
+group by
+	login_time;
+```
+
+日活
+
+```sql
+--根据用户每天登录日期进行去重运算
+select 
+	to_date(login_time),count(distinct uid)
+from
+	t_login
+group by
+	to_date(login_time);
+```
+
+月活
+
+```sql
+--跟日活思路一样，只不过以月为单位
+select 
+	date_format(login_time,'yyyy-mm') as ym_date,
+	count(distinct uid)
+from
+	t_login
+group by
+	date_format(login_time,'yyyy-mm')
+	
+```
+
+周活
+
+难点：如何确定每一天都是哪个周，几号到几号，明确了每一周之后，再根据周来分组
+
+```sql
+--1.确定每一天都是在第几周
+select 
+	uid,login_time,weekofyear(login_time) as week
+from
+	t_login;week_table
+	
+--2.根据周来分组求和
+select 
+	week,count(distinct uid)
+from
+	week_table
+group by
+	week;
+```
+
+### SQL 第10题 各个视频平均完播率
+
+题目链接：[各个视频平均完播率](https://www.nowcoder.com/practice/96263162f69a48df9d84a93c71045753?tpId=268&tqId=2285032&ru=/exam/oj&qru=/ta/sql-factory-interview/question-ranking&sourceUrl=%2Fexam%2Foj%3Ftab%3DSQL%25E7%25AF%2587%26topicId%3D268)
+
+```sql
+--1.将两个表进行连接，将大于完播率的视频置为1否则置为0 last_table
+select a.video_id,if(a.watch_time>=b.duration,1,0) as flag
+from
+(select 
+ 	video_id,(end_time - start_time) as watch_time,start_time 
+ from 
+ 	tb_user_video_log)a
+left join 
+(select 
+ 	video_id,duration 
+ from 
+ 	tb_video_info)b
+on a.video_id=b.video_id
+where year(start_time)='2021'--这个条件不能忘了
+
+--2.根据video_id进行分组，求count和求sum
+select 
+	video_id,round(sum(flag)/count(video_id),3) as avg_comp_play_rate
+from
+	last_table
+group by
+	video_id
+order by 
+	avg_comp_play_rate desc
+```
 
 
 
+### SQL 第11题 平均播放进度大于60%的视频类别(答案不对)
+
+题目链接：[平均播放进度大于60%的视频类别](https://www.nowcoder.com/practice/c60242566ad94bc29959de0cdc6d95ef?tpId=268&tqId=2285039&ru=%2Fpractice%2F96263162f69a48df9d84a93c71045753&qru=%2Fta%2Fsql-factory-interview%2Fquestion-ranking&sourceUrl=%2Fexam%2Foj%3Ftab%3DSQL%25E7%25AF%2587%26topicId%3D268)
+
+```sql
+select tag,concat(round(avg(progress),2) * 100,'%') as avg_play_progress 
+from
+(
+select a.video_id,b.tag,if((a.watch_time/b.duration)>1,1,(a.watch_time/b.duration)) as progress
+from
+(select video_id,(end_time - start_time) as watch_time from tb_user_video_log)a
+left join
+(select video_id,tag,duration from tb_video_info)b
+on a.video_id=b.video_id
+)last_table
+group by tag
+having avg_play_progress>60
+```
 
 
 
