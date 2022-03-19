@@ -6100,6 +6100,68 @@ class Solution {
 
 
 
+### 93、复原IP地址
+
+**题目链接**：[复原IP地址](https://leetcode-cn.com/problems/restore-ip-addresses/)
+
+**解题思路**：
+
+1. 使用回溯法 + 剪枝的思路进行求解。需要确定一个变参，那就是切割的字符串位数
+2. 回溯的过程中，当list.size()长度为4时，说明都是合法字符串，加入到结果集中
+3. 回溯法的关键还是在于for循环如何处置，如果切割完字符串，剩余的字符串大于了合理字符串长度，进行剪枝；如果不大于，再判断切割的字符串是否是合理的字符串，如果不合理，剪枝
+4. 最后进行回溯求解
+
+**代码实现**：
+
+```java
+class Solution {
+
+    List<String> res = new ArrayList<>();
+    public List<String> restoreIpAddresses(String s) {
+        int len = s.length();
+        //对字符串长度进行判断
+        if(len<4 || len>12){
+            return res;
+        }
+        LinkedList<String> list = new LinkedList<>();
+        //回溯法
+        dfs(s,0,list);
+        return res;
+    }
+
+    private void dfs(String s,int start,LinkedList<String> list){
+        //递归终止条件，分割的四个字符都是合法的
+        if(list.size()==4){
+            res.add(String.join(".",list));
+            return;
+        }
+
+        for(int i=start;i<s.length();i++){
+            //每次切割后，对剩余字符串的长度进行判断，看是否合理
+            //比如你剩下10个字符串，但是合法的字符串最多是9个，因此进行剪枝
+            if(s.length()-i-1 > 3*(3-list.size())) continue;
+            //判断分割的字符串是否是合理的字符串
+            String str = s.substring(start,i+1);
+            if(!isValid(str)) continue;
+            //把合法的字符串加入到列表中
+            list.add(str);
+            dfs(s,i+1,list);
+            list.removeLast();           
+        }
+    }
+
+    private boolean isValid(String s){
+        //判断前导是否为0，比如01这种就是不合法的
+        if(s.charAt(0)=='0' && s.length()>1) return false;
+        //判断是否超过255。长度超过4直接返回false
+        if(s.length()>4 || Integer.parseInt(s)>255) return false;
+        return true;
+    }
+}
+```
+
+
+
 ### 200、岛屿数量
 
 **题目链接**：[岛屿数量](https://leetcode-cn.com/problems/number-of-islands/)
