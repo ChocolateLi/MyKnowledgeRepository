@@ -313,6 +313,8 @@ while ( A 没完 || B 没完)
 判断还有进位吗
 ```
 
+注意：注意进位在循环里的第一步，第一步就要加上进位，容易忽略
+
 **实现代码**：
 
 ```java
@@ -2818,6 +2820,70 @@ class Solution {
     }
 }
 ```
+
+### 8、字符串转换整数
+
+**题目链接**：[字符串转换整数](https://leetcode-cn.com/problems/string-to-integer-atoi/)
+
+**解题思路**：
+
+1.定义索引，也可以叫指针，index
+
+2.第一步判断前面的是否空格，通过移动指针来判断；注意判断极端情况，本来就是空格字符的情况
+
+3.判断符号。定义sign表示正负
+
+4.接下来就是判断是否是数字，若不是就停止；定义res表示结果集，last_res用于记录上一次的结果集，用于判断是否溢出
+
+5.最后返回带sign的res
+
+注意：判断符号时，是否要对index++的情况。只有碰到'+'或者'-'才需要修改index，否则不用动
+
+**代码实现**：
+
+```java
+class Solution {
+    public int myAtoi(String s) {
+        int len = s.length();
+        char[] c = s.toCharArray();
+        //1.去空格
+        int index = 0;
+        while(index<len && c[index]==' ') index++;
+        //排除极端情况，s="   "
+        if(index==len) return 0;
+        //2.设置符号，是正号还是负号
+        int sign = 1;
+        char first_char = c[index];
+        if(first_char=='-'){
+            sign = -1;
+            index++;
+        }else if(first_char=='+'){
+            index++;
+        }
+        //3.记录结果
+        int res = 0;
+        int last_res = 0;//记录上一次结果，用于判断是否溢出
+        while(index < len){
+            char tmp = c[index];
+            //判断是否是数字
+            if(tmp >'9' || tmp < '0') break;
+            int val = tmp - '0';
+            last_res = res;
+            res = res * 10 + val;
+            //如果不相等就是溢出
+            if(last_res != res/10){
+                return sign==1?Integer.MAX_VALUE:Integer.MIN_VALUE;
+            }
+            index++;
+        }
+        return res * sign;
+    }
+}
+```
+
+
+
+
 
 ### 415、字符串相加
 
@@ -5885,7 +5951,7 @@ class Solution {
 
 ### 46、全排列
 
-**题目链接**：[全排列](https://leetcode-cn.com/problems/subsets/)
+**题目链接**：[全排列](https://leetcode-cn.com/problems/permutations/)
 
 **算法思路**：
 

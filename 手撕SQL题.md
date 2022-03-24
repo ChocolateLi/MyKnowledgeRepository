@@ -813,7 +813,7 @@ from
 (
     select
         shop,user_id,total_count,
-        rank()over(partition by shop order by total count desc) as rank
+        rank()over(partition by shop order by total_count count desc) as rank
     from s1
 )
 where rank<=3;
