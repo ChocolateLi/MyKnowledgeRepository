@@ -2883,6 +2883,60 @@ class Solution {
 
 
 
+### 43、字符串相乘
+
+**题目链接**：[字符串相乘](https://leetcode-cn.com/problems/multiply-strings/)
+
+**解题思路**：
+
+1.按照乘法运算，从后往前计算
+
+2.存储位置是 i + j和i+j+1，这个需要弄明白
+
+**代码实现**：
+
+```java
+class Solution {
+    public String multiply(String num1, String num2) {
+        int m = num1.length();
+        int n = num2.length();
+        //存储结果的数组
+        int[] res = new int[m+n];
+        char[] s1 = num1.toCharArray();
+        char[] s2 = num2.toCharArray();
+        //从后面往前计算，就和小学乘法一样的过程
+        for(int i=m-1;i>=0;i--){
+            for(int j=n-1;j>=0;j--){
+                int mul = (s1[i]-'0') * (s2[j]-'0');
+                //结果存储的位置
+                int p1 = i + j;
+                int p2 = i + j + 1;
+                //记得加上之前这位数上的数值
+                int sum = mul + res[p2];
+                res[p2] = sum%10;
+                res[p1] += sum/10; //别忘了 + 
+            }
+        }
+        //去除前面的0数字
+        int k = 0;
+        while(k<res.length && res[k]==0) k++;
+        //特殊情况，res[]数组全部为0的情况
+        if(k==res.length){
+            return new String("0");
+        }
+        //依次将数组的数字转化为string类型
+        StringBuilder sb = new StringBuilder();
+        while(k<res.length){
+            sb.append(res[k]);
+            k++;
+        }
+        return sb.toString();
+    }
+}
+```
+
+
+
 
 
 ### 415、字符串相加
