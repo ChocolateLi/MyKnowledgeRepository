@@ -6624,6 +6624,40 @@ class Solution {
 
 
 
+### 50、Pow(x,n)
+
+**题目链接**：[Pow(x,n)](https://leetcode-cn.com/problems/powx-n/)
+
+**解题思路**：https://blog.csdn.net/weixin_42870497/article/details/118736946
+
+**代码实现**：
+
+```java
+class Solution {
+    public double myPow(double x, int n) {
+        if(n<0){
+            x = 1/x;
+            n = -n;
+        }
+        return pow(x,n);
+    }
+
+    private double pow(double x,int n){
+        if(n==0) return 1;
+        double val = pow(x,n/2);
+        if((n&1)==0){
+            return val*val;
+        }else{
+            return val*val*x;
+        }
+    }
+}
+```
+
+
+
+
+
 ## 七、二分查找
 
 👍**二分查找模板**：[二分查找模板](https://blog.csdn.net/weixin_42870497/article/details/119728363)
