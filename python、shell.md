@@ -334,9 +334,160 @@ sayHello
 
 
 
+### 基础知识
+
+#### 参数
+
+***args**：表示将实参中按照位置传值，多出来的都给args，且以元组的方式呈现
+
+```python
+def foo(x, * args):
+     print (x)
+     print (args)
+ 
+foo( 1 , 2 , 3 , 4 , 5 ) #其中的2,3,4,5都给了args
+
+
+输出结果如下：
+1
+( 2 , 3 , 4 , 5 )
+```
+
+**kwargs：表示形参中按照关键字传值，把多余的值以字典的方式呈现。
+
+```python
+def foo(x, * * kwargs):
+     print (x)
+     print (kwargs)
+foo( 1 ,y = 1 ,a = 2 ,b = 3 ,c = 4 ) #将y=1,a=2,b=3,c=4以字典的方式给了kwargs
+
+输出结果如下：
+1
+{ 'y' : 1 , 'a' : 2 , 'b' : 3 , 'c' : 4 }
+```
+
+
+
 
 
 ### os模块
+
+#### os.path模块
+
+os.path 模块主要用于获取文件的属性。
+
+
+
+**常用方法**
+
+| 方法                                | 说明                                                         |
+| ----------------------------------- | ------------------------------------------------------------ |
+| os.path.abspath(path)               | 返回绝对路径                                                 |
+| os.path.basename(path)              | 返回文件名                                                   |
+| os.path.dirname(path)               | 返回文件路径                                                 |
+| os.path.exists(path)                | 如果路径 path 存在，返回 True；如果路径 path 不存在，返回 False。 |
+| os.path.split(path)                 | 把路径分割成 dirname 和 basename，返回一个元组               |
+| os.path.join(path1[, path2[, ...]]) | 把目录和文件名合成一个路径                                   |
+
+**实例**
+
+```python
+#!/usr/bin/python
+# -*- coding: UTF-8 -*-
+ 
+import os
+ 
+print( os.path.basename('/root/runoob.txt') )   # 返回文件名
+print( os.path.dirname('/root/runoob.txt') )    # 返回目录路径
+print( os.path.split('/root/runoob.txt') )      # 分割文件名与路径
+print( os.path.join('root','test','runoob.txt') )  # 将目录和文件名合成一个路径，他自己会加/
+
+
+--输出--
+runoob.txt
+/root
+('/root', 'runoob.txt')
+root/test/runoob.txt
+```
+
+
+
+#### os.walk()
+
+os.walk()方法是目录遍历器，可以在目录树中游走输出目录中的文件名
+
+
+
+`os.walk(path)` ：参数path是要遍历的目录地址，返回的是一个三元组(root,dirs,files)
+
+root：指的是当前正在遍历的这个文件夹的本身的地址
+
+dirs：是一个 list ，内容是该文件夹中所有的目录的名字(不包括子目录)
+
+files：同样是 list , 内容是该文件夹中所有的文件(不包括子目录)
+
+
+
+实例
+
+```python
+#!/usr/bin/python
+# -*- coding: UTF-8 -*-
+
+import os
+for root, dirs, files in os.walk(".", topdown=False):
+    for name in files:
+        print(os.path.join(root, name))
+    for name in dirs:
+        print(os.path.join(root, name))
+```
+
+
+
+### python 处理 Json
+
+**两个方法**
+
+| 函数             | 描述                                     |
+| ---------------- | ---------------------------------------- |
+| json.dumps(data) | 将 Python 对象编码成 JSON 字符串         |
+| json.loads(data) | 将已编码的 JSON 字符串解码为 Python 对象 |
+
+**实例**
+
+第一实例，将数组编码为 JSON 格式数据
+
+```python
+#!/usr/bin/python
+import json
+
+data = [ { 'a' : 1, 'b' : 2, 'c' : 3, 'd' : 4, 'e' : 5 } ]
+
+data2 = json.dumps(data)
+print(data2)
+
+--输出--
+[{"a": 1, "c": 3, "b": 2, "e": 5, "d": 4}]
+```
+
+第二实例，python解码json对象
+
+```python
+#!/usr/bin/python
+import json
+
+jsonData = '{"a":1,"b":2,"c":3,"d":4,"e":5}';
+
+text = json.loads(jsonData)
+print(text)
+
+--输出--
+{u'a': 1, u'c': 3, u'b': 2, u'e': 5, u'd': 4}
+```
+
+
+
+
 
 
 
