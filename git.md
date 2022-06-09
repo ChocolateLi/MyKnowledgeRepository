@@ -97,7 +97,7 @@ git remote set-url origin https://<your_token>@github.com/<USERNAME>/<REPO>.git
 git remote set-url origin https://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@github.com/shliang0603/Yolov4_DeepSocial.git/
 
 
-git remote set-url origin https://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@github.com/ChocolateLi/Pytorch.git/
+git remote set-url origin https://***********@github.com/ChocolateLi/MyKnowledgeRepository.git/
 ```
 
 
