@@ -241,7 +241,7 @@ CAS操作的就是乐观锁
 
 **CorrentHashMap1.7**
 
-![CorrentHashMap1.7](D:\github\MyKnowledgeRepository\picture\CorrentHashMap1.7.png)
+![CorrentHashMap1.7](D:\github\MyKnowledgeRepository\img\picture\CorrentHashMap1.7.png)
 
 Segment继承了ReentrantLock
 
@@ -253,7 +253,7 @@ put的过程：
 
 它是自平衡的二叉树
 
-![红黑树](D:\github\MyKnowledgeRepository\picture\红黑树.jpg)
+![红黑树](D:\github\MyKnowledgeRepository\img\picture\红黑树.jpg)
 
 
 

@@ -4,7 +4,7 @@
 
 ### 1、JVM内存分为哪几个区？每个区的作用
 
-![JVM内存区域](D:\github\MyKnowledgeRepository\picture\java内存区域.png)
+![JVM内存区域](D:\github\MyKnowledgeRepository\img\picture\java内存区域.png)
 
 
 
@@ -26,7 +26,7 @@
 
 从方法调用直至完成的过程，对应着一个栈帧在java虚拟机栈中入栈和出栈的过程
 
-![**虚拟机栈**](D:\github\MyKnowledgeRepository\picture\java虚拟机栈.png)
+![**虚拟机栈**](D:\github\MyKnowledgeRepository\img\picture\java虚拟机栈.png)
 
 
 
@@ -58,7 +58,7 @@ java堆可以细分为：新生代和老年代
 
 
 
-![jdk1.8内存区域](D:\github\MyKnowledgeRepository\picture\JDK1.8内存区域.png)
+![jdk1.8内存区域](D:\github\MyKnowledgeRepository\img\picture\JDK1.8内存区域.png)
 
 
 
@@ -108,7 +108,7 @@ java堆可以细分为：新生代和老年代
 
    会产生大量不连续内存碎片
 
-   ![标记清除](D:\github\MyKnowledgeRepository\picture\标记清除算法.png)
+   ![标记清除](D:\github\MyKnowledgeRepository\img\picture\标记清除算法.png)
 
    
 
@@ -120,7 +120,7 @@ java堆可以细分为：新生代和老年代
 
    缺点：需要移动大量对象，处理效率比较低
 
-   ![标记整理](D:\github\MyKnowledgeRepository\picture\标记整理算法.png)
+   ![标记整理](D:\github\MyKnowledgeRepository\img\picture\标记整理算法.png)
 
    
 
@@ -130,7 +130,7 @@ java堆可以细分为：新生代和老年代
 
    主要不足是只使用了内存的另一半
 
-   ![标记复制](D:\github\MyKnowledgeRepository\picture\标记复制算法.png)
+   ![标记复制](D:\github\MyKnowledgeRepository\img\picture\标记复制算法.png)
 
    
 
@@ -161,7 +161,7 @@ java堆可以细分为：新生代和老年代
 
 以GC Roots为起始点进行搜索，可到达的对象都是存活的，不可达到的对象可被回收的
 
-![可达性分析算法](D:\github\MyKnowledgeRepository\picture\可达性分析算法.png)
+![可达性分析算法](D:\github\MyKnowledgeRepository\img\picture\可达性分析算法.png)
 
 
 
@@ -211,7 +211,51 @@ Full GC：回收老年代和新生代。老年代对象存活时间长，因此F
 
 ### 1、Synchronized与Lock(ReentrantLock)的区别
 
-**回答这个问题前，可以把Synchronized和ReentrantLock介绍一遍，然后再给出下述答案**
+**Synchronized**
+
+它可以修饰普通方法、静态方法，代码块；
+
+
+
+它的作用：
+
+1.原子性。可以确保线程互斥的访问代码
+
+2.可见行。保证共享变量的修改能够及时可见
+
+3.有序性。解决了重排序问题
+
+
+
+它的原理：
+
+通过 monitorenter 和 monitorexit 指令，其中 monitorenter 指令指向同步代码块的开始位置，monitorexit 指令则指明同步代码块的结束位置。当执行 monitorenter 指令时，线程试图获取锁，锁的内部包含一个计数器，当计数器为0则可以成功获取，获取后将锁计数器设为1也就是加1。相应的在 执行 monitorexit 指令后，将锁计数器设为0，表明锁被释放。如果获取对象锁失败，那当前线程就要阻塞等待，直到锁被另外一个线程释放为止
+
+
+
+**ReentrantLock**
+
+ReentrantLock是基于AQS的，在并发编程中它可以实现公平锁和非公平锁来实现对共享资源的同步，并且它支持可重入。
+
+
+
+公平锁：按照请求锁的顺序分配，拥有稳定获得锁的机会，但是性能可能比非公平锁低
+
+非公平锁：不按照请求锁的顺序分配，不一定拥有获得锁的机会，但是性能可能比公平锁高
+
+非公平锁意味着后请求锁的线程，可能在前面的休眠线程恢复前拿到锁，这样就可能提高并发的性能，这是因为通常情况下，你去唤醒一个挂起的线程，线程切换之间会产生短暂的延时，非公平锁就可以利用这段时间来完成操作，这也就是为什么非公平锁在一些情况下比公平锁性能高的原因。
+
+
+
+可重入：单个线程执行时，重新进入一个子程序，仍然是线程安全的。
+
+可以这么理解，线程A在某上下文中获取了某锁，当线程A想要再次获取锁时，不会因为锁已经被自己占用，而需要等待锁的释放。假如线程A既获得了锁，又在等待自己释放锁，那么就会造成死锁。
+
+可重入性简单地来说，就是一个线程可以不用释放而重复地获取一个锁n次，只是在释放的时候也需要相应的释放n次。
+
+
+
+**总结，区别**
 
 1. Synchronized能实现的功能，Lock都能实现，而且Lock比Synchronized更好用更灵活
 2. Synchronized可以自动上锁和解锁，Lock需要手动上锁和解锁
@@ -243,7 +287,7 @@ CAP理论是指在分布式系统中，一致性、可用性、分区容错性�
 
 可用性是指集群一部分节点出现故障后，集群整体是否还能响应客户端的读写请求。
 
-分区容错是指区间通信可能失败，系统不能在时限内保持数据一致性。
+分区容错是指区间通信可能失败，系统在时限内保持数据一致性。
 
 
 
@@ -281,7 +325,7 @@ CAP理论是指在分布式系统中，一致性、可用性、分区容错性�
 
 一个线程集合workset和一个阻塞队列workqueue，当用户向线程池提交一个任务时（也就是线程），线程池会先将任务放到workqueue中，workset中的线程会不断地从workqueue中获取任务然后执行。当workqueue中没有任务的时候，worker就会阻塞，直到队列中有了任务就取出来继续执行。
 
-![线程池实现原理](D:\github\MyKnowledgeRepository\picture\线程池实现原理.png)
+![线程池实现原理](D:\github\MyKnowledgeRepository\img\picture\线程池实现原理.png)
 
 
 
@@ -323,7 +367,7 @@ public ThreadPoolExecutor(int corePoolSize,
 3. 如果队列已满，判断线程池是否已满，如果未满就创建非核心线程执行任务。
 4. 如果线程池已满，采用拒绝策略。
 
-![线程池工作流程](D:\github\MyKnowledgeRepository\picture\线程池工作流程.png)
+![线程池工作流程](D:\github\MyKnowledgeRepository\img\picture\线程池工作流程.png)
 
 
 
@@ -382,7 +426,7 @@ public ThreadPoolExecutor(int corePoolSize,
 
 
 
-![线程池状态](D:\github\MyKnowledgeRepository\picture\线程池状态.png)
+![线程池状态](D:\github\MyKnowledgeRepository\img\picture\线程池状态.png)
 
 
 
@@ -398,8 +442,6 @@ public ThreadPoolExecutor(int corePoolSize,
 
 3.interrupted()。判断目标线程是否被中断，会清除中断标记。
 
-
-
 ### 8、volatile
 
 volatile是轻量级同步机制，它能保证变量对所有线程的可见性，但不能保证原子性。
@@ -412,7 +454,7 @@ volatile是轻量级同步机制，它能保证变量对所有线程的可见性
 
 2.由于缓存一致性协议，其他线程发现数据被修改了，会重新从内存中读取数据到缓存中
 
-**延申扩展缓存一致性的问题**、
+**延申扩展缓存一致性的问题**
 
 缓存一致性协议的核心思想：当CPU向内存写入数据时，如果发现操作的变量时共享变量，即在其他CPU中也存在该变量的副本，会发出信号通知其他CPU将该变量的缓存行置为无效状态，因此当其他CPU需要读取这个变量时，发现自己缓存中缓存该变量的缓存是无效的，那么它就会从内存重新读取。
 
@@ -468,9 +510,45 @@ ReentrantLock 内部自定义了同步器 Sync，在加锁的时候通过 CAS �
 
 ### 11、volatile和synchronized的区别
 
-**回答前先介绍volatile和synchronized**
+**volatile**
 
-1. volatile只能使用在变量上；而synchronized可以在类，变量，方法和代码块上。
+volatile是轻量级同步机制，它能保证变量对所有线程的可见性，但不能保证原子性。
+
+他有两个作用：1.可见性 2.禁止指令重排序
+
+它的原理是：
+
+1.当对volatile变量进行写操作时，会将缓存的数据写回给内存
+
+2.由于缓存一致性协议，其他线程发现数据被修改了，会重新从内存中读取数据到缓存中
+
+
+
+**synchronized**
+
+它可以修饰普通方法、静态方法，代码块；
+
+
+
+它的作用：
+
+1.原子性。可以确保线程互斥的访问代码
+
+2.可见行。保证共享变量的修改能够及时可见
+
+3.有序性。解决了重排序问题
+
+
+
+它的原理：
+
+通过 monitorenter 和 monitorexit 指令，其中 monitorenter 指令指向同步代码块的开始位置，monitorexit 指令则指明同步代码块的结束位置。当执行 monitorenter 指令时，线程试图获取锁，锁的内部包含一个计数器，当计数器为0则可以成功获取，获取后将锁计数器设为1也就是加1。相应的在 执行 monitorexit 指令后，将锁计数器设为0，表明锁被释放。如果获取对象锁失败，那当前线程就要阻塞等待，直到锁被另外一个线程释放为止
+
+
+
+**区别**
+
+1. volatile只能使用在变量上；而synchronized可以在变量，方法和代码块上。
 2. volatile只保证可见性；synchronized保证原子性与可见性。
 
 

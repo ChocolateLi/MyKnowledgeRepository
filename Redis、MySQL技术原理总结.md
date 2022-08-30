@@ -93,7 +93,7 @@ zset(SortedSet)：有序集合。带分数的set
 
 缓存穿透是指查询一个一定不存在的数据，比如id=-1，由于缓存命不中，就会去查询数据库，查询不到数据则不会写入缓存，这就导致了这个不存在的数据每次请求都要到数据库查询，一旦并发点高，就会造成缓存穿透。
 
-![缓存穿透](D:\github\MyKnowledgeRepository\picture\缓存穿透.png)
+![缓存穿透](D:\github\MyKnowledgeRepository\img\picture\缓存穿透.png)
 
 
 
@@ -108,7 +108,7 @@ zset(SortedSet)：有序集合。带分数的set
 
 如果缓存集中在一段时间内失效，发生大量缓存穿透，所有查询都落到数据库上，就会造成缓存雪崩。
 
-![缓存雪崩](D:\github\MyKnowledgeRepository\picture\缓存雪崩.png)
+![缓存雪崩](D:\github\MyKnowledgeRepository\img\picture\缓存雪崩.png)
 
 **解决方案：**
 
@@ -154,7 +154,7 @@ zset(SortedSet)：有序集合。带分数的set
 
 Bloom Filter跟单哈希函数Bit-Map的区别在于：它使用了K个哈希函数，每个元素跟K个bit对应，从而降低冲突的概率
 
-![Bloom Filter](D:\github\MyKnowledgeRepository\picture\布隆过滤器.png)
+![Bloom Filter](D:\github\MyKnowledgeRepository\img\picture\布隆过滤器.png)
 
 ### 4、哨兵模式
 
@@ -339,7 +339,7 @@ InnoDB适合场景
 
 **B树**
 
-![B树](D:\github\MyKnowledgeRepository\picture\B树.png)
+![B树](D:\github\MyKnowledgeRepository\img\picture\B树.png)
 
 
 
@@ -356,9 +356,9 @@ B树的特征：
 
 **B+树**
 
-![B+树](D:\github\MyKnowledgeRepository\picture\B+树.png)
+![B+树](D:\github\MyKnowledgeRepository\img\picture\B+树.png)
 
-![B+树](D:\github\MyKnowledgeRepository\picture\B+树2.png)
+![B+树](D:\github\MyKnowledgeRepository\img\picture\B+树2.png)
 
 
 
@@ -526,7 +526,7 @@ MySQL会一直向右匹配直到遇到范围查询（<、>、between、like）�
 
    如：T1 和 T2 两个事务都对一个数据进行修改，T1 先修改并提交生效，T2 随后修改，T2 的修改覆盖了 T1 的修改。
 
-   ![丢失修改](D:\github\MyKnowledgeRepository\picture\丢失修改.png)
+   ![丢失修改](D:\github\MyKnowledgeRepository\img\picture\丢失修改.png)
 
    
 
@@ -534,7 +534,7 @@ MySQL会一直向右匹配直到遇到范围查询（<、>、between、like）�
 
    如：T1 修改一个数据但未提交，T2 随后读取这个数据。如果 T1 撤销了这次修改，那么 T2 读取的数据是脏数据
 
-   ![脏读](D:\github\MyKnowledgeRepository\picture\脏读.png)
+   ![脏读](D:\github\MyKnowledgeRepository\img\picture\脏读.png)
 
    
 
@@ -542,13 +542,13 @@ MySQL会一直向右匹配直到遇到范围查询（<、>、between、like）�
 
    例如：T2 读取一个数据，T1 对该数据做了修改。如果 T2 再次读取这个数据，此时读取的结果和第一次读取的结果不同
 
-   ![不可重复读](D:\github\MyKnowledgeRepository\picture\不可重复读.png)
+   ![不可重复读](D:\github\MyKnowledgeRepository\img\picture\不可重复读.png)
 
    
 
 4. 幻影读。幻影读也属于不可重复读的一种。一个事务T读取同一范围内数据，另一个事务在这个范围内插入或者删除了一条数据，当事务T再次读取时，两次读取结果不同。
 
-   ![幻影读](D:\github\MyKnowledgeRepository\picture\幻影读.png)
+   ![幻影读](D:\github\MyKnowledgeRepository\img\picture\幻影读.png)
 
    
 

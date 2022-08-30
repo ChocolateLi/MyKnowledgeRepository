@@ -5475,6 +5475,203 @@ class Solution {
 
 
 
+### 931、下降路径最小和
+
+**题目链接**：[下降路径最小和](https://leetcode.cn/submissions/detail/353045277/)
+
+**解题思路**：
+
+典型的动态规划问题，按照思路。
+
+1.明确状态。在这个求解过程中会变化的量就是矩阵(i,j)的位置，因此将这个作为状态变化量
+
+2.定义dp数组/函数。dp(matrix,i,j)表示从一行开始向下落，达到(i,j)这个位置最小路径和
+
+3.定义base case。第一行自然是不用计算的，既i==0直接返回matrix [i] [j] 的值
+
+4.定义状态转移。dp(i,j)可以由dp(i-1,j-1)、dp(i-1,j)、dp(i-1,j+1)得来
+
+
+
+上面求法还存在重叠子问题，比如dp(i-1,j-1)可以得到dp(i-1,j)，再得到dp(i,j)，这里就存在重叠子问题，可以考虑使用备忘录。
+
+**代码实现**：
+
+暴力解法：
+
+```java
+class Solution {
+
+
+    public int minFallingPathSum(int[][] matrix) {
+        int n = matrix.length;
+        int res = Integer.MAX_VALUE;
+        for(int j=0;j<n;j++){
+            //1.明确状态。最后肯定达到最后一行，这个是不会变。
+            //但是达到哪一列是不知道，所以需要穷举
+            res = Math.min(res,dp(matrix,n-1,j));
+        }
+        return res;
+    }
+
+
+    //2.定义dp函数：表示达到（i，j）这个位置下降得最小和
+    private int dp(int[][] matrix,int i,int j){
+        if(i<0 || j<0 || i>=matrix.length || j>=matrix[0].length){
+            //返回一个不存在的值。可以通过题目所给的范围确定
+            return 99999;
+        }
+        //3.定义base case。第一行的值直接返回
+        if(i==0){
+            return matrix[0][j];
+        }
+        //4.做选择
+        return matrix[i][j] + min(dp(matrix,i-1,j-1),
+                                        dp(matrix,i-1,j),
+                                        dp(matrix,i-1,j+1));
+
+    }
+
+    private int min(int a,int b,int c){
+        return Math.min(a,Math.min(b,c));
+    }
+
+
+}
+```
+
+加上备忘录
+
+```java
+class Solution {
+
+    int memo[][];
+    public int minFallingPathSum(int[][] matrix) {
+        int n = matrix.length;
+        int res = Integer.MAX_VALUE;
+        //定义一个备忘录
+        memo = new int[n][n];
+        for(int i=0;i<n;i++){
+            Arrays.fill(memo[i],66666);
+        }
+        for(int j=0;j<n;j++){
+            //1.明确状态。最后肯定达到最后一行，这个是不会变。
+            //但是达到哪一列是不知道，所以需要穷举
+            res = Math.min(res,dp(matrix,n-1,j));
+        }
+        return res;
+    }
+
+
+    //2.定义dp函数：表示达到（i，j）这个位置下降得最小和
+    private int dp(int[][] matrix,int i,int j){
+        if(i<0 || j<0 || i>=matrix.length || j>=matrix[0].length){
+            //返回一个不存在的值。可以通过题目所给的范围确定
+            return 99999;
+        }
+        //3.定义base case。第一行的值直接返回
+        if(i==0){
+            return matrix[0][j];
+        }
+        //如果已经计算过了，则直接返回
+        if(memo[i][j]!=66666){
+            return memo[i][j];
+        }
+        //4.做选择
+        memo[i][j] =  matrix[i][j] + min(dp(matrix,i-1,j-1),
+                                        dp(matrix,i-1,j),
+                                        dp(matrix,i-1,j+1));
+
+        return memo[i][j];
+    }
+
+    private int min(int a,int b,int c){
+        return Math.min(a,Math.min(b,c));
+    }
+
+
+}
+```
+
+
+
+### 416、分割等和子集
+
+**题目链接**：[分割等和子集](https://leetcode.cn/problems/partition-equal-subset-sum/)
+
+**算法思路**：[0-1背包变种](https://mp.weixin.qq.com/s/OzdkF30p5BHelCi6inAnNg)
+
+这题就是典型的0-1背包问题
+
+**代码实现**：
+
+```java
+class Solution {
+    public boolean canPartition(int[] nums) {
+        int sum = 0;
+        for(int num:nums){
+            sum += num;
+        }
+        //和为奇数，肯定不能平分
+        if(sum%2!=0) return false;
+        sum = sum/2;//和为偶数，将其平分，转换成背包问题
+        //定义dp数组，dp[i][j]表示对于前i个物品，当前背包容量为j，若此时为true,说明恰好把背包装满
+        boolean[][] dp = new boolean[nums.length+1][sum+1];
+        //定义base case
+        for(int i=0;i<nums.length;i++){
+            dp[i][0] = true;
+        }
+        for(int i=1;i<=nums.length;i++){
+            for(int j=1;j<=sum;j++){
+                if(j-nums[i-1]<0){
+                    dp[i][j] = dp[i-1][j];
+                }else{
+                    dp[i][j] = dp[i-1][j] | dp[i-1][j-nums[i-1]];
+                }
+            }
+        }
+        return dp[nums.length][sum];
+    }
+}
+```
+
+
+
+### 518、兑换零钱2
+
+**题目链接**：[兑换零钱2](https://leetcode.cn/problems/coin-change-2/)
+
+**算法思路**：[完全背包问题](https://mp.weixin.qq.com/s/zGJZpsGVMlk-Vc2PEY4RPw)
+
+**代码实现**：
+
+```java
+class Solution {
+    public int change(int amount, int[] coins) {
+        int n = coins.length;
+        //两种状态，一个是amount，一个是硬币的状态
+        int dp[][] = new int[n+1][amount+1];
+        for(int i=0;i<=n;i++){
+            dp[i][0] = 1;
+        }
+        //两个状态，两个for循环
+        for(int i=1;i<=n;i++){
+            for(int j=1;j<=amount;j++){
+                if(j-coins[i-1]<0){
+                    dp[i][j] = dp[i-1][j];
+                }else{
+                    dp[i][j] = dp[i-1][j] + dp[i][j-coins[i-1]];
+                }
+            }
+        }
+        return dp[n][amount];
+
+    }
+}
+```
+
+
+
 
 
 ## 四、双指针
