@@ -311,11 +311,17 @@ TreeMap是一个能比较元素大小的Map集合，会对传入的key进行了�
 
 #### 13、HashSet、LinkedHashSet 和 TreeSet 的区别？
 
-`HashSet` 是 `Set` 接口的主要实现类 ，`HashSet` 的底层是 `HashMap`，线程不安全的，可以存储 null 值；
+`HashSet` 是 `Set` 接口的主要实现类 ，`HashSet` 的底层是 `HashMap`，线程不安全的，可以存储 null 值，add、remove、contain等方法的时间复杂度是O(1)
 
 `LinkedHashSet` 是 `HashSet` 的子类，能够按照添加的顺序遍历；
 
-`TreeSet` 底层使用红黑树，能够按照添加元素的顺序进行遍历，排序的方式可以自定义。
+`TreeSet` 底层使用红黑树，能够按照添加元素的顺序进行遍历，排序的方式可以自定义，add、remove、contain等方法的时间复杂度是O(longn)。
+
+
+
+#### 14、HashSet底层实现原理
+
+hashset是基于hashmap实现的，默认构造函数是构建一个初始容量为16，负载因子为0.75的hashmap。封装了一个hashmap 对象来存储所有的集合元素，所有放在 hashset中的集合元素实际上由 hashmap的key来保存，而 hashset中的 hashmap的 value则存储了一个PRESENT的静态object对象
 
 
 

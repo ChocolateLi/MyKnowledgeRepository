@@ -1032,6 +1032,45 @@ class Solution {
 }
 ```
 
+### 234、回文链表
+
+**题目链接：**[回文链表](https://leetcode.cn/problems/palindrome-linked-list/)
+
+**算法思路：**使用栈存储链表的节点，然后再遍历链表的元素是否和栈顶元素相等，不相等就返回false
+
+**代码实现：**
+
+```java
+/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode() {}
+ *     ListNode(int val) { this.val = val; }
+ *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }
+ * }
+ */
+class Solution {
+    public boolean isPalindrome(ListNode head) {
+        if(head==null || head.next==null) return true;
+        Deque<Integer> stack = new ArrayDeque<>();
+        ListNode p = head;
+        while(p!=null){
+            stack.push(p.val);
+            p = p.next;
+        }
+        while(head!=null){
+            if(head.val!=stack.pop()){
+                return false;
+            }
+            head = head.next;
+        }
+        return true;
+    }
+}
+```
+
 
 
 
@@ -1072,9 +1111,9 @@ int[] nextGreaterElement(int[] nums){
             stack.pop();
         }
         // nums[i] 身后的 next great number
-        res[i] = s.empty() ? -1 : s.top();
+        res[i] = stack.empty() ? -1 : stack.top();
         // 入栈
-        s.push(nums[i]);
+        stack.push(nums[i]);
     }
     
     return res;
@@ -1621,6 +1660,10 @@ public class Solution {
 
 
 👍**二叉树的非递归遍历模板**
+
+![](D:\github\MyKnowledgeRepository\img\Leetcode_img\二叉树的遍历.jpg)
+
+前序遍历的代码在进入一个节点之前的那个时间点执行，后序遍历的代码在离开某个之后的那个时间点执行。
 
 👍前序遍历
 
@@ -4482,15 +4525,16 @@ class Solution {
 
 核心：穷举。动态规划的本质就是穷举状态，然后在选择中选择最优
 
-解题套路：
-1.明确状态（即在函数中会改变变化的参数）
-2.明确选择（即在一个状态中有多少种选择，穷举这个选择，选最优）
-3.明确dp数组/函数的定义（即这个dp数组/函数表示什么意思）
-3.明确初始化状态（即不能通过状态转移方程得到的）
-
 寻找状态转移方程
 1.明白dp数组的含义
 2.假设dp[0...i-1]都求出来了，如何求dp[i](即找规律)
+
+思考状态转移方程思路：
+明确【状态】-> 定义dp数组/函数的含义 -> 明确【选择】 -> 明确 base case
+1.明确状态（即在函数中会改变变化的参数）
+2.明确dp数组/函数的定义（即这个dp数组/函数表示什么意思，一般按照题目的意思进行定义）
+3.明确选择（也就是对于每一个状态，可以做出什么选择改变当前状态）
+4.明确初始化状态（即不能通过状态转移方程得到的）
 ```
 
 👍动态规划代码框架
@@ -5477,7 +5521,7 @@ class Solution {
 
 ### 931、下降路径最小和
 
-**题目链接**：[下降路径最小和](https://leetcode.cn/submissions/detail/353045277/)
+**题目链接**：[下降路径最小和](https://leetcode.cn/problems/minimum-falling-path-sum/)
 
 **解题思路**：
 
@@ -5501,7 +5545,6 @@ class Solution {
 
 ```java
 class Solution {
-
 
     public int minFallingPathSum(int[][] matrix) {
         int n = matrix.length;
@@ -5631,6 +5674,80 @@ class Solution {
             }
         }
         return dp[nums.length][sum];
+    }
+}
+```
+
+### 322、零钱兑换
+
+**题目链接：**[零钱兑换](https://leetcode.cn/problems/coin-change/)
+
+**算法思路：** 动态规划。
+
+**代码实现：**
+
+暴力(超时)
+
+```java
+class Solution {
+
+    
+    public int coinChange(int[] coins, int amount) {
+        //1.明确状态。硬币是无限的，他不会缩减，会变化的只有amount
+        return dp(coins,amount);
+    }
+
+    //2.定义dp函数。dp函数表示凑出零钱n所需要的硬币数
+    private int dp(int[] coins,int n){
+        //4.明确base case
+        if(n==0) return 0;
+        //表示无解
+        if(n<0) return -1;
+        
+        int res = Integer.MAX_VALUE;
+        //3.明确选择
+        for(int coin:coins){
+            int sub_problem = dp(coins,n-coin);
+            //子问题无解，跳过
+            if(sub_problem==-1) continue;
+            res = Math.min(res,sub_problem+1);
+        }
+        return res!=Integer.MAX_VALUE?res:-1;
+    }
+}
+```
+
+带备忘录
+
+```java
+class Solution {
+
+    int[] memo;
+    public int coinChange(int[] coins, int amount) {
+        memo = new int[amount+1];
+        //1.明确状态。硬币是无限的，他不会缩减，会变化的只有amount
+        return dp(coins,amount);
+    }
+
+    //2.定义dp函数。dp函数表示凑出零钱n所需要的硬币数
+    private int dp(int[] coins,int n){
+        //4.明确base case
+        if(n==0) return 0;
+        //表示无解
+        if(n<0) return -1;
+        //备忘录已经有值，直接返回
+        if(memo[n]!=0) return memo[n];
+
+        int res = Integer.MAX_VALUE;
+        //3.明确选择
+        for(int coin:coins){
+            int sub_problem = dp(coins,n-coin);
+            //子问题无解，跳过
+            if(sub_problem==-1) continue;
+            res = Math.min(res,sub_problem+1);
+        }
+        memo[n] = (res!=Integer.MAX_VALUE?res:-1);
+        return memo[n];
     }
 }
 ```
@@ -5949,7 +6066,34 @@ class Solution {
 
 ## 五、回溯法
 
-👍**算法模板**：[回溯框架团灭排列、组合、子集问题](https://blog.csdn.net/weixin_42870497/article/details/119443910)
+👍**算法模板：**
+
+核心是for循环里面的递归，在递归之前做选择，在递归调用之后撤销选择
+
+```java
+result = []
+def backtrack(路径, 选择列表):
+    if 满足结束条件:
+        result.add(路径)
+        return
+
+    for 选择 in 选择列表:
+        做选择
+        backtrack(路径, 选择列表)
+        撤销选择
+            
+-----------------进一步解释-----------------------
+for 选择 in 选择列表:
+    # 做选择
+    将该选择从选择列表移除
+    路径.add(选择)
+    backtrack(路径, 选择列表)
+    # 撤销选择
+    路径.remove(选择)
+    将该选择再加入选择列表
+```
+
+👍**算法题解**：[回溯框架团灭排列、组合、子集问题](https://blog.csdn.net/weixin_42870497/article/details/119443910)
 
 👍**矩阵搜索算法模板：**
 
@@ -6216,7 +6360,9 @@ class Solution {
 
     List<List<Integer>> res = new ArrayList<>();
     public List<List<Integer>> permute(int[] nums) {
+        //list表示路径
         LinkedList<Integer> list = new LinkedList<>();
+        //visit表示选择的列表
         boolean [] visit = new boolean[nums.length];
         backtrack(nums,list,visit);
         return res;
@@ -6229,14 +6375,16 @@ class Solution {
             return;
         }
         for(int i=0;i<nums.length;i++){
-            //小剪枝
+            //小剪枝。即已经选择过了，可以跳过
             if(visit[i]) continue;
-            //做选择
+            //做选择。
+            //将当前元素添加到路径中，并且从选择列表中移除。
             list.add(nums[i]);
             visit[i] = true;
             //递归
             backtrack(nums,list,visit);
             //撤销选择
+            //将当前元素从路径中移除，并且添加到选择列表中。
             visit[i] = false;
             list.removeLast();
         }
@@ -6684,6 +6832,114 @@ class Solution {
         return sum;
     }
 }
+```
+
+### 51.N皇后
+
+👍C++ vector的用法
+
+```c++
+vector是STL的动态数组，可以在运行中根据需要动态改变大小
+它以数组的形式存储，他的内存空间是连续的
+
+常用方法：
+1.vector<int>a                                  创建一个动态数组a，a的默认初值为0
+2.vector<int >b(a)                             将a中的元素复制到b中
+3.vetcor<int>a(100)                          将数组a的元素定义为100个，默认初始值为0
+4.vector<int>a(100,6)                       定义100个值为6的元素
+5.vector<string>a(10,"null")              定义10个值为null的元素
+6.vector<string>a(10,"hello")             定义10个值为hello的元素
+7.vector<string>b(a.begin(),a.end())  将动态数组a的元素值复制到b中
+
+常用操作：
+1.a.push_back(100)                            在尾部加入一个值为100的元素
+2.a.size()                                              返回数组中元素的个数
+3.bool isEmpty=a.empty()                    判断a是否为空，若为空返回true，若不为空则返回false
+4.cout<<a[0]<<endl                               输出数组的大小
+5.a.insert(a.begin+i,k)                           在第i个元素前插入k
+6.a.insert(a.end(),10,5)                         在末尾插入10个值为5的元素
+7.a.pop_back                                        删除末尾元素
+8.a.erase(a.begin()+i,a.begin()+j)         将[i,j-1]的元素都删除
+9.a.erase(a.begin()+i)                           将第i+1个元素删除
+10.a.resize(n)                                        将数组重置为n个元素
+11.a.clear()                                             清空数组
+12.reverse(a.begin(),a.end())                 将数组逆转
+13.sort(a.begin(),a.end())                       将数组从小到大排序
+
+二维数组初始化
+vector vec(m,string(n, ‘.’));
+表示一个连续容器vector，
+存储string类型的数据。
+容器名叫vec，
+有m个这样string类型（m行），
+string(n,’.’)表示每个string数据类型包含n个’.'string字符串（n列）。
+这样就构建了二维字符串组（m*n)。
+```
+
+**题目链接：**[Nh皇后](https://leetcode.cn/problems/n-queens/)
+
+**算法思路：**[N皇后算法思路](https://mp.weixin.qq.com/s/nMUHqvwzG2LmWA9jMIHwQQ)
+
+**代码实现：**
+
+```c++
+class Solution {
+public:
+
+    vector<vector<string>> result;
+    vector<vector<string>> solveNQueens(int n) {
+        // '.' 表示空，'Q' 表示皇后，初始化空棋盘。
+        vector<string> res(n,string(n,'.'));
+        dfs(res,0);
+        return result;
+    }
+
+    // 路径：board 中小于 row 的那些行都已经成功放置了皇后
+    // 选择列表：第 row 行的所有列都是放置皇后的选择
+    // 结束条件：row 超过 board 的最后一行
+    void dfs(vector<string> res,int row){
+        if(row == res.size()){
+            result.push_back(res);
+            return;
+        }
+        int n = res[row].size();
+        for(int clo=0;clo<n;clo++){
+            // 排除不合法选择
+            if(!vaild(res,row,clo)){
+                continue;
+            }
+            //做选择
+            res[row][clo] = 'Q';
+            //进入下一行决策
+            dfs(res,row+1);
+            //撤销选择
+            res[row][clo] = '.';
+        }
+    }
+
+    bool vaild(vector<string> res,int row,int clo){
+        int n = res.size();
+        //判断行上是否有皇后
+        for(int i=0;i<n;i++){
+            if(res[i][clo] == 'Q'){
+                return false;
+            }
+        }
+        //判断右上方是否有皇后
+        for(int i=row-1,j=clo+1;i>=0 && j<n;i--,j++){
+            if(res[i][j]=='Q'){
+                return false;
+            }
+        }
+        //判断左上方是否有皇后
+        for(int i=row-1,j=clo-1;i>=0 && j>=0;i--,j--){
+            if(res[i][j]=='Q'){
+                return false;
+            }
+        }
+        return true;
+    }
+};
 ```
 
 
