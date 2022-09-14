@@ -661,18 +661,11 @@ MVCC的思想就是保存历史版本，通过对数据多个版本的管理来�
 
 
 
-### Next-Keys Locks
+#### Next-Keys Locks
 
 next-key locks是mysql的innodb一种锁的实现。
 
 MVCC不能解决幻读的问题，next-key locks就是为解决这个问题而存在的。在可重复读的隔离级别下，使用MVCC + next-key locks可以解决幻影读的问题。
-
-
-
-
-
-
-
 
 
 

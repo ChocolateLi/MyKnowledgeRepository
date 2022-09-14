@@ -3032,7 +3032,7 @@ class Solution {
 
 **主对角线反转矩阵(按照左上到右下的对角线进行镜像对称)**
 
-![主对角线](D:\github\MyKnowledgeRepository\picture\主对角线镜像.jpg)
+![主对角线](D:\github\MyKnowledgeRepository\img\picture\主对角线镜像.jpg)
 
 ```java
 public void rotate(int[][] matrix) {
@@ -3051,7 +3051,7 @@ public void rotate(int[][] matrix) {
 
 **反对角线反转矩阵**
 
-![反对角线](D:\github\MyKnowledgeRepository\picture\反对角线镜像.jpg)
+![反对角线](D:\github\MyKnowledgeRepository\img\picture\反对角线镜像.jpg)
 
 ```java
 public void rotate(int[][] matrix) {
@@ -4608,8 +4608,6 @@ for (int i = 0; i < n; i++) {
     }
 }
 ```
-
-
 
 
 
