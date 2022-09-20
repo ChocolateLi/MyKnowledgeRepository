@@ -792,9 +792,25 @@ u1		b
 
 **1、统计店铺的UV(访客数)**
 
-```
+```sql
 select shop,count(distinct user_id) from shop
 ```
+
+优化
+
+```sql
+select shop,sum(cnt)
+from
+(select shop,tag,count(*) as cnt
+from
+(select shop,user_id,cast(rand()*100 as bigint) as tag
+from shop
+group by shop,user_id)t1
+group by shop,tag)t2
+group by shop;
+```
+
+
 
 **2、每个店铺访问次数top3的访客信息。输出店铺名称、访客id、访问次数**
 
@@ -813,7 +829,7 @@ from
 (
     select
         shop,user_id,total_count,
-        rank()over(partition by shop order by total_count count desc) as rank
+        rank()over(partition by shop order by total_count desc) as rank
     from s1
 )
 where rank<=3;
