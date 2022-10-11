@@ -98,8 +98,6 @@ git remote set-url origin https://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@githu
 
 
 git remote set-url origin https://***********@github.com/ChocolateLi/MyKnowledgeRepository.git/
-
-git remote set-url origin https://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@github.com/ChocolateLi/travel_spider.git/
 ```
 
 
