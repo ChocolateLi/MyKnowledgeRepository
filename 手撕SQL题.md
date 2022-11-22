@@ -1019,6 +1019,36 @@ order by
 
 
 
+### 8、肯斯爪特面试题
+
+连续3天登录
+
+思路：
+
+- 通过用户ID分组升序排序得出排序号rk
+- 用登陆日期减去这个排序号得出一个日期dt
+- 如果是连续登录，那么这个dt应该是相同的
+
+代码
+
+```sql
+select 
+	user_id,count(1) as cnt
+from
+(select 
+	user_id,
+	login_date,
+	row_number()over(partition by user_id order by login_date) as rk
+from
+	t1)
+group by user_id,date_sub(login_data,rk)
+having count(1)>=3
+```
+
+
+
+
+
 ## 常见面试题
 
 ### SQL第一题
