@@ -99,6 +99,8 @@ git remote set-url origin https://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@githu
 
 git remote set-url origin https://***********@github.com/ChocolateLi/MyKnowledgeRepository.git/
 
+git remote set-url origin https://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@github.com/ChocolateLi/Pytorch.git
+
 ```
 
 
