@@ -103,7 +103,22 @@ git remote set-url origin https://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@githu
 
 ```
 
+### 2.git pull发生冲突
 
+git pull 命令发生以下错误
+
+![](https://img2018.cnblogs.com/blog/773489/201905/773489-20190508113231265-2020653666.png)
+
+目前git的报错提示已经相关友好了，可以直观的发现，这里可以通过commit的方式解决这个冲突问题
+
+如果不想commit它，那就通过以下方案解决：
+
+放弃本地修改，直接覆盖
+
+```shell
+git reset --hard
+git pull
+```
 
 
 
