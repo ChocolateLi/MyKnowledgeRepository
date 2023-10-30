@@ -46,7 +46,9 @@ git commit -m "一些描述"
 git push 
 ```
 
+### 3.git merge命令
 
+[合并分支----git merge命令应用的三种情景](https://blog.csdn.net/qq_42780289/article/details/97945300)
 
 ## git问题解决方案
 
