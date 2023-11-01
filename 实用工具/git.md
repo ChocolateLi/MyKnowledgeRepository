@@ -89,6 +89,14 @@ git merger dev_15534
 git push
 ```
 
+6.删除分支
+
+```git
+git branch -d dev_15534
+```
+
+
+
 **演示流程**
 
 ![](F:\github\MyKnowledgeRepository\img\git_img\git merge.png)
@@ -126,6 +134,12 @@ git branch -r
 
 ```git
 git branch -a
+```
+
+删除分支
+
+```git
+git branch -d 分支名
 ```
 
 
