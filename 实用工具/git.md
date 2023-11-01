@@ -50,6 +50,43 @@ git push
 
 [合并分支----git merge命令应用的三种情景](https://blog.csdn.net/qq_42780289/article/details/97945300)
 
+### 4.git branch 命令
+
+创建新分支
+
+```git
+git branch 新分支名称
+```
+
+切换分支
+
+```git
+git checkout 新分支名称
+
+//创建和切换一起操作
+git checkout -b 新分支
+```
+
+查看本地分支
+
+```git
+git branch
+```
+
+查看远程分支
+
+```git
+git branch -r
+```
+
+查看所有分支（本地和远程）
+
+```git
+git branch -a
+```
+
+
+
 ## git问题解决方案
 
 ### 1.Support for password authentication was removed on August 13, 2021. Please use a personal access token instead.
