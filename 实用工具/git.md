@@ -50,6 +50,49 @@ git push
 
 [合并分支----git merge命令应用的三种情景](https://blog.csdn.net/qq_42780289/article/details/97945300)
 
+[git分支-新建与合并](https://git-scm.com/book/zh/v2/Git-%E5%88%86%E6%94%AF-%E5%88%86%E6%94%AF%E7%9A%84%E6%96%B0%E5%BB%BA%E4%B8%8E%E5%90%88%E5%B9%B6)
+
+
+
+**整个开发流程：**
+
+1.先创建和切换要开发的分支
+
+```git
+git checkout -b dev_15534
+```
+
+2.在新的分支上开发完后，进行提交
+
+```git
+git status
+git add .
+git commit -m '提交内容'
+```
+
+3.切换回主分支，记得拉取一下最新的主分区代码
+
+```git
+git checkout main
+git pull
+```
+
+4.将新分支提交的内容合并到主分支
+
+```git 
+git merger dev_15534
+```
+
+5.将主分区的内容提交到远程仓库
+
+```git
+git push
+```
+
+**演示流程**
+
+![](F:\github\MyKnowledgeRepository\img\git_img\git merge.png)
+
 ### 4.git branch 命令
 
 创建新分支
