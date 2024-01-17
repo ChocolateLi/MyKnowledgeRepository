@@ -30,6 +30,18 @@ user.email=343672271@qq.com
 
 
 
+## git常用命令原理解释
+
+[我用四个命令，总结了 Git 的所有套路](https://mp.weixin.qq.com/s/VdeQpFCL3GGsfOKrIRW6Hw)
+
+
+
+## git命令练习网站
+
+[learning git](https://learngitbranching.js.org/?locale=zh_CN)
+
+
+
 ## git基本命令
 
 ### 1.拉取github项目
