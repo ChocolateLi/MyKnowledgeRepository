@@ -254,3 +254,8 @@ c)问题(你提出相关问题，询问我需要哪些额外信息来改进 Prom
 
 
 
+# 论文润色
+
+## 参考资料
+
+[ChatGPT(GPT 4.0)论文润色指南](https://blog.csdn.net/He_r_o/article/details/129050606)
