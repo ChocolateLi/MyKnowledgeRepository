@@ -156,6 +156,75 @@ git branch -d 分支名
 
 
 
+### 5.git reset 命令
+
+在Git中，`git reset`命令主要用于撤销之前的一些操作，比如提交。它可以根据不同的参数选项，对工作区和暂存区进行操作，从而达到不同的效果。理解`git reset`命令之前，先简单了解一下Git的三个主要区域：
+
+1. **工作区（Working Directory）**：就是你在电脑里能看到的文件。
+2. **暂存区（Staging Area/Index）**：是Git用来准备下一次提交的文件改动的地方。你可以将一些更改添加到暂存区中，这样下次提交时，Git会将暂存区里的改动作为提交内容。（git add 命令的东西到暂存区）
+3. **仓库（Repository）**：是Git用来保存项目的元数据和对象数据库的地方。提交（Commit）会将暂存区的内容永久保存到仓库的历史记录中。
+
+`git reset`命令主要有三个选项，分别影响这些区域：
+
+1. `git reset --soft <commit>`
+
+- **作用**：将当前分支的HEAD指向另一个commit，但不改变暂存区和工作区。
+- **适用场景**：当你想要撤销刚才的提交，但不想丢失工作进度时，可以使用这个选项。它只会改变Git历史记录，而不触及你的文件。
+- **示例**：如果你想要撤销最近的一次提交，并保留更改在暂存区中，可以使用：
+  ```bash
+  git reset --soft HEAD~1
+  ```
+
+2. `git reset --mixed <commit>`（默认选项）
+
+- **作用**：将HEAD指向另一个commit，并更新暂存区，但不改变工作区。
+- **适用场景**：当你想要撤销最近的提交，并且想要重新审视和调整即将提交的文件时。这个命令会将改动回滚到暂存区，让你有机会重新`git add`文件。
+- **示例**：如果你想要撤销最近的一次提交，并将更改回滚到暂存区，可以使用：
+  ```bash
+  git reset --mixed HEAD~1
+  ```
+  或者简写为（因为`--mixed`是默认选项）：
+  ```bash
+  git reset HEAD~1
+  ```
+
+3. `git reset --hard <commit>`
+
+- **作用**：将HEAD指向另一个commit，并更新暂存区和工作区，使之与HEAD指向的commit一致。
+- **适用场景**：当你想彻底撤销最近的提交和所有更改时，包括没有提交的工作进度。
+- **示例**：如果你想要撤销最近的一次提交，并且不保留任何更改，可以使用：
+  ```bash
+  git reset --hard HEAD~1
+  ```
+
+使用`git reset`时，需要谨慎选择合适的选项，因为`--hard`选项会丢失所有未提交的更改。在执行操作前，确保不会意外丢失重要数据。
+
+
+
+总结：
+
+1.撤销git commit，并撤销git add .操作，但不撤销本地修改的代码。
+
+```git
+git reset --mixed HEAD^
+```
+
+2.撤销 git commit，但不撤销git add .操作。
+
+```git
+git reset --soft HEAD^
+```
+
+3.撤销commit 、撤销 git add. 操作，同时撤销本地修改的代码。（慎重使用）
+
+```
+git reset --hard HEAD^
+```
+
+
+
+
+
 ## git问题解决方案
 
 ### 1.Support for password authentication was removed on August 13, 2021. Please use a personal access token instead.
