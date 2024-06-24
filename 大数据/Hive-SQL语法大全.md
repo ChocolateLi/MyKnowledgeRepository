@@ -878,10 +878,6 @@ GROUP BY sender_phonetype;
 
 
 
-
-
-
-
 需求8
 
 ```sql
@@ -894,8 +890,6 @@ SELECT
 FROM db_msg.tb_msg_etl 
 GROUP BY sender_os
 ```
-
-
 
 
 
@@ -921,6 +915,72 @@ mysql>alter table INDEX_PARAMS modify column PARAM_VALUE varchar(4000) character
 ```
 
 
+
+# Hive实操
+
+## Hive设置动态分区
+
+1.设置Hive动态分区设置
+
+```hive
+SET hive.exec.dynamic.partition = true;
+SET hive.exec.dynamic.partition.mode = nonstrict;
+SET hive.exec.max.dynamic.partitions.pernode = 1000;
+SET hive.exec.max.dynamic.partitions = 1000;
+```
+
+2.创建外部表
+
+```hive
+CREATE EXTERNAL TABLE test.MED_OPERATION_SCHEDULE (
+  PATIENT_ID STRING,
+  VISIT_ID STRING,
+  SCHEDULE_ID STRING,
+  DEPT_STAYED STRING,
+  BED_NO STRING,
+  SCHEDULED_DATE_TIME TIMESTAMP,
+  OPERATING_ROOM STRING,
+  OPERATING_ROOM_NO STRING
+)
+PARTITIONED BY (year STRING, month STRING, day STRING)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY '\t'
+--STORED AS ORC
+LOCATION '/user/hive/warehouse/test.db/surgery/MED_OPERATION_SCHEDULE';
+```
+
+3.加载分区
+
+```hive
+ALTER TABLE test.MED_OPERATION_SCHEDULE ADD IF NOT EXISTS PARTITION (year='2024', month='06', day='21');
+
+--查看表分区
+SHOW PARTITIONS test.MED_OPERATION_SCHEDULE;
+
+--修复Hive表分区
+MSCK REPAIR TABLE test.MED_OPERATION_SCHEDULE;
+
+```
+
+4.使用动态分区加载数据
+
+```hive
+INSERT INTO TABLE test.MED_OPERATION_SCHEDUL PARTITION (year, month, day)
+SELECT
+  PATIENT_ID,
+  VISIT_ID,
+  SCHEDULE_ID,
+  DEPT_STAYED,
+  BED_NO,
+  SCHEDULED_DATE_TIME,
+  OPERATING_ROOM,
+  OPERATING_ROOM_NO,
+  year,
+  month,
+  day
+FROM
+  temp_table;
+```
 
 
 
