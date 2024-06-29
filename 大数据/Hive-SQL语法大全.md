@@ -982,6 +982,50 @@ FROM
   temp_table;
 ```
 
+## Hive加载hdfs上json格式数据
+
+```sql
+CREATE EXTERNAL TABLE IF NOT EXISTS test.ods_batj_patientvisit_mi (
+  FID BIGINT,
+  FPRN STRING,
+  FTIMES INT,
+  FICDVERSION TINYINT,
+  FZYID STRING,
+  FAGE STRING,
+  FNAME STRING,
+  FSEXBH STRING,
+  FSEX STRING,
+  FBIRTHDAY TIMESTAMP
+)
+PARTITIONED BY (year STRING, month STRING)
+ROW FORMAT SERDE 'org.apache.hive.hcatalog.data.JsonSerDe'
+STORED AS TEXTFILE
+LOCATION '/user/hive/warehouse/test.db/patientvisit3';
+
+SHOW PARTITIONS test.ods_batj_patientvisit_mi;
+
+MSCK REPAIR TABLE test.ods_batj_patientvisit_mi;
+
+select * from test.ods_batj_patientvisit_mi where year='2024' and month = '06';
+
+ADD JAR /data/u01/app/hive/apache-hive-3.1.3/lib/hive-hcatalog-core-3.1.3.jar;
+
+select count(*) from test.ods_batj_patientvisit_mi where year='2024' and month = '06';
+
+SELECT 
+    YEAR(FCYDATE) AS year,
+    MONTH(FCYDATE) AS month,
+    COUNT(*) AS visit_count
+FROM 
+    ods_batj_patientvisit_mi
+WHERE 
+    FCYDATE >= '2024-01-01' AND FCYDATE <= '2024-05-31'
+GROUP BY 
+    YEAR(FCYDATE), MONTH(FCYDATE)
+ORDER BY 
+    year, month;
+```
+
 
 
 

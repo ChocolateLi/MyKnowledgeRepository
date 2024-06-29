@@ -141,7 +141,19 @@ Directory:/user/hive/warehouse/test.db/surgery/med_dept_dict_2
 
 
 
+# 同步配置
 
+## 按天同步
+
+每天凌晨一点同步
+
+![](D:\Github\MyKnowledgeRepository\img\bigdata\nifi\按天同步配置.png)
+
+## 按月同步
+
+按照每月1号凌晨一点开始同步
+
+![](D:\Github\MyKnowledgeRepository\img\bigdata\nifi\按月同步配置.png)
 
 # 数据源同步
 
@@ -161,15 +173,21 @@ Directory:/user/hive/warehouse/test.db/surgery/med_dept_dict_2
 
 ## oracle_to_hdfs
 
-- 以json格式存储到hdfs中
+### 以csv格式存储到hdfs中
 
-  ![](D:\Github\MyKnowledgeRepository\img\bigdata\nifi\json格式存储到hdfs.png)
-
-- 以csv格式存储到hdfs中
-
-  - ExecuteSQL组件和QueryDatabaseTable组件可以交替使用
-  - ConvertRecord 要选择这两个配置 Reader选择AvroReader Writer选择CSVRecordSetWriter
-  - UpdateAttribute组件根据需要添加，可以添加可不添加。
+- ExecuteSQL组件和QueryDatabaseTable组件可以交替使用
+- ConvertRecord 要选择这两个配置 Reader选择AvroReader Writer选择CSVRecordSetWriter
+- UpdateAttribute组件根据需要添加，可以添加可不添加。
 
 ​	![](D:\Github\MyKnowledgeRepository\img\bigdata\nifi\csv格式存储到Hdfs.png)
 
+### 以json格式存储（成功实践）
+
+由于csv格式会因为分隔符号","、"\t"导致数据切分错误，从而导致数据不一致的问题，并且格式错乱。因为将数据以json格式存储，可以保证数据的完整性。
+
+![](D:\Github\MyKnowledgeRepository\img\bigdata\nifi\oracle_to_hdfs_json.png)
+
+ConvertRecord配置如下
+![](D:\Github\MyKnowledgeRepository\img\bigdata\nifi\JsonRecordSetWriter配置1.png)
+
+![](D:\Github\MyKnowledgeRepository\img\bigdata\nifi\JsonRecordSetWriter配置2.png)
