@@ -191,3 +191,19 @@ ConvertRecord配置如下
 ![](D:\Github\MyKnowledgeRepository\img\bigdata\nifi\JsonRecordSetWriter配置1.png)
 
 ![](D:\Github\MyKnowledgeRepository\img\bigdata\nifi\JsonRecordSetWriter配置2.png)
+
+
+
+# 报错总结
+
+## java.lang.NoClassDefFoundError: oracle/xdb/XMLType
+
+nifi的ExecuteSQL组件同步oracle数据库时，报这个错误。只需要下载xdb6.jar，放在nifi安装目录下的lib包下重启即可。
+
+## java.lang.NoClassDefFoundError: oracle/xml/binxml/BinXMLMetadataProvider
+
+添加了xdb6.jar，重启后，还是同步不了数据，报这个错误。按照Oracle官方的意思是需要xmlparsev2.jar包。但是当我把jar包放在Nifi的lib包下时，会导致nifi重启失败，重启之后立马关闭。可能是因为jar包冲突的原因。
+
+后面找到的原因是因为同步的表中的某个字段是SYS.XMLTYPE这个类型，所以导致报xml相关jar包的错误。
+
+解决的办法就是，同步表的时候，不同步这个SYS.XMLTYPE字段就行，这样就可以解决这个问题。

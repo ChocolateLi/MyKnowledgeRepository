@@ -1028,6 +1028,66 @@ ORDER BY
 
 
 
+## 创建时间维表
+
+
+
+```sql
+-- 创建时间维度表
+CREATE EXTERNAL TABLE IF NOT EXISTS dim.dim_date (
+    date_id DATE COMMENT '日期ID，格式为YYYY-MM-DD', 
+    date_year INT COMMENT '年份',
+    date_season INT COMMENT '季度',
+    date_month INT COMMENT '月份',
+    date_week INT COMMENT '周几（1表示星期一，7表示星期日）',
+    date_halfyear STRING COMMENT '半年（上半年，下半年）',
+    date_partmonth STRING COMMENT '旬（上旬，中旬，下旬）',
+    date_monweek INT COMMENT '本月第几周',
+    date_yearweek INT COMMENT '本年第几周'
+)
+COMMENT '时间维度表'
+STORED AS ORC;
+
+
+-- 使用临时表生成2024年的所有日期
+CREATE EXTERNAL TABLE IF NOT EXISTS tmp.tmp_date_2024 (date_id DATE);
+
+with dates as(
+    select date_add("2024-01-01", a.pos) as d
+    from (select posexplode(split(repeat("m", datediff("2024-12-31", "2024-01-01")), "m"))) a
+)
+-- 插入生成的日期到临时表中
+INSERT INTO tmp.tmp_date_2024 (date_id)
+SELECT d from dates;
+
+select * from tmp.tmp_date_2024;
+
+-- 插入数据到dim_time表
+INSERT INTO TABLE dim.dim_date
+SELECT
+    d.date_id,
+    YEAR(d.date_id) AS date_year,
+    QUARTER(d.date_id) AS date_season,
+    MONTH(d.date_id) AS date_month,
+    DAYOFWEEK(d.date_id) AS date_week,
+    CASE
+        WHEN MONTH(d.date_id) BETWEEN 1 AND 6 THEN '上半年'
+        ELSE '下半年'
+    END AS date_halfyear,
+    CASE
+        WHEN DAY(d.date_id) BETWEEN 1 AND 10 THEN '上旬'
+        WHEN DAY(d.date_id) BETWEEN 11 AND 20 THEN '中旬'
+        ELSE '下旬'
+    END AS date_partmonth,
+    CEIL(DAY(d.date_id) / 7.0) AS date_monweek,
+    WEEKOFYEAR(d.date_id) AS date_yearweek
+FROM
+    tmp.tmp_date_2024 d;
+   
+ select * from dim.dim_date;
+
+```
+
 
 
 
