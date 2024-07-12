@@ -1026,11 +1026,7 @@ ORDER BY
     year, month;
 ```
 
-
-
 ## 创建时间维表
-
-
 
 ```sql
 -- 创建时间维度表
@@ -1086,6 +1082,31 @@ FROM
    
  select * from dim.dim_date;
 
+```
+
+## hive加载excel数据
+
+1.先要删除表头数据，将excel另存或者到处为csv格式，数据格式要为utf-8，不然会乱码。
+
+2.将csv文件上传到hadoop分布式文件系统中
+
+```shell
+hadoop fs -put /data/u01/soft/excel/ods_selform_compare1deptid_ig.csv /user/hive/warehouse/ods.db/excel/ods_selform_compare1deptid_ig
+```
+
+3.创建外部表加载数据
+
+```sql
+-- 创建一个与CSV文件结构匹配的表
+CREATE EXTERNAL TABLE IF NOT EXISTS ods_selform_compare1deptid_ig (
+    DEPT_BIZ_Id STRING,
+    FCYTYKH STRING,
+    FCYDEPT STRING
+)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+STORED AS TEXTFILE
+LOCATION '/user/hive/warehouse/ods.db/excel/ods_selform_compare1deptid_ig';
 ```
 
 
