@@ -371,6 +371,23 @@ INSERT OVERWRITE [LOCAL] DIRECTORY ‘path’ 				-- LOCAL可选，带LOCAL导�
 
 
 
+## 时间操作
+
+1.取当前日期的年和月
+
+```sql
+--今天是2024-7-16
+SELECT *
+FROM ods_bagl_wardworklog_mi b
+WHERE b.year = year(from_unixtime(unix_timestamp()))--2024
+  AND b.month = lpad(month(from_unixtime(unix_timestamp())), 2, '0');--07
+
+--2024 7 07
+SELECT year(from_unixtime(unix_timestamp())) as year,month(from_unixtime(unix_timestamp())) as month ,lpad(month(from_unixtime(unix_timestamp())), 2, '0') as month;
+```
+
+
+
 
 
 ## 数据查询的课堂SQL记录
