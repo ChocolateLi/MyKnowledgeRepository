@@ -1,5 +1,145 @@
 # Nifi
 
+# Nifi集群搭建
+
+1.下载安装包解压
+
+[下载地址](https://nifi.apache.org/download/)
+
+```bash
+tar -zxvf nifi-1.26.0-bin.zip -C /data/u01/app/nifi/
+```
+
+2.修改端口号和路径
+
+```
+[root@cesdb conf]# vim nifi.properties 
+
+nifi.web.http.host=10.201.100.75
+nifi.web.http.port=8081
+
+```
+
+3.启动
+
+```bash
+bin/nifi.sh start  #启动命令
+bin/nifi.sh stop   #关闭命令
+bin/nifi.sh status #查看运行状态
+```
+
+这种方式运行的是单机版的NiFi，如果要进行分布式安装，还需要进行其他一些配置。
+
+分布式的NiFi需要使用Zookeeper作为集群的管理工具，NiFi本身内置了Zookeeeper，也可以使用独立安装的Zookeeper。
+
+[参考链接](https://www.jianshu.com/p/20f9ac79f8d0)
+
+**使用内置Zookeeper**
+
+对每一个节点完成以下配置（建议在一个节点配置好，分发给其他节点再稍作修改）
+
+1.修改conf/zookeeper.properties
+
+```bash
+server.1=cesdb:2888:3888;2181
+server.2=cesdb1:2888:3888;2181
+server.3=cesdb2:2888:3888;2181
+```
+
+2.执行以下脚本（zookeeper不同节点需要不同id）
+
+```
+cd state/
+mkdir zookeeper
+echo 1 > ./zookeeper/myid
+```
+
+3.修改conf/nifi.properties
+
+```bash
+#是否启动内置的zk
+nifi.state.management.embedded.zookeeper.start=true
+#配置zk节点
+nifi.zookeeper.connect.string=cesdb:2181,cesdb1:2181,cesdb2:2181
+nifi.state.management.embedded.zookeeper.start=true
+nifi.cluster.is.node=true
+# nifi.cluster.node.address=
+nifi.cluster.node.address=cesdb (根据节点修改)
+#nifi.cluster.node.address=cesdb1 
+#nifi.cluster.node.address=cesdb2
+nifi.cluster.node.protocol.port=9998
+nifi.cluster.flow.election.max.candidates=1
+
+nifi.web.http.host=cesdb(根据节点修改)
+# nifi.web.http.host=cesdb1(根据节点修改)
+# nifi.web.http.host=cesdb2(根据节点修改)
+
+nifi.remote.input.host=cesdb
+# nifi.remote.input.host=cesdb1
+# nifi.remote.input.host=cesdb2
+nifi.remote.input.socket.port=10443
+
+```
+
+4.修改conf/state-management.xml
+
+主要是修改`Connect String`，和第三步中的`nifi.zookeeper.connect.string`一致。
+
+```
+<cluster-provider>
+        <id>zk-provider</id>
+        <class>org.apache.nifi.controller.state.providers.zookeeper.ZooKeeperStateProvider</class>
+        <property name="Connect String">cesdb:2181,cesdb1:2181,cesdb2:2181</property>
+        <property name="Root Node">/nifi</property>
+        <property name="Session Timeout">10 seconds</property>
+        <property name="Access Control">Open</property>
+    </cluster-provider>
+
+```
+
+5.分发安装包
+
+```bash
+scp -r /data/u01/app/nifi root@cesdb1:/data/u01/app/
+scp -r /data/u01/app/nifi root@cesdb2:/data/u01/app/
+```
+
+6.修改cesdb1和cesdb2的myid和nifi.properties文件
+
+```bash
+# cesdb1
+vim myid 
+2
+
+vim nifi.properties 
+nifi.remote.input.host=cesdb1
+nifi.web.http.host=cesdb1
+nifi.cluster.node.address=cesdb1 
+# cesdb2
+vim myid 
+3
+
+vim nifi.properties 
+nifi.remote.input.host=cesdb2
+nifi.web.http.host=cesdb2
+nifi.cluster.node.address=cesdb2
+```
+
+7.三个节点都要启动
+
+```bash
+bin/nifi.sh start
+
+# 访问哪一个都行
+http://cesdb:8081/nifi/
+http://cesdb1:8081/nifi/
+http://cesdb2:8081/nifi/
+```
+
+![](D:\Github\MyKnowledgeRepository\img\bigdata\nifi\nifi集群.png)
+
+
+
 # 数据源配置
 
 ## Oracle数据源配置
