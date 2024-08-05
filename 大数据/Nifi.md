@@ -267,9 +267,11 @@ Directory:/user/hive/warehouse/test.db/surgery/med_dept_dict_2
 
 ## UpdateAttribute
 
-更新属性，比如说添加时间属性等
+更新属性，比如说添加时间属性等。也可以添加文件名等操作。
 
 ![](D:\Github\MyKnowledgeRepository\img\bigdata\nifi\UpdateAttribute组件.png)
+
+![](D:\Github\MyKnowledgeRepository\img\bigdata\nifi\添加文件名.png)
 
 
 
@@ -332,7 +334,31 @@ ConvertRecord配置如下
 
 ![](D:\Github\MyKnowledgeRepository\img\bigdata\nifi\JsonRecordSetWriter配置2.png)
 
+## 集群方式的同步
 
+如果使用了nifi集群，那么在配置上需要注意两点：一是头结点Execution的配置，二是连接器Load Balance Strategy的配置。
+
+Execution有两个选择：1.All nodes：所有节点 2.Primary node：主节点。
+
+**对应单节点的NiFi来说上面两种选择都是没有区别的，对于集群来说的话，头处理器一般都是选择Primary node，其他处理器选择All nodes，因为在头处理器是整个任务的起点，选择所有节点的话，每个节点都会去执行相同的任务，这肯定不是我们所想要的，我们只需要一个节点执行就可以了。集群模式下，如果头处理器选择All nodes，就会导致同步到多份数据，三个节点就会同步到三份数据。**
+
+连接器的Setting中有一个Load Balance Strategy，它有四种负载均衡策略选项：
+
+**1.Do not load balance**：不进行负载均衡
+
+**2.Partition by attribute**：按属性分区
+
+**3.Round robin**：轮询
+
+**4.Single node**：单节点
+
+如果没有特别要求，建议选择轮询的方式。
+
+![](D:\Github\MyKnowledgeRepository\img\bigdata\nifi\集群配置1.png)
+
+![](D:\Github\MyKnowledgeRepository\img\bigdata\nifi\集群配置2.png)
+
+![](D:\Github\MyKnowledgeRepository\img\bigdata\nifi\集群配置3.png)
 
 # 报错总结
 
