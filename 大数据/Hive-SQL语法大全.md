@@ -89,8 +89,6 @@ SELECT current_database();
 
 ### 数据类型
 
-
-
 | **分类** | **类型**  | **描述**                                       | **字面量示例**                                               |
 | -------- | --------- | ---------------------------------------------- | ------------------------------------------------------------ |
 | 原始类型 | BOOLEAN   | true/false                                     | TRUE                                                         |
@@ -385,8 +383,6 @@ WHERE b.year = year(from_unixtime(unix_timestamp()))--2024
 --2024 7 07
 SELECT year(from_unixtime(unix_timestamp())) as year,month(from_unixtime(unix_timestamp())) as month ,lpad(month(from_unixtime(unix_timestamp())), 2, '0') as month;
 ```
-
-
 
 
 
