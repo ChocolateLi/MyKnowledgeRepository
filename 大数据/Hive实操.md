@@ -191,6 +191,197 @@ STORED AS TEXTFILE
 LOCATION '/user/hive/warehouse/ods.db/excel/ods_selform_compare1deptid_ig';
 ```
 
+## hive授权管理
+
+编辑hive-site.xml，添加相应的配置
+
+```
+<configuration>
+<property>
+  <name>fs.defaultFS</name>
+  <value>hdfs://cesdb:8020</value>
+</property>
+
+  <!-- Oracle JDBC connection string -->
+  <property>
+    <name>javax.jdo.option.ConnectionURL</name>
+    <value>jdbc:oracle:thin:@10.201.100.75:1521:cesdb</value>
+    <description>JDBC connect string for a JDBC metastore</description>
+  </property>
+
+  <property>
+    <name>javax.jdo.option.ConnectionDriverName</name>
+    <value>oracle.jdbc.OracleDriver</value>
+    <description>Driver class name for a JDBC metastore</description>
+  </property>
+
+  <property>
+    <name>javax.jdo.option.ConnectionUserName</name>
+    <value>hive_user</value>
+    <description>Username to use against metastore database</description>
+  </property>
+
+  <property>
+    <name>javax.jdo.option.ConnectionPassword</name>
+    <value>hive_0753</value>
+    <description>Password to use against metastore database</description>
+  </property>
+
+
+  <!-- Hive Execution Configuration -->
+  <property>
+    <name>hive.execution.engine</name>
+    <value>mr</value>
+    <description>Execution engine to use. mr is mapreduce, tez is Tez, spark is Spark</description>
+  </property>
+    
+    <property>
+        <!--hive表在hdfs的位置-->
+        <name>hive.metastore.warehouse.dir</name>
+        <value>/user/hive/warehouse</value>
+    </property>
+<!--开启授权检查-->
+    <property>
+        <name>hive.security.authorization.enabled</name>
+        <value>true</value>
+    </property>
+    <property>
+        <name>hive.security.authorization.createtable.owner.grants</name>
+        <value>ALL</value>
+    </property>
+<property>
+  <name>hive.security.authorization.task.factory</name>
+  <value>org.apache.hadoop.hive.ql.parse.authorization.HiveAuthorizationTaskFactoryImpl</value>
+</property>
+<property>
+  <name>hive.users.in.admin.role</name>
+  <value>hadoop</value>
+  <description>定义超级管理员 启动的时候会自动创建comma separated list of users who are in admin role for bootstrapping. More users can be added in ADMIN role later.</description>
+</property>
+
+    <property>
+        <name>hive.server2.enable.doAs</name>
+        <value>true</value>
+    </property>
+
+<!--启用sql标准授权模式-->
+<property>
+  <name>hive.security.authorization.manager</name>
+  <value>org.apache.hadoop.hive.ql.security.authorization.plugin.sqlstd.SQLStdHiveAuthorizerFactory</value>
+</property>
+<property>
+  <name>hive.security.authenticator.manager</name>
+  <value>org.apache.hadoop.hive.ql.security.SessionStateUserAuthenticator</value>
+</property>
+
+	<property>
+  		<name>hive.metastore.partition.management.task.frequency</name>
+  		<value>1d</value>
+ 		 <description>Frequency at which the partition management task runs to add partitions.</description>
+	</property>    
+<property>
+  <name>hive.aux.jars.path</name>
+  <value>/data/u01/app/hive/apache-hive-3.1.3/lib/hive-hcatalog-core-3.1.3.jar</value>
+</property>
+
+</configuration>
+
+```
+
+hive的授权操作
+
+```sql
+--展示当前角色
+SHOW CURRENT ROLES;
+
+--切换角色
+SET ROLE admin;
+
+-- 查看所有角色
+SHOW ROLES;
+
+-- 查看某个角色的权限
+SHOW GRANT ROLE data_analyst;
+SHOW GRANT ROLE public;
+
+-- 创建数据统计人员角色
+CREATE ROLE data_analyst;
+
+-- 授予 data_analyst 角色对 ods、dwd、dws 和 ads 数据库的 SELECT 权限
+GRANT SELECT ON DATABASE ods TO ROLE data_analyst;
+GRANT SELECT ON DATABASE dwd TO ROLE data_analyst;
+GRANT SELECT ON DATABASE dws TO ROLE data_analyst;
+GRANT SELECT ON DATABASE ads TO ROLE data_analyst;
+GRANT SELECT ON DATABASE tmp TO ROLE data_analyst;
+grant select on DATABASE test to role data_analyst;
+
+--授予角色某个表的权限
+grant select on table ods.ods_med_his_users_ig to role data_analyst;
+grant select on table tmp.temp_wardwordlog_mi to role data_analyst;
+grant select on table test.t_user to role data_analyst;
+grant select on table ods.ods_bagl_operation_mi to role data_analyst;
+--直接授予用户库的权限
+GRANT SELECT ON DATABASE ods TO user analyst_user;
+
+--查看角色已有的权限
+show grant role data_analyst;
+SHOW GRANT ROLE public;
+
+-- 为数据统计人员分配角色
+GRANT ROLE data_analyst TO USER analyst_user;
+--注意，需要Linux系统创建analyst_user用户
+adduser analyst_user;
+passwd analyst_user;
+
+--列出给定角色/用户已授予的所有角色
+--角色
+show role grant role public;
+show role grant role data_analyst;
+--用户
+show role grant user hadoop;
+show role grant user analyst_user;
+
+--查看角色已有权限
+show grant role data_analyst;
+--查看角色在某个库的权限
+show grant role data_analyst on database ods;
+--查看指定用户已有权限
+SHOW GRANT USER hadoop;
+show grant user analyst_user;
+--查看指定用户在某个库的权限
+show grant user hadoop on database ods;
+show grant user analyst_user on database ods;
+
+--列出属于此角色的所有角色和用户
+show principals data_analyst;
+show principals admin;
+
+--回收用户role角色
+revoke role data_analyst from user analyst_user;
+--回收用户权限
+revoke all from user analyst_user;
+--回收角色对库的所有权限
+revoke select on database ods from role data_analyst;
+revoke select on database dwd from role data_analyst;
+revoke select on database dws from role data_analyst;
+revoke select on database ads from role data_analyst;
+revoke select on database tmp from role data_analyst;
+revoke select on database test from role data_analyst;
+--回收用户对表的权限
+revoke select on TABLE ods.ods_med_dept_dict_ig from user analyst_user;
+--回收用户对库的权限
+revoke select on database ods from user analyst_user;
+
+--查看当前用户信息
+select current_user();
+
+--查看某个表被谁拥有权限
+SHOW GRANT ON TABLE ods.ods_med_his_users_ig;
+
+```
+
+
+
 
 
 # 问题处理
