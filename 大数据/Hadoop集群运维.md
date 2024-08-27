@@ -316,5 +316,79 @@ nifi-all.sh stop
 nifi-all.sh status
 ```
 
+## ds集群
+
+```bash
+touch ds-all.sh
+
+vim ds-all.sh
+
+#!/bin/bash
+
+# 设置环境变量
+export DS_HOME=/data/u01/app/dolphinscheduler/apache-dolphinscheduler-3.2.2-bin
+
+# 检查输入参数
+if [ "$#" -ne 1 ]; then
+    echo "Usage: $0 {start|stop}"
+    exit 1
+fi
+
+ACTION=$1
+
+if [ "$ACTION" == "start" ]; then
+    echo "Starting DolphinScheduler components..."
+
+    # 启动 Master（cesdb 和 cesdb1）
+    ssh dolphinscheduler@cesdb "cd $DS_HOME && bash ./bin/dolphinscheduler-daemon.sh start master-server"
+    ssh dolphinscheduler@cesdb1 "cd $DS_HOME && bash ./bin/dolphinscheduler-daemon.sh start master-server"
+
+    # 启动 Worker（cesdb、cesdb1 和 cesdb2）
+    ssh dolphinscheduler@cesdb "cd $DS_HOME && bash ./bin/dolphinscheduler-daemon.sh start worker-server"
+    ssh dolphinscheduler@cesdb1 "cd $DS_HOME && bash ./bin/dolphinscheduler-daemon.sh start worker-server"
+    ssh dolphinscheduler@cesdb2 "cd $DS_HOME && bash ./bin/dolphinscheduler-daemon.sh start worker-server"
+
+    # 启动 Api（cesdb）
+    ssh dolphinscheduler@cesdb "cd $DS_HOME && bash ./bin/dolphinscheduler-daemon.sh start api-server"
+
+    # 启动 Alert（cesdb2）
+    ssh dolphinscheduler@cesdb2 "cd $DS_HOME && bash ./bin/dolphinscheduler-daemon.sh start alert-server"
+
+    echo "DolphinScheduler components have been started."
+
+elif [ "$ACTION" == "stop" ]; then
+    echo "Stopping DolphinScheduler components..."
+
+    # 停止 Master（cesdb 和 cesdb1）
+    ssh dolphinscheduler@cesdb "cd $DS_HOME && bash ./bin/dolphinscheduler-daemon.sh stop master-server"
+    ssh dolphinscheduler@cesdb1 "cd $DS_HOME && bash ./bin/dolphinscheduler-daemon.sh stop master-server"
+
+    # 停止 Worker（cesdb、cesdb1 和 cesdb2）
+    ssh dolphinscheduler@cesdb "cd $DS_HOME && bash ./bin/dolphinscheduler-daemon.sh stop worker-server"
+    ssh dolphinscheduler@cesdb1 "cd $DS_HOME && bash ./bin/dolphinscheduler-daemon.sh stop worker-server"
+    ssh dolphinscheduler@cesdb2 "cd $DS_HOME && bash ./bin/dolphinscheduler-daemon.sh stop worker-server"
+
+    # 停止 Api（cesdb）
+    ssh dolphinscheduler@cesdb "cd $DS_HOME && bash ./bin/dolphinscheduler-daemon.sh stop api-server"
+
+    # 停止 Alert（cesdb2）
+    ssh dolphinscheduler@cesdb2 "cd $DS_HOME && bash ./bin/dolphinscheduler-daemon.sh stop alert-server"
+
+    echo "DolphinScheduler components have been stopped."
+
+else
+    echo "Invalid action: $ACTION"
+    echo "Usage: $0 {start|stop}"
+    exit 1
+fi
+
+chmod -R 777 ds-all.sh
+
+# 启动集群
+ds-all.sh start
+# 关闭集群
+ds-all.sh stop
+```
+
 
 
