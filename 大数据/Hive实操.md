@@ -380,9 +380,37 @@ SHOW GRANT ON TABLE ods.ods_med_his_users_ig;
 
 ```
 
+## hive修改分区
 
+Hive本身不支持直接修改分区名，比如你不能直接通过一个命令将 `year=2024/month=06` 修改为 `year=2024/month=05`。然而，你可以通过以下步骤间接地完成这个操作：
 
+**重命名分区（通过添加新分区并移动数据）**
 
+1. 创建新分区： 创建一个新的分区，目标为你希望的新分区名，如 `year=2024/month=05`。
+
+2. 移动数据： 将原分区的数据文件从 `year=2024/month=06` 移动到 `year=2024/month=05` 的路径下。
+
+3. 修复元数据： 使用 `MSCK REPAIR TABLE` 或 `ALTER TABLE table_name PARTITION` 更新表的元数据。
+
+4. 删除旧分区： 删除旧分区 `year=2024/month=06`。
+
+   ```sql
+   -- 创建新的分区
+   ALTER TABLE your_table_name ADD PARTITION (year=2024, month=05);
+   
+   -- 移动数据
+   -- 需要在HDFS上操作，移动原分区的数据到新的分区路径
+   hdfs dfs -mv /path/to/your_table/year=2024/month=06/* /path/to/your_table/year=2024/month=05/
+   
+   -- 修复表元数据
+   MSCK REPAIR TABLE your_table_name;
+   
+   -- 删除旧分区
+   ALTER TABLE your_table_name DROP PARTITION (year=2024, month=06);
+   
+   ```
+
+   
 
 # 问题处理
 
