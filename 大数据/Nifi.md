@@ -331,6 +331,67 @@ previousYear = ${currentMonth:equals('01'):ifElse(${currentYear:minus(1)}, ${cur
 
 
 
+## ExecuteScript
+
+![](D:\Github\MyKnowledgeRepository\img\bigdata\nifi\ExecuteScript.png)
+
+Groovy脚本示例：
+
+```groovy
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import org.apache.nifi.processor.io.OutputStreamCallback
+
+// 定义输入参数
+String startDateStr = "2022-01-01"  // 开始日期
+String endDateStr = "2024-07-31"    // 结束日期
+
+// 日期格式
+DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+
+// 将字符串转换为日期对象
+LocalDate startDate = LocalDate.parse(startDateStr, dateFormat)
+LocalDate endDate = LocalDate.parse(endDateStr, dateFormat)
+
+// 生成SQL语句
+List<String> sqlStatements = []
+LocalDate currentDate = startDate
+while (!currentDate.isAfter(endDate)) {
+    String currentDateStr = currentDate.format(dateFormat)
+    //String sqlStatement = "CALL web.xspinterface4_QueryDHCWorkloadIP(\"${currentDateStr}\",\"${currentDateStr}\");"
+    //String sqlStatement = "CALL web.xspinterface4_QueryDHCWorkloadOP(\"${currentDateStr}\",\"${currentDateStr}\");"
+    //String sqlStatement = "CALL web.xspinterface4_QueryDHCWorkloadMaterial(\"${currentDateStr}\",\"${currentDateStr}\");"
+    //String sqlStatement = "CALL web.xspinterface4_QueryDHCWorkloadDrug(\"${currentDateStr}\",\"${currentDateStr}\");"
+    //String sqlStatement = "CALL web.xspinterface4_QueryDHCWorkloadOP6(\"${currentDateStr}\",\"${currentDateStr}\");"
+    //String sqlStatement = "CALL web.xspinterface4_QueryDHCWorkloadOP7(\"${currentDateStr}\",\"${currentDateStr}\");"
+    //String sqlStatement = "CALL web.xspinterface4_QueryDHCWorkloadIP6(\"${currentDateStr}\",\"${currentDateStr}\");"
+    String sqlStatement = "CALL web.xspinterface4_QueryDHCWorkloadIP7(\"${currentDateStr}\",\"${currentDateStr}\");"
+    sqlStatements.add(sqlStatement)
+    currentDate = currentDate.plusDays(1)
+}
+
+// 将生成的SQL语句拼接成一个字符串，每个语句一行
+String sqlStatementsStr = sqlStatements.join("\n")
+
+// 定义一个回调类，用于将生成的SQL语句写入流文件
+flowFile = session.create()
+flowFile = session.write(flowFile, { outputStream ->
+    outputStream.write(sqlStatementsStr.bytes)
+} as OutputStreamCallback)
+flowFile = session.putAttribute(flowFile, "mime.type", "text/plain")
+
+// 将FlowFile传递给下游组件
+session.transfer(flowFile, REL_SUCCESS)
+```
+
+## SplitText
+
+切分文本组件，配合ExecuteScript组件可以切分脚本生成的Sql语句等。Line Split Count设置为1
+
+![](D:\Github\MyKnowledgeRepository\img\bigdata\nifi\SplitText.png)
+
+
+
 # 同步配置
 
 格式如下
@@ -447,6 +508,20 @@ ConcurrentTasks设置为4。（因为我的数据库连接池设置为12个，3�
 ![](D:\Github\MyKnowledgeRepository\img\bigdata\nifi\集群数值.png)
 
 ![](D:\Github\MyKnowledgeRepository\img\bigdata\nifi\集群细节.png)
+
+## ExecuteScript脚本的应用
+
+![](D:\Github\MyKnowledgeRepository\img\bigdata\nifi\ExecuteScript应用1.png)
+
+这种应用流程可以同步大数据量，多少年的数据都能同步。只需要使用ExecuteScript脚本把sql语句切分好。
+
+为了防止写入PutHDFS上的文件被覆盖或替换，可以添加一个UpdateAttribute组件中添加filename属性，是`filename = ${UUID()} `
+
+会随机生成文件名。
+
+还有关键的一点就是ExecuteSQL只需要配置数据库连接那些，其他都不用设置了。
+
+![](D:\Github\MyKnowledgeRepository\img\bigdata\nifi\ExecuteScript应用2.png)
 
 # Nifi集群调优
 
