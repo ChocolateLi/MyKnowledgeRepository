@@ -335,7 +335,9 @@ previousYear = ${currentMonth:equals('01'):ifElse(${currentYear:minus(1)}, ${cur
 
 ![](D:\Github\MyKnowledgeRepository\img\bigdata\nifi\ExecuteScript.png)
 
-Groovy脚本示例：
+**Groovy脚本示例：**
+
+1.按天切分存储过程
 
 ```groovy
 import java.time.LocalDate
@@ -383,6 +385,52 @@ flowFile = session.putAttribute(flowFile, "mime.type", "text/plain")
 // 将FlowFile传递给下游组件
 session.transfer(flowFile, REL_SUCCESS)
 ```
+
+2.按月切分sql语句
+
+```sql
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import org.apache.nifi.processor.io.OutputStreamCallback
+
+// 定义输入参数
+String startDateStr = "2024-01-01"  // 开始日期
+String endDateStr = "2024-08-01"    // 结束日期
+
+// 日期格式
+DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+
+// 将字符串转换为日期对象
+LocalDate startDate = LocalDate.parse(startDateStr, dateFormat)
+LocalDate endDate = LocalDate.parse(endDateStr, dateFormat)
+
+// 生成SQL语句
+List<String> sqlStatements = []
+LocalDate currentDate = startDate
+while (!currentDate.isAfter(endDate.minusDays(1))) {
+    LocalDate nextMonthDate = currentDate.plusMonths(1)
+    String currentDateStr = currentDate.format(dateFormat)
+    String nextMonthDateStr = nextMonthDate.format(dateFormat)
+    String sqlStatement = """select * from cdr.CIS_INHOS_MEDICAL_RECORD where DISCHARGE_DATE>=to_date('${currentDateStr}','yyyy-mm-dd') and DISCHARGE_DATE<to_date('${nextMonthDateStr}','yyyy-mm-dd')"""
+    sqlStatements.add(sqlStatement)
+    currentDate = nextMonthDate
+}
+
+// 将生成的SQL语句拼接成一个字符串，每个语句一行
+String sqlStatementsStr = sqlStatements.join("\n")
+
+// 定义一个回调类，用于将生成的SQL语句写入流文件
+flowFile = session.create()
+flowFile = session.write(flowFile, { outputStream ->
+    outputStream.write(sqlStatementsStr.bytes)
+} as OutputStreamCallback)
+flowFile = session.putAttribute(flowFile, "mime.type", "text/plain")
+
+// 将FlowFile传递给下游组件
+session.transfer(flowFile, REL_SUCCESS)
+```
+
+
 
 ## SplitText
 

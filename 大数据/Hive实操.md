@@ -345,6 +345,8 @@ show role grant user analyst_user;
 show grant role data_analyst;
 --查看角色在某个库的权限
 show grant role data_analyst on database ods;
+--查看角色在某个表的权限
+show grant role data_analyst on table ods.ods_med_his_users_ig ;
 --查看指定用户已有权限
 SHOW GRANT USER hadoop;
 show grant user analyst_user;
@@ -377,6 +379,17 @@ select current_user();
 
 --查看某个表被谁拥有权限
 SHOW GRANT ON TABLE ods.ods_med_his_users_ig;
+
+--创建视图（源表删除了，视图也看不到了）
+create view test_view as 
+select * from test.ca_configcommon ;
+--授权视图的查询权限给角色(直接把视图当成表来授权)
+grant select on TABLE test.test_view to role data_analyst;
+--授权视图的查询权限给用户
+GRANT SELECT ON TABLE test.test_view TO USER username;
+--回收视图权限
+revoke select on TABLE test.test_view from role data_analyst;
+
 
 ```
 
