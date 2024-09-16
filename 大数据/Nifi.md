@@ -430,6 +430,99 @@ flowFile = session.putAttribute(flowFile, "mime.type", "text/plain")
 session.transfer(flowFile, REL_SUCCESS)
 ```
 
+3.按天切分sql语句
+
+```groovy
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import org.apache.nifi.processor.io.OutputStreamCallback
+
+// 定义输入参数
+String startDateStr = "2020-01-01"  // 开始日期
+String endDateStr = "2021-01-01"    // 结束日期
+
+// 日期格式
+DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+
+// 将字符串转换为日期对象
+LocalDate startDate = LocalDate.parse(startDateStr, dateFormat)
+LocalDate endDate = LocalDate.parse(endDateStr, dateFormat)
+
+// 生成SQL语句
+List<String> sqlStatements = []
+LocalDate currentDate = startDate
+while (!currentDate.isAfter(endDate.minusDays(1))) {
+    LocalDate nextDayDate = currentDate.plusDays(1)
+    String currentDateStr = currentDate.format(dateFormat)
+    String nextDayDateStr = nextDayDate.format(dateFormat)
+    String sqlStatement = """select * from cdr.CIS_OP_MEDICAL_RECORD where VISIT_DATE>=to_date('${currentDateStr}','yyyy-mm-dd') and VISIT_DATE<to_date('${nextDayDateStr}','yyyy-mm-dd')"""
+    sqlStatements.add(sqlStatement)
+    currentDate = nextDayDate
+}
+
+// 将生成的SQL语句拼接成一个字符串，每个语句一行
+String sqlStatementsStr = sqlStatements.join("\n")
+
+// 定义一个回调类，用于将生成的SQL语句写入流文件
+flowFile = session.create()
+flowFile = session.write(flowFile, { outputStream ->
+    outputStream.write(sqlStatementsStr.bytes)
+} as OutputStreamCallback)
+flowFile = session.putAttribute(flowFile, "mime.type", "text/plain")
+
+// 将FlowFile传递给下游组件
+session.transfer(flowFile, REL_SUCCESS)
+```
+
+4.切分上月的sql
+
+```groovy
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import org.apache.nifi.processor.io.OutputStreamCallback
+
+// 获取当前日期
+LocalDate now = LocalDate.now()
+
+// 计算开始日期为上个月的第一天
+LocalDate startDate = now.withDayOfMonth(1).minusMonths(1)
+
+// 计算结束日期为本月的第一天
+LocalDate endDate = now.withDayOfMonth(1)
+
+// 日期格式
+DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+
+// 将日期对象转换为字符串
+String startDateStr = startDate.format(dateFormat)
+String endDateStr = endDate.format(dateFormat)
+
+// 生成SQL语句
+List<String> sqlStatements = []
+LocalDate currentDate = startDate
+while (!currentDate.isEqual(endDate)) {
+    LocalDate nextDayDate = currentDate.plusDays(1)
+    String currentDateStr = currentDate.format(dateFormat)
+    String nextDayDateStr = nextDayDate.format(dateFormat)
+    String sqlStatement = """select * from cdr.CIS_OP_MEDICAL_RECORD where VISIT_DATE>=to_date('${currentDateStr}','yyyy-mm-dd') and VISIT_DATE<to_date('${nextDayDateStr}','yyyy-mm-dd')"""
+    sqlStatements.add(sqlStatement)
+    currentDate = nextDayDate
+}
+
+// 将生成的SQL语句拼接成一个字符串，每个语句一行
+String sqlStatementsStr = sqlStatements.join("\n")
+
+// 定义一个回调类，用于将生成的SQL语句写入流文件
+flowFile = session.create()
+flowFile = session.write(flowFile, { outputStream ->
+    outputStream.write(sqlStatementsStr.bytes)
+} as OutputStreamCallback)
+flowFile = session.putAttribute(flowFile, "mime.type", "text/plain")
+
+// 将FlowFile传递给下游组件
+session.transfer(flowFile, REL_SUCCESS)
+```
+
 
 
 ## SplitText
@@ -637,6 +730,8 @@ Size Threshold 设置为 3GB
 
 ## 分区数和处理的线程数调优
 
+### 错误使用
+
 | Partition Size、Max Rows Per Flow File、Output Batch Size | Concurrent Tasks | 总线程数 | 数据量   | 处理完成时间 | 平均每分钟处理数据 |
 | --------------------------------------------------------- | ---------------- | -------- | -------- | ------------ | ------------------ |
 | 10000                                                     | 12               | 36       | 2650395  | 11min        | 24w                |
@@ -682,7 +777,15 @@ Size Threshold 设置为 3GB
 
 建议在实际应用中，根据数据量和处理需求，合理设置`Partition Size`，并监控系统资源使用情况，以避免出现处理瓶颈。
 
+### 正确使用
 
+通过切分数据查询的方式可以实现亿万级别的数据同步。
+
+| 数据量   | 处理完成时间 | 平均每分钟处理数据 |
+| -------- | ------------ | ------------------ |
+| 48295103 | 14 min       | 345w               |
+| 52537171 | 8 min        | 656.7w             |
+| 59883152 | 8 min        | 748.5w             |
 
 # 报错总结
 

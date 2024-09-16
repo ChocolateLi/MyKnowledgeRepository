@@ -390,7 +390,11 @@ GRANT SELECT ON TABLE test.test_view TO USER username;
 --回收视图权限
 revoke select on TABLE test.test_view from role data_analyst;
 
+-- 查看hdfs上的权限
+hdfs dfs -getfacl /user/hive/warehouse
 
+--hdfs上设置只读权限
+hdfs dfs -setfacl -m user:view_user:rx /user/hive/warehouse
 ```
 
 ## hive修改分区
