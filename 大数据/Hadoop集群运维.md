@@ -392,3 +392,20 @@ ds-all.sh stop
 
 
 
+# Hadoop
+
+检查当前HDFS的全局副本设置
+
+```bash
+hdfs getconf -confKey dfs.replication
+```
+
+递归调整目录下文件的副本数
+
+```bash
+hdfs dfs -setrep -R 2 /path/to/your/directory
+
+hdfs dfs -setrep -R 2 /user/hive/warehouse/test.db
+
+```
+
