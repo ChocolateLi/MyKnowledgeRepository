@@ -544,6 +544,55 @@ hdfs dfs -setrep -R 2 /user/hive/warehouse/test.db
 
 这表明当前YARN集群已正常启动，资源配置正确，但当前没有运行任务，因此没有资源占用。
 
+## Yarn队列
+
+![](D:\Github\MyKnowledgeRepository\img\bigdata\yarn\yarn队列.png)
+
+该界面是 YARN (Yet Another Resource Negotiator) 中资源管理器的应用程序队列页面，显示了 `root.default` 队列的配置信息和资源使用情况。以下是对主要部分的解释：
+
+1. **Queue State (队列状态)**:  
+   队列的当前状态是 `RUNNING`，表示该队列处于活动状态，可以接受新任务。
+
+2. **Used Capacity (已使用容量)**:  
+   `Used Capacity: <memory:0, vCores:0> (0.0%)` 表示当前没有使用内存或虚拟 CPU 核心，使用率为 0%。这意味着该队列没有正在运行的任务。
+
+3. **Configured Capacity (配置容量)** 和 **Configured Max Capacity (配置最大容量)**:  
+   配置的容量为 `<memory:0, vCores:0>`，并且最大容量为 `unlimited`，这表明该队列没有被设置固定容量限制。
+
+4. **Effective Capacity (有效容量)** 和 **Effective Max Capacity (有效最大容量)**:  
+   显示该队列的有效容量，即该队列可以使用的最大资源量。在此例中为 `<memory:73728, vCores:48>`，即 73728 MB 内存和 48 个 vCores。
+
+5. **Absolute Used Capacity (绝对已使用容量)**:  
+   为 `0.0%`，表示绝对资源使用率为 0%。
+
+6. **Configured Max Application Master Limit (配置的最大应用程序主限制)**:  
+   为 `1.0`，意味着每个用户在该队列中只能有一个应用程序主进程。
+
+7. **Max Application Master Resources (最大应用程序主资源)**:  
+   每个应用程序主进程最多可以使用 `memory:8192, vCores:1`，即 8192 MB 内存和 1 个 vCore。
+
+8. **Num Schedulable Applications (可调度应用程序数)** 和 **Num Non-Schedulable Applications (不可调度应用程序数)**:  
+   当前该队列中没有可以调度的应用程序或不可调度的应用程序。
+
+9. **Max Applications (最大应用程序数)** 和 **Max Applications Per User (每用户最大应用程序数)**:  
+   队列的最大应用程序数为 10000，每个用户的最大应用程序数也为 10000。
+
+10. **Ordering Policy (排序策略)**:  
+    使用 `FifoOrderingPolicy`，即先进先出排序。
+
+11. **Preemption (抢占)** 和 **Intra-queue Preemption (队列内抢占)**:  
+    抢占功能被禁用（disabled），表示不会通过抢占资源来调度其他任务。
+
+12. **Default Node Label Expression (默认节点标签表达式)**:  
+    为 `<DEFAULT_PARTITION>`，表明该队列的默认标签，用于控制任务在哪些节点上运行。
+
+13. **Default Application Priority (默认应用程序优先级)**:  
+    默认优先级为 0，表示任务在调度时没有特殊优先级。
+
+总体来说，该界面展示了 `root.default` 队列的配置信息和资源使用情况，目前没有任务正在运行，队列处于空闲状态，未占用任何资源。
+
+
+
 # 报错
 
 ## 1.java.lang.OutOfMemoryError: GC overhead limit exceeded
