@@ -593,6 +593,66 @@ hdfs dfs -setrep -R 2 /user/hive/warehouse/test.db
 
 
 
+## Yarn Running任务
+
+![](D:\Github\MyKnowledgeRepository\img\bigdata\yarn\yarn running任务.png)
+
+在YARN（Yet Another Resource Negotiator）的界面上，您看到的是某个应用程序（Application Attempt）正在运行的详细信息。这是一个典型的YARN应用程序监控界面，显示了资源分配和执行情况。
+
+从界面上可以观察到以下几点：
+
+1. **Application Attempt State**: 应用程序的当前状态为“RUNNING”，表示这个任务正在执行中。
+
+2. **Total Allocated Containers**: 系统为这个应用程序分配了6个容器（Containers）。这些容器是YARN用于并行处理的基本执行单元。每个容器代表一个独立的进程或线程，可以在集群中的不同节点上执行。
+
+3. **Num Node Local Containers / Rack Local Containers / Off Switch Containers**:
+   - **Node Local Containers**表示容器位于相同节点上，减少数据传输的开销（此处显示为1个）。
+   - **Rack Local Containers**表示容器位于相同机架上，但不同节点上（此处显示为0）。
+   - **Off Switch Containers**表示容器位于不同机架上，可能需要跨机架传输数据（此处显示为2个）。
+
+4. **Container ID 和 Node**: 在下方的表格中列出了每个容器的ID和对应的节点地址，说明这些容器被分配到不同节点上执行。YARN通过分配多个容器来支持任务的并行处理，因此确实是多个容器并行执行。
+
+**总结**
+
+是YARN的设计目标之一就是支持并行计算。每个容器可以看作是一个独立的计算单元，多个容器可以并行执行不同的任务，从而加快整个应用的执行时间。在这个界面中，您可以看到6个容器分布在不同节点上，支持应用程序的并行执行。
+
+![](D:\Github\MyKnowledgeRepository\img\bigdata\yarn\yarn running任务1.png)
+
+该界面是YARN的应用程序资源请求和分配情况的详细界面，具体解释如下：
+
+### Application Attempt Headroom
+- **Application Attempt Headroom** 表示此应用程序在资源上限内还能请求的剩余资源量。
+- 本次尝试的剩余资源上限为 **2048 MB 内存** 和 **30 个 vCores**。
+
+### Total Allocated Containers
+- **Total Allocated Containers: 74** 表示当前已经为该应用程序分配了 **74 个容器**。
+- 这些容器被分配在不同的节点上，用于并行执行任务。
+
+### Container Locality 分配情况
+界面下方的表格展示了容器的分配情况，分为 **Node Local Request** 和 **Off Switch Request**，没有 **Rack Local Request**，说明该应用程序优先在本地节点和机架之外的节点上执行。
+- **Num Node Local Containers (satisfied by)**: 表示满足 **Node Local 请求**的容器数量，目前分配了 **67 个 Node Local 请求**。
+- **Num Rack Local Containers (satisfied by)**: 没有分配到任何 **Rack Local** 请求。
+- **Num Off Switch Containers (satisfied by)**: 通过 **Off Switch** 方式分配了 **7 个容器**，这通常指容器被分配到与数据所在机架不同的地方，增加了跨机架传输的开销。
+
+### Total Outstanding Resource Requests
+此部分表格详细展示了当前应用的 **资源请求** 状况：
+- **Priority**: 请求的优先级，这里显示所有请求的优先级为20。
+- **AllocationRequestId**: 资源分配请求ID，此处统一显示为 **-1**，表示没有特定ID。
+- **ResourceName**: 显示资源位置的名称：
+  - **cesdb1、cesdb2、/default-rack、cesdb** 等为集群中的节点或机架。
+  - **"*”** 表示可以分配到任意节点。
+- **Capability**: 每个容器请求的资源规格，这里每个容器请求 **4096 MB 内存和1个vCore**。
+- **NumContainers**: 当前请求的容器数量，每行表示不同资源位置的请求数量。例如，`cesdb1`请求了**30个容器**，`cesdb2`请求了**24个容器**，`default-rack`请求了**87个容器**等。
+- **RelaxLocality**: 允许资源调度松弛本地性。**true** 表示请求可以放宽位置要求，可以分配到非本地节点。
+- **NodeLabelExpression**: 目前显示为空（N/A），表示没有特定的节点标签需求。
+- **ExecutionType**: 执行类型，显示为 **GUARANTEED**，表示这些请求的资源分配是保证执行的，YARN会优先满足这类请求。
+- **AllocationTags / PlacementConstraint**: 分配标签和位置约束，当前显示为空（N/A），表示没有特殊约束。
+
+### 总结
+- 该界面显示了一个运行中的应用程序资源使用情况。应用当前已分配了74个容器，其中67个容器是Node Local本地分配，7个为Off Switch跨机架分配。
+- 资源请求表格显示应用正在持续请求多个容器来处理任务，并且请求的容器配置均为4096 MB内存和1个vCore。
+- RelaxLocality为true表示应用可以接受非本地容器分配，这样有助于在资源紧张时加快容器分配，提高资源利用率。
+
 # 报错
 
 ## 1.java.lang.OutOfMemoryError: GC overhead limit exceeded
