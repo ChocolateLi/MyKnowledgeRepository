@@ -443,6 +443,125 @@ done
 
 ```
 
+优化后代码
+
+```bash
+#!/bin/bash
+
+# 设置Hive的安装路径
+HIVE_HOME=/data/u01/app/hive/apache-hive-3.1.3
+
+# 日志目录设置
+LOG_DIR="/data/u01/app/hive/apache-hive-3.1.3/logs/hiveserver2_monitor"
+mkdir -p $LOG_DIR  # 创建日志目录（如果不存在）
+DATE=$(date +%Y-%m-%d)
+LOG_FILE="$LOG_DIR/hiveserver2_monitor_$DATE.log"
+
+# 将所有输出重定向到日志文件，以减少文件描述符使用
+exec >> $LOG_FILE 2>&1
+
+# 删除两天前的日志文件
+find $LOG_DIR -type f -name "hiveserver2_monitor_*.log" -mtime +2 -exec rm {} \;
+
+# 检查hiveserver2是否运行的函数
+function is_hiveserver2_running() {
+    jps | grep -q "RunJar"
+    return $?
+}
+
+# 关闭所有RunJar服务
+function stop_hiveserver2_services() {
+    jps | grep "RunJar" | awk '{print $1}' | xargs kill -9
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - Stopped all RunJar services."
+}
+
+# 启动metastore和hiveserver2服务
+function start_hiveserver2_services() {
+    $HIVE_HOME/bin/hive --service metastore &
+    $HIVE_HOME/bin/hive --service hiveserver2 &
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - Started metastore and hiveserver2 services."
+}
+
+# 主监控循环
+while true; do
+    # 检查hiveserver2服务状态
+    if ! is_hiveserver2_running; then
+        echo "$(date '+%Y-%m-%d %H:%M:%S') - hiveserver2 is not running, attempting to restart..."
+        stop_hiveserver2_services
+        start_hiveserver2_services
+    else
+        echo "$(date '+%Y-%m-%d %H:%M:%S') - hiveserver2 is running."
+    fi
+    sleep 300  # 每5分钟检查一次
+done
+
+```
+
+再优化代码
+
+```bash
+#!/bin/bash
+
+# 设置Hive的安装路径
+HIVE_HOME=/data/u01/app/hive/apache-hive-3.1.3
+
+# 日志目录设置
+LOG_DIR="/data/u01/app/hive/apache-hive-3.1.3/logs/hiveserver2_monitor"
+mkdir -p $LOG_DIR  # 创建日志目录（如果不存在）
+DATE=$(date +%Y-%m-%d)
+LOG_FILE="$LOG_DIR/hiveserver2_monitor_$DATE.log"
+
+# 将所有输出重定向到日志文件，以减少文件描述符使用
+exec >> $LOG_FILE 2>&1
+
+# 删除两天前的日志文件
+find $LOG_DIR -type f -name "hiveserver2_monitor_*.log" -mtime +2 -exec rm {} \;
+
+# HiveServer2 端口
+HIVESERVER2_PORT=10000
+HIVESERVER2_STATUS_PORT=10002
+
+# 检查hiveserver2服务是否运行
+function is_hiveserver2_running() {
+    # 使用netstat检查端口是否被占用
+    netstat -an | grep -q ":$HIVESERVER2_PORT .*LISTEN"
+    return $?
+}
+
+# 发送简单查询以检测服务是否阻塞
+function is_hiveserver2_responsive() {
+    $HIVE_HOME/bin/beeline -u "jdbc:hive2://localhost:$HIVESERVER2_PORT" -e "show databases;" > /dev/null 2>&1
+    return $?
+}
+
+# 关闭所有HiveServer2和MetaStore服务
+function stop_hiveserver2_services() {
+    jps | grep -E "HiveServer2|RunJar" | awk '{print $1}' | xargs kill -9
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - Stopped HiveServer2 and MetaStore services."
+}
+
+# 启动metastore和hiveserver2服务
+function start_hiveserver2_services() {
+    $HIVE_HOME/bin/hive --service metastore &
+    $HIVE_HOME/bin/hive --service hiveserver2 &
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - Started metastore and hiveserver2 services."
+}
+
+# 主监控循环
+while true; do
+    # 检查hiveserver2服务状态
+    if ! is_hiveserver2_running || ! is_hiveserver2_responsive; then
+        echo "$(date '+%Y-%m-%d %H:%M:%S') - hiveserver2 is not running or not responsive, attempting to restart..."
+        stop_hiveserver2_services
+        start_hiveserver2_services
+    else
+        echo "$(date '+%Y-%m-%d %H:%M:%S') - hiveserver2 is running and responsive."
+    fi
+    sleep 300  # 每5分钟检查一次
+done
+
+```
+
 2.运行脚本
 
 ```bash
@@ -463,6 +582,83 @@ tail -f nohup.out
 # 关闭任务
 kill -9 pid
 ```
+
+## 每天备份hive元数据
+
+脚本
+
+```bash
+#!/bin/bash
+
+# 配置环境变量
+export ORACLE_HOME=/data/u01/app/oracle/product/19/db_1
+export PATH=$ORACLE_HOME/bin:$PATH
+export ORACLE_SID=cesdb  # 本地 Oracle 数据库 SID
+
+# 配置变量
+BACKUP_DIR="/data/u01/backup/hive_backup/hive_metadata"  # 本地备份目录
+LOG_DIR="/data/u01/backup/hive_backup/logs"  # 日志目录
+REMOTE_HOSTS=("cesdb1" "cesdb2")  # 远程主机列表
+REMOTE_BACKUP_DIR="/data/u01/backup/hive_backup/hive_metadata"  # 远程备份目录
+DB_USER="hive_user"  # 数据库用户名
+DB_PASSWORD="hive_0753"  # 数据库密码
+# DB_CONNECTION="10.201.100.75:1521:cesdb"  # 数据库连接字符串
+DATE=$(date +"%Y%m%d")
+LOG_FILE="${LOG_DIR}/backup_log_${DATE}.log"
+BACKUP_FILE="hive_metadata_${DATE}.dmp"  # 备份文件名
+
+# 确保备份和日志目录存在
+mkdir -p "$BACKUP_DIR"
+mkdir -p "$LOG_DIR"
+
+# 备份Hive元数据
+echo "[$(date +"%Y-%m-%d %H:%M:%S")] 开始备份Hive元数据..." | tee -a "$LOG_FILE"
+expdp $DB_USER/$DB_PASSWORD schemas=HIVE_USER directory=DATA_PUMP_DIR dumpfile=$BACKUP_FILE logfile=expdp_hive_metadata_${DATE}.log
+
+# 检查备份文件是否生成成功
+if [ -f "/data/u01/app/oracle/admin/cesdb/dpdump/$BACKUP_FILE" ]; then
+    # 移动备份文件到备份目录
+    mv /data/u01/app/oracle/admin/cesdb/dpdump/$BACKUP_FILE "$BACKUP_DIR/"
+    mv /data/u01/app/oracle/admin/cesdb/dpdump/expdp_hive_metadata_${DATE}.log "$LOG_DIR/"
+    echo "[$(date +"%Y-%m-%d %H:%M:%S")] 备份完成：$BACKUP_DIR/$BACKUP_FILE" | tee -a "$LOG_FILE"
+else
+    echo "[$(date +"%Y-%m-%d %H:%M:%S")] 备份失败，未生成备份文件" | tee -a "$LOG_FILE"
+    exit 1  # 退出脚本，避免传输不存在的文件
+fi
+
+# 将备份文件传输到远程服务器并覆盖
+for host in "${REMOTE_HOSTS[@]}"; do
+    echo "[$(date +"%Y-%m-%d %H:%M:%S")] 正在将备份文件传输到 $host 并覆盖..." | tee -a "$LOG_FILE"
+    scp "$BACKUP_DIR/$BACKUP_FILE" "$host:$REMOTE_BACKUP_DIR/$BACKUP_FILE" && \
+    echo "[$(date +"%Y-%m-%d %H:%M:%S")] 传输到 $host 成功" | tee -a "$LOG_FILE" || \
+    echo "[$(date +"%Y-%m-%d %H:%M:%S")] 传输到 $host 失败" | tee -a "$LOG_FILE"
+done
+
+# 删除三天前的备份和日志
+find "$BACKUP_DIR" -type f -name "hive_metadata_*.dmp" -mtime +3 -exec rm {} \;
+find "$LOG_DIR" -type f -name "backup_log_*.log" -mtime +3 -exec rm {} \;
+echo "[$(date +"%Y-%m-%d %H:%M:%S")] 已删除三天前的旧备份和日志" | tee -a "$LOG_FILE"
+
+echo "[$(date +"%Y-%m-%d %H:%M:%S")] 全部任务完成" | tee -a "$LOG_FILE"
+
+
+```
+
+添加权限
+
+```bash
+# 添加执行权限
+chmod -R 777 backup_hive_metadata.sh
+```
+
+配置定时任务
+
+```bash
+crontab -e
+0 0 * * * /path/to/backup_hive_metadata.sh >> /data/u01/backup/hive_backup/logs/cron_backup_log.log 2>&1
+```
+
+
 
 # Hadoop
 
@@ -652,6 +848,31 @@ hdfs dfs -setrep -R 2 /user/hive/warehouse/test.db
 - 该界面显示了一个运行中的应用程序资源使用情况。应用当前已分配了74个容器，其中67个容器是Node Local本地分配，7个为Off Switch跨机架分配。
 - 资源请求表格显示应用正在持续请求多个容器来处理任务，并且请求的容器配置均为4096 MB内存和1个vCore。
 - RelaxLocality为true表示应用可以接受非本地容器分配，这样有助于在资源紧张时加快容器分配，提高资源利用率。
+
+# Hive
+
+## 1.设置会话时间
+
+**hive-site.xml**
+
+```bash
+<!-- 每隔30分钟检查不活跃的会话 -->
+<property>
+    <name>hive.server2.session.check.interval</name>
+    <value>1800000</value> <!-- 以毫秒为单位，1800000毫秒即30分钟 -->
+    <description>检查不活跃会话的时间间隔（毫秒）。设置为1800000表示每30分钟检查一次。</description>
+</property>
+
+<!-- 会话的空闲超时时间为1小时 -->
+<property>
+    <name>hive.server2.idle.session.timeout</name>
+    <value>3600000</value> <!-- 以毫秒为单位，3600000毫秒即1小时 -->
+    <description>不活跃的会话超过该时间将被关闭（毫秒）。设置为3600000表示会话空闲超过1小时自动关闭。</description>
+</property>
+
+```
+
+
 
 # 报错
 
