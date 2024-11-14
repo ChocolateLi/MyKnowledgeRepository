@@ -523,6 +523,51 @@ flowFile = session.putAttribute(flowFile, "mime.type", "text/plain")
 session.transfer(flowFile, REL_SUCCESS)
 ```
 
+5.按yyyy-MM格式切分数据
+
+```groovy
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import org.apache.nifi.processor.io.OutputStreamCallback
+
+// 定义输入参数
+String startDateStr = "2023-01"  // 开始日期
+String endDateStr = "2024-01"    // 结束日期
+
+// 日期格式
+DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM")
+
+// 将字符串转换为日期对象
+LocalDate startDate = LocalDate.parse(startDateStr, dateFormat).withDayOfMonth(1)
+LocalDate endDate = LocalDate.parse(endDateStr, dateFormat).withDayOfMonth(1).plusMonths(1)
+
+// 生成SQL语句
+List<String> sqlStatements = []
+LocalDate currentDate = startDate
+while (!currentDate.isAfter(endDate.minusMonths(1))) {
+    LocalDate nextMonthDate = currentDate.plusMonths(1)
+    String currentDateStr = currentDate.format(dateFormat)
+    String nextMonthDateStr = nextMonthDate.format(dateFormat)
+    String sqlStatement = """SELECT * FROM TZYHOSPITALWORKREPORT WHERE FREPORTDATESTR >= '${currentDateStr}' AND FREPORTDATESTR < '${nextMonthDateStr}'"""
+    sqlStatements.add(sqlStatement)
+    currentDate = nextMonthDate
+}
+
+// 将生成的SQL语句拼接成一个字符串，每个语句一行
+String sqlStatementsStr = sqlStatements.join("\n")
+
+// 定义一个回调类，用于将生成的SQL语句写入流文件
+flowFile = session.create()
+flowFile = session.write(flowFile, { outputStream ->
+    outputStream.write(sqlStatementsStr.bytes)
+} as OutputStreamCallback)
+flowFile = session.putAttribute(flowFile, "mime.type", "text/plain")
+
+// 将FlowFile传递给下游组件
+session.transfer(flowFile, REL_SUCCESS)
+
+```
+
 
 
 ## SplitText
@@ -531,7 +576,56 @@ session.transfer(flowFile, REL_SUCCESS)
 
 ![](D:\Github\MyKnowledgeRepository\img\bigdata\nifi\SplitText.png)
 
+## JoltTransformJSON
 
+可以对json数据的中文字段进行映射，转换为英文字段。
+
+![](D:\Github\MyKnowledgeRepository\img\bigdata\nifi\JoltTransformJSON组件.jpg)
+
+JoltSpecification内容
+
+```json
+[
+  {
+    "operation": "shift",
+    "spec": {
+      "EMPID": "empid",
+      "是否在册": "is_register",
+      "入册时间": "register_date",
+      "在岗开始时间": "duty_startdate",
+      "在岗结束时间": "duty_enddate",
+      "在册_医生": "register_doctor",
+      "在册_技师": "register_technician",
+      "在册_药师": "register_pharmacist",
+      "在册_护士": "register_nurse",
+      "在册_工勤": "register_worker",
+      "是否在岗": "is_duty",
+      "在岗_医生": "duty_doctor",
+      "在岗_技师": "duty_technician",
+      "在岗_药师": "duty_pharmacist",
+      "在岗_护士": "duty_nurse",
+      "在岗_工勤": "duty_worker"
+    }
+  }
+]
+
+```
+
+
+
+## MergeContent
+
+合并内容。可以将切分的数据合并在一起，一起写入一个文件。比如将多条json合并在一起。
+
+![](D:\Github\MyKnowledgeRepository\img\bigdata\nifi\MergeContent组件.jpg)
+
+
+
+**Maximum Number of Entries**：最多几条数据合并在一起
+
+**Delimiter Strategy**：Text
+
+Demarcator：shift + Enter进行换行，这样就可以按照一条条数据存储，hive就可以识别json条数了。
 
 # 同步配置
 
@@ -664,6 +758,12 @@ ConcurrentTasks设置为4。（因为我的数据库连接池设置为12个，3�
 
 ![](D:\Github\MyKnowledgeRepository\img\bigdata\nifi\ExecuteScript应用2.png)
 
+## Json映射字段转换流程
+
+SplitText组件是切分json为一条条数据，然后送入JoltTransformJSON进行一条条转换，最后通过MergeContent组件将一条条转换好的数据合并在一个文件进行传递。
+
+![](D:\Github\MyKnowledgeRepository\img\bigdata\nifi\Json映射字段转换.jpg)
+
 # Nifi集群调优
 
 ## 集群信息
@@ -786,6 +886,8 @@ Size Threshold 设置为 3GB
 | 48295103 | 14 min       | 345w               |
 | 52537171 | 8 min        | 656.7w             |
 | 59883152 | 8 min        | 748.5w             |
+
+
 
 # 报错总结
 
