@@ -658,7 +658,104 @@ crontab -e
 0 0 * * * /path/to/backup_hive_metadata.sh >> /data/u01/backup/hive_backup/logs/cron_backup_log.log 2>&1
 ```
 
+## shell +  cron方式监控Metastore和HiveServer2端口
 
+1.查看端口是否监听
+
+netstat可以检查端口是否被占用。
+
+lsof是一个查看打开文件和端口使用情况的工具。
+
+```bash
+[hadoop@cesdb bin]$ netstat -tuln | grep 10000
+tcp6       0      0 :::10000                :::*                    LISTEN     
+[hadoop@cesdb bin]$ netstat -tuln | grep 9083
+tcp6       0      0 :::9083                 :::*                    LISTEN
+[hadoop@cesdb conf]$ lsof -i:10000
+COMMAND    PID   USER   FD   TYPE    DEVICE SIZE/OFF NODE NAME
+java    110500 hadoop  649u  IPv6 119579645      0t0  TCP cesdb:ndmp->199.168.66.197:54920 (ESTABLISHED)
+java    110500 hadoop  678u  IPv6 119528279      0t0  TCP *:ndmp (LISTEN)
+java    110500 hadoop  693u  IPv6 119579472      0t0  TCP cesdb:ndmp->199.168.66.201:65189 (ESTABLISHED)
+java    110500 hadoop  696u  IPv6 119579488      0t0  TCP cesdb:ndmp->199.168.66.201:65196 (ESTABLISHED)
+java    110500 hadoop  703u  IPv6 119579496      0t0  TCP cesdb:ndmp->199.168.66.201:65197 (ESTABLISHED)
+java    110500 hadoop  704u  IPv6 119579648      0t0  TCP cesdb:ndmp->199.168.66.197:54921 (ESTABLISHED)
+java    110500 hadoop  706u  IPv6 119579498      0t0  TCP cesdb:ndmp->199.168.66.201:65198 (ESTABLISHED)
+java    110500 hadoop  732u  IPv6 119610371      0t0  TCP cesdb:ndmp->199.168.66.197:54922 (ESTABLISHED)
+java    110500 hadoop  735u  IPv6 119610374      0t0  TCP cesdb:ndmp->199.168.66.197:54923 (ESTABLISHED)
+java    110500 hadoop  740u  IPv6 119610377      0t0  TCP cesdb:ndmp->199.168.66.197:54924 (ESTABLISHED)
+java    110500 hadoop  743u  IPv6 119610380      0t0  TCP cesdb:ndmp->199.168.66.197:54925 (ESTABLISHED)
+java    110500 hadoop  746u  IPv6 119610383      0t0  TCP cesdb:ndmp->199.168.66.197:54926 (ESTABLISHED)
+java    110500 hadoop  751u  IPv6 119610386      0t0  TCP cesdb:ndmp->199.168.66.197:54927 (ESTABLISHED)
+java    110500 hadoop  755u  IPv6 119610389      0t0  TCP cesdb:ndmp->199.168.66.197:54928 (ESTABLISHED)
+java    110500 hadoop  820u  IPv6 119858124      0t0  TCP cesdb:ndmp->199.168.66.168:65484 (ESTABLISHED)
+java    110500 hadoop  821u  IPv6 119858172      0t0  TCP cesdb:ndmp->199.168.66.168:65487 (ESTABLISHED)
+java    110500 hadoop  837u  IPv6 119875979      0t0  TCP cesdb:ndmp->199.168.66.197:55010 (ESTABLISHED)
+java    110500 hadoop  900u  IPv6 120201026      0t0  TCP cesdb:ndmp->199.168.66.168:49346 (ESTABLISHED)
+[hadoop@cesdb conf]$ lsof -i:9083
+COMMAND    PID   USER   FD   TYPE    DEVICE SIZE/OFF NODE NAME
+java    110499 hadoop  670u  IPv6 119590967      0t0  TCP *:emc-pp-mgmtsvc (LISTEN)
+[hadoop@cesdb conf]$ 
+
+```
+
+2.监控shell脚本
+
+```bash
+#!/bin/bash
+
+# 配置
+LOG_DIR="/data/u01/app/hive/apache-hive-3.1.3/logs/hiveserver2_monitor"  # 日志目录
+TODAY=$(date '+%Y-%m-%d')
+YESTERDAY=$(date -d "yesterday" '+%Y-%m-%d')
+
+METASTORE_PORT=9083
+METASTORE_HOST=127.0.0.1
+HIVESERVER2_PORT=10000
+HIVESERVER2_HOST=127.0.0.1
+
+# 创建日志目录（如果不存在）
+mkdir -p "$LOG_DIR"
+
+# 日志文件
+LOG_FILE="$LOG_DIR/$TODAY.log"
+
+# 检查服务函数
+check_service() {
+    local HOST=$1
+    local PORT=$2
+    local SERVICE_NAME=$3
+    if nc -z "$HOST" "$PORT"; then
+        echo "$(date '+%Y-%m-%d %H:%M:%S') - $SERVICE_NAME is running." >> "$LOG_FILE"
+    else
+        echo "$(date '+%Y-%m-%d %H:%M:%S') - $SERVICE_NAME is down. Restarting..." >> "$LOG_FILE"
+        # 重启服务命令（根据实际环境修改）
+        if [ "$SERVICE_NAME" == "Metastore" ]; then
+            nohup $HIVE_HOME/bin/hive --service metastore >> "$LOG_FILE" 2>&1 &
+        elif [ "$SERVICE_NAME" == "HiveServer2" ]; then
+            nohup $HIVE_HOME/bin/hive --service hiveserver2 >> "$LOG_FILE" 2>&1 &
+        fi
+        echo "$(date '+%Y-%m-%d %H:%M:%S') - $SERVICE_NAME restart command executed." >> "$LOG_FILE"
+    fi
+}
+
+# 检查 Metastore 和 HiveServer2
+check_service "$METASTORE_HOST" "$METASTORE_PORT" "Metastore"
+check_service "$HIVESERVER2_HOST" "$HIVESERVER2_PORT" "HiveServer2"
+
+# 删除昨天的日志文件
+if [ -f "$LOG_DIR/$YESTERDAY.log" ]; then
+    rm -f "$LOG_DIR/$YESTERDAY.log"
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - Deleted $LOG_DIR/$YESTERDAY.log" >> "$LOG_FILE"
+fi
+```
+
+3.配置cron定时任务
+
+```bash
+# 每15分钟检查一次
+*/15 * * * * /data/u01/app/hive/apache-hive-3.1.3/bin/check_hive_services.sh >> /data/u01/app/hive/apache-hive-3.1.3/logs/hiveserver2_monitor 2>&1
+
+```
 
 # Hadoop
 

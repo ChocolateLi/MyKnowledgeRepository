@@ -568,6 +568,85 @@ session.transfer(flowFile, REL_SUCCESS)
 
 ```
 
+6.按yyyyMM格式切分数据
+
+```sql
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import org.apache.nifi.processor.io.OutputStreamCallback;
+
+// 定义输入参数
+String startDateStr = "202301";  // 开始日期
+String endDateStr = "202312";    // 结束日期
+
+// 日期格式
+DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyyMM");
+
+// 修复问题：在解析时显式指定日为1日
+LocalDate startDate = LocalDate.parse(startDateStr + "01", DateTimeFormatter.ofPattern("yyyyMMdd"));
+LocalDate endDate = LocalDate.parse(endDateStr + "01", DateTimeFormatter.ofPattern("yyyyMMdd"));
+
+// 生成SQL语句
+List<String> sqlStatements = [];
+LocalDate currentDate = startDate;
+while (!currentDate.isAfter(endDate)) { // 包含结束月份
+    String currentDateStr = currentDate.format(dateFormat); // 格式化当前日期为yyyyMM
+    String sqlStatement = "select * from F_BASYMX_RZ where BBQ_='${currentDateStr}'";
+    sqlStatements.add(sqlStatement); // 添加到列表
+    currentDate = currentDate.plusMonths(1); // 加一个月
+}
+
+// 将生成的SQL语句拼接成一个字符串，每个语句一行
+String sqlStatementsStr = String.join("\n", sqlStatements);
+
+// 定义一个回调类，用于将生成的SQL语句写入流文件
+flowFile = session.create();
+flowFile = session.write(flowFile, new OutputStreamCallback() {
+    @Override
+    public void process(java.io.OutputStream outputStream) throws java.io.IOException {
+        outputStream.write(sqlStatementsStr.getBytes());
+    }
+});
+flowFile = session.putAttribute(flowFile, "mime.type", "text/plain");
+
+// 将FlowFile传递给下游组件
+session.transfer(flowFile, REL_SUCCESS);
+```
+
+切分上月Sql，只取上月
+
+```sql
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import org.apache.nifi.processor.io.OutputStreamCallback;
+
+// 获取当前日期并计算上个月
+LocalDate now = LocalDate.now(); // 当前日期
+LocalDate lastMonth = now.minusMonths(1); // 上个月
+
+// 日期格式
+DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyyMM");
+
+// 格式化为上个月的时间
+String lastMonthStr = lastMonth.format(dateFormat); // 形如 "202410"
+
+// 生成SQL语句
+String sqlStatement = "select * from F_BASYMX_RZ where BBQ_='${lastMonthStr}'";
+
+// 定义一个回调类，用于将生成的SQL语句写入流文件
+flowFile = session.create();
+flowFile = session.write(flowFile, new OutputStreamCallback() {
+    @Override
+    public void process(java.io.OutputStream outputStream) throws java.io.IOException {
+        outputStream.write(sqlStatement.getBytes());
+    }
+});
+flowFile = session.putAttribute(flowFile, "mime.type", "text/plain");
+
+// 将FlowFile传递给下游组件
+session.transfer(flowFile, REL_SUCCESS);
+```
+
 
 
 ## SplitText
