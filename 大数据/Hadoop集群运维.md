@@ -757,6 +757,76 @@ fi
 
 ```
 
+## 集群文件分发脚本
+
+```bash
+vim sync_script.sh
+
+#!/bin/bash
+
+# 获取输出参数，如果没有参数则直接返回
+pcount=$#
+if [ $pcount -eq 0 ]; then
+    echo "No parameter provided!"
+    exit 1
+fi
+
+# 获取传输文件名
+p1=$1
+filename=$(basename "$p1")
+echo "Load file $p1 success!"
+
+# 获取文件的绝对路径
+pdir=$(cd -P "$(dirname "$p1")" && pwd)
+echo "File path is $pdir"
+
+# 获取当前用户（如果想使用 root 用户权限拷贝文件，在命令后加入 -root 参数即可）
+user=$2
+case "$user" in
+"-root")
+    user="root"
+    ;;
+"")
+    user=$(whoami)
+    ;;
+*)
+    echo "Illegal parameter $user"
+    exit 1
+    ;;
+esac
+
+echo "Using user: $user"
+
+# 拷贝文件到从机（这里的目标机器是 cesdb1 到 cesdb4）
+for host in cesdb1 cesdb2 cesdb3 cesdb4; do
+    echo "================ Current host is $host ================="
+    scp "$pdir/$filename" "$user@$host:$pdir"
+    if [ $? -eq 0 ]; then
+        echo "File successfully copied to $host:$pdir"
+    else
+        echo "Failed to copy file to $host"
+    fi
+done
+
+echo "Complete!"
+
+```
+
+添加权限
+
+```bash
+chmod -R 777 sync_script.sh
+```
+
+使用，执行脚本
+
+```bash
+./sync_script.sh /data/u01/app/hadoop_config.xml
+
+# 如果用root用户执行
+./sync_script.sh /data/u01/app/hadoop_config.xml -root
+```
+
 # Hadoop
 
 检查当前HDFS的全局副本设置
