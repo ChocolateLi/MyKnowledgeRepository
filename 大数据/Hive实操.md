@@ -441,7 +441,40 @@ Hive本身不支持直接修改分区名，比如你不能直接通过一个命�
 
 
 
+## 2.FAILED: Execution Error, return code 1 from org.apache.hadoop.hive.ql.exec.StatsTask
 
+这个问题是发生在执行StatsTask阶段，这是hive在加载数据到表时自动统计表和分区统计信息的任务。
+
+hadoop日志以及hive日志排查方法
+
+```
+grep -i "ERROR" hadoop-hadoop-datanode-cesdb.log
+grep -i "permission" hadoop-hadoop-namenode-cesdb.log
+grep -i "ERROR" hadoop-hadoop-namenode-cesdb.log
+grep -i "ERROR" hadoop-hadoop-historyserver-cesdb.log
+grep "StatsTask" hive.log
+grep -i 'ERROR' hive.log
+grep "application_1733822991327_0710" hadoop-hadoop-resourcemanager-cesdb.log
+```
+
+| 配置项                       | 影响范围       | 默认值 | 作用                                                         | 适用场景                                                     |
+| ---------------------------- | -------------- | ------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| hive.stats.autogather        | 表级统计信息   | true   | 是否自动收集 **表级统计信息**（如行数、文件大小等）          | 加载数据频繁但查询优化依赖表级统计时开启，否则可关闭。       |
+| hive.stats.column.autogather | 列级统计信息   | true   | 是否自动收集 **列级统计信息**（如列的最大值、最小值、基数、分布等），用于更精细化的查询优化器优化。 | 数据量较大、加载频繁但查询优化不依赖列级统计信息时可关闭；对于需要复杂过滤或查询优化器依赖列的场景，建议开启或手动更新。 |
+| hive.txn.stats.enabled       | 事务表统计信息 | true   | 是否自动为 **事务表**（ACID 表）维护统计信息。事务表的 `INSERT`、`UPDATE` 或 `DELETE` 操作后，会自动更新表和列的统计信息。 | 只适用于事务表（ACID 表），对非事务表无效。高频更新事务表但不依赖统计信息时可关闭。 |
+
+目前我没有做太多操作，只是设置了以下内容，问题就解决了。
+
+```
+SET hive.stats.column.autogather=false;
+```
+
+针对重要表手动收集统计信息
+
+```bash
+ANALYZE TABLE <important_table> COMPUTE STATISTICS;
+ANALYZE TABLE <important_table> COMPUTE STATISTICS FOR COLUMNS;
+```
 
 
 

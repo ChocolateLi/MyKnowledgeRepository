@@ -1,0 +1,143 @@
+<?xml version="1.0"?>
+<!--
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License. See accompanying LICENSE file.
+-->
+<configuration>
+
+<!-- Site specific YARN configuration properties -->
+<!-- 指定YARN的老大（ResourceManager）的地址 -->
+<property>
+     <name>yarn.resourcemanager.hostname</name>
+     <value>cesdb</value>
+</property>
+<!-- reducer获取数据的方式 -->
+<property>
+     <name>yarn.nodemanager.aux-services</name>
+     <value>mapreduce_shuffle</value>
+</property>
+<!-- ResourceManager Web UI Port Configuration -->
+  <property>
+    <name>yarn.resourcemanager.webapp.address</name>
+    <value>cesdb:8082</value>
+    <description>Address where the ResourceManager web application will listen on.</description>
+  </property>
+<property>
+    <name>yarn.nodemanager.aux-services.mapreduce.shuffle.class</name>
+    <value>org.apache.hadoop.mapred.ShuffleHandler</value>
+  </property>
+  <property>
+    <name>yarn.application.classpath</name>
+    <value>/user/tez/*,$HADOOP_HOME/etc/hadoop:$HADOOP_HOME//share/hadoop/common/lib/*:$HADOOP_HOME//share/hadoop/common/*:$HADOOP_HOME//share/hadoop/hdfs:$HADOOP_HOME//share/hadoop/hdfs/lib/*:$HADOOP_HOME//share/hadoop/hdfs/*:$HADOOP_HOME//share/hadoop/mapreduce/lib/*:$HADOOP_HOME//share/hadoop/mapreduce/*:$HADOOP_HOME//share/hadoop/yarn:$HADOOP_HOME//share/hadoop/yarn/lib/*:$HADOOP_HOME//share/hadoop/yarn/*:/data/u01/app/hive/apache-hive-3.1.3/lib/*</value>
+  </property>
+
+<!-- Tez 应用的资源分配 -->
+  <property>
+      <name>tez.am.resource.memory.mb</name>
+      <value>8192</value> <!-- Application Master 的内存分配 8GB -->
+  </property>
+  <property>
+      <name>tez.am.resource.cpu.vcores</name>
+      <value>4</value> <!-- Application Master 的 CPU 分配 4 核 -->
+  </property>
+  <property>
+      <name>tez.am.container.reuse.enabled</name>
+      <value>true</value> <!-- 启用容器复用，减少开销 -->
+  </property>
+
+
+ <property>
+    <name>yarn.log-aggregation-enable</name>
+    <value>true</value>
+    <description>该参数是配置是否启用日志聚集功能</description>
+ </property>
+ <property>
+    <name>yarn.log-aggregation.retain-seconds</name>
+    <value>106800</value>
+   <description>该参数是配置聚集的日志在hdfs上保存的最长时间</description>
+
+ </property>
+ <property>
+    <name>yarn.nodemanager.remote-app-log-dir</name>
+    <value>/user/container/logs</value>
+   <description>该参数是指定日志聚合目录</description>
+ </property>
+
+<!-- NodeManager的总内存和CPU核心数 -->
+    <property>
+        <name>yarn.nodemanager.resource.memory-mb</name>
+        <value>114688</value> <!-- 每台机器的总内存：24GB，现在调整为128G,现在调整为116GB内存分配给yarn，保留12GB给系统。现在改为分配112GB，已达到map的并行度计算都相同 -->
+    </property>
+    <property>
+        <name>yarn.nodemanager.resource.cpu-vcores</name>
+        <value>56</value> <!-- 每台机器的CPU核心数：16 ，现在调整为64核，分配56核给yarn，保留8核给系统-->
+    </property>
+    <!-- YARN调度器每个容器的内存和CPU核心分配 -->
+    <property>
+        <name>yarn.scheduler.minimum-allocation-mb</name>
+        <value>1024</value> <!-- 单个容器最小内存：1GB，更灵活 -->
+    </property>
+    <property>
+        <name>yarn.scheduler.maximum-allocation-mb</name>
+        <value>8192</value> <!-- 单个容器最大内存：8GB,调整为32GB，调整为16GB -->
+    </property>
+    <property>
+        <name>yarn.scheduler.minimum-allocation-vcores</name>
+        <value>1</value> <!-- 单个容器最小CPU核心数：2，调整为1核更加灵活-->
+    </property>
+    <property>
+        <name>yarn.scheduler.maximum-allocation-vcores</name>
+        <value>4</value> <!-- 单个容器最大CPU核心数：4 ，调整为16核，调整为8核-->
+    </property>
+
+<!--启用资源动态分配（如启用 Shuffle Service）。为了更好地支持资源动态分配，建议启用 YARN Shuffle Service。mapreduece不需要开启，spark就需要-->
+<!--    <property>
+    	<name>yarn.nodemanager.aux-services</name>
+    	<value>spark_shuffle</value>
+	</property>
+	<property>
+    	<name>yarn.nodemanager.aux-services.spark_shuffle.class</name>
+    	<value>org.apache.spark.network.yarn.YarnShuffleService</value>
+	</property>
+-->
+
+    <!-- 启用LinuxContainerExecutor和CGroups支持 -->
+<!--
+    <property>
+        <name>yarn.nodemanager.container-executor.class</name>
+        <value>org.apache.hadoop.yarn.server.nodemanager.LinuxContainerExecutor</value>
+    </property>
+    <property>
+        <name>yarn.nodemanager.linux-container-executor.cgroups.enabled</name>
+        <value>true</value>
+    </property>
+-->
+
+   <!-- 使用容量调度器 -->
+    <property>
+        <name>yarn.resourcemanager.scheduler.class</name>
+        <value>org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacityScheduler</value>
+    </property>
+
+   <!-- 启用抢占机制 -->
+    <property>
+        <name>yarn.resourcemanager.scheduler.monitor.enable</name>
+        <value>true</value>
+    </property>
+
+    <!-- 启用 Dominant Resource Calculator -->
+    <property>
+        <name>yarn.scheduler.capacity.resource-calculator</name>
+        <value>org.apache.hadoop.yarn.util.resource.DominantResourceCalculator</value>
+    </property>
+
+</configuration>
