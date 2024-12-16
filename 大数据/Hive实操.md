@@ -467,6 +467,11 @@ grep "application_1733822991327_0710" hadoop-hadoop-resourcemanager-cesdb.log
 
 ```
 SET hive.stats.column.autogather=false;
+
+<property>
+  <name>hive.stats.column.autogather</name>
+  <value>false</value>
+</property>
 ```
 
 针对重要表手动收集统计信息
