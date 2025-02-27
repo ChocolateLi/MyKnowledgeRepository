@@ -1071,3 +1071,64 @@ hdfs dfs -setrep -R 2 /user/hive/warehouse/test.db
 
 在这种配置下，每台机器最多可以并发执行大约 **8个任务**（24GB ÷ 4GB = 6，16个核心 ÷ 2个核心 = 8，以资源较少的计算），最终并发数量还会依据任务的资源需求在上下浮动。
 
+
+
+## 2.mr引擎丢数问题
+
+同一sql，设置以下参数和不设置以下参数，跑出的数据不一致，丢失了很多数据。
+
+```bash
+set mapreduce.map.memory.mb=4096;
+set mapreduce.map.java.opts=-Xmx3072m;
+set hive.exec.reducers.bytes.per.reducer=512000000;-- 这个不一致，默认的是256000000
+set hive.exec.reducers.max=100;-- 这个不一致
+set mapreduce.reduce.memory.mb=8192;
+set mapreduce.reduce.java.opts=-Xmx6144m;
+set mapreduce.map.output.compress=true;-- 默认为false
+set mapreduce.map.output.compress.codec=org.apache.hadoop.io.compress.SnappyCodec;-- 默认为org.apache.hadoop.io.compress.DefaultCodec
+set hive.exec.compress.output=true;
+set mapreduce.output.fileoutputformat.compress.codec=org.apache.hadoop.io.compress.SnappyCodec;
+set mapreduce.output.fileoutputformat.compress.type=BLOCK;-- 默认是RECORD
+set hive.auto.convert.join=true;
+set hive.optimize.sort.dynamic.partition=true;-- 默认false
+```
+
+从设置来看，设置的这些参数确保了Hive任务有足够的内存、并行度和压缩机制来正确处理数据。如果没有设置这些参数，Hive任务可能会因为内存不足、并行度不够或压缩问题导致数据丢失或处理不完整。为了防止后续出现这种问题，现将这些参数永久设置。修改hive-site.xml文件
+
+```xml
+<configuration>
+    <!-- 设置Reducer的字节数 -->
+    <property>
+        <name>hive.exec.reducers.bytes.per.reducer</name>
+        <value>512000000</value> <!-- 默认值 -->
+    </property>
+    <!-- 设置Map输出压缩 -->
+    <property>
+        <name>mapreduce.map.output.compress</name>
+        <value>true</value> <!-- 默认值 -->
+    </property>
+    <!-- 设置最大Reducer数量 -->
+    <property>
+        <name>hive.exec.reducers.max</name>
+        <value>100</value> <!-- 默认值 -->
+    </property>
+    <!-- 设置Map输出压缩编解码器 -->
+    <property>
+        <name>mapreduce.map.output.compress.codec</name>
+        <value>org.apache.hadoop.io.compress.SnappyCodec</value> <!-- 默认值 -->
+    </property>
+    <!-- 设置输出文件压缩类型 -->
+    <property>
+        <name>mapreduce.output.fileoutputformat.compress.type</name>
+        <value>BLOCK</value> <!-- 默认值 -->
+    </property>
+    <!-- 设置动态分区优化 -->
+    <property>
+        <name>hive.optimize.sort.dynamic.partition</name>
+        <value>true</value> <!-- 默认值 -->
+    </property>
+</configuration>
+```
+
+
+
