@@ -397,6 +397,83 @@ hdfs dfs -getfacl /user/hive/warehouse
 hdfs dfs -setfacl -m user:view_user:rx /user/hive/warehouse
 ```
 
+授权视图给data_view
+```sql
+--切换角色
+SET ROLE admin;
+--查看有哪些视图
+show views in view;
+--一张张表授权
+grant select on TABLE view.dwd_operation_view to role data_view;
+grant select on TABLE view.dwd_opsafe_01_preoperative_discussion_view to role data_view;
+grant select on TABLE view.dwd_opsafe_02_preoperative_interview_view to role data_view;
+grant select on TABLE view.dwd_opsafe_03_unplan_stop_operation_view to role data_view;
+grant select on TABLE view.dwd_opsafe_04_safecheck1_before_ane_view to role data_view;
+grant select on TABLE view.dwd_opsafe_05_safecheck2_before_op_view to role data_view;
+grant select on TABLE view.dwd_opsafe_06_authorization_mismatch_view to role data_view;
+grant select on TABLE view.dwd_opsafe_07_active_insulation_view to role data_view;
+grant select on TABLE view.dwd_opsafe_08a_temperature_view to role data_view;
+grant select on TABLE view.dwd_opsafe_08b_lowtemperature_view to role data_view;
+grant select on TABLE view.dwd_opsafe_09_opdoctor_different_view to role data_view;
+grant select on TABLE view.dwd_opsafe_10_cardiac_arrest_view to role data_view;
+grant select on TABLE view.dwd_opsafe_11_anes_anaphylaxis_view to role data_view;
+grant select on TABLE view.dwd_opsafe_12_safecheck3_after_op_view to role data_view;
+grant select on TABLE view.dwd_opsafe_14a_in_pacu_view to role data_view;
+grant select on TABLE view.dwd_opsafe_14b_lowtemperature_in_pacu_view to role data_view;
+grant select on TABLE view.dwd_opsafe_15_delay_out_pacu_view to role data_view;
+grant select on TABLE view.dwd_opsafe_16_anevisit_afterop_view to role data_view;
+grant select on TABLE view.dwd_opsafe_18_complete_op_record_view to role data_view;
+grant select on TABLE view.dwd_opsafe_19_op_death_view to role data_view;
+
+--2024.12.11授权
+SET ROLE admin;
+grant select on TABLE view.view_ads_op_mini_test20241211 to role data_view;
+```
+
+python授权脚本
+
+```python
+from pyhive import hive
+# 设置连接到Hive的参数
+hive_host = "*"  # 替换为你的Hive服务器地址
+hive_port = 10000  # 默认Hive端口
+hive_username = "*"  # 替换为你的Hive用户名（如果需要）
+hive_password = "*"  # 替换为你的Hive密码（如果需要）
+# 创建Hive连接
+conn = hive.Connection(host=hive_host, port=hive_port, username=hive_username, password=hive_password, auth='LDAP')
+cursor = conn.cursor()
+# 切换到admin角色
+cursor.execute("SET ROLE admin")
+# 获取view库中的所有视图
+cursor.execute("SHOW VIEWS IN view")
+views = cursor.fetchall()
+for view in views:
+    view_name = view[0]
+    try:
+        # 检查是否已经授予了SELECT权限
+        cursor.execute(f"SHOW GRANT ROLE data_view ON TABLE view.{view_name}")
+        grants = cursor.fetchall()
+        
+        # 检查是否有SELECT权限
+        already_granted = any("SELECT" in grant[6] for grant in grants)  # grant[2] 是权限类型字段
+
+        if not already_granted:
+            # 如果未授予，则执行授权
+            grant_sql = f"GRANT SELECT ON TABLE view.{view_name} TO ROLE data_view"
+            cursor.execute(grant_sql)
+            print(f"Granted SELECT permission on view.{view_name} to data_view")
+        else:
+            print(f"SELECT permission on view.{view_name} is already granted to data_view")
+    except Exception as e:
+        # 只输出简洁提示
+        print(f"Error processing view {view_name}: Permission check or grant failed")
+# 关闭连接
+cursor.close()
+conn.close()
+```
+
+
+
 ## hive修改分区
 
 Hive本身不支持直接修改分区名，比如你不能直接通过一个命令将 `year=2024/month=06` 修改为 `year=2024/month=05`。然而，你可以通过以下步骤间接地完成这个操作：
@@ -427,7 +504,22 @@ Hive本身不支持直接修改分区名，比如你不能直接通过一个命�
    
    ```
 
-   
+
+## Hadoop删除数据
+
+删除操作是不可逆的，请谨慎操作。
+
+1.删除文件数据
+
+```bash
+hdfs dfs -rm /user/hadoop/example.txt
+```
+
+2.删除目录及其所有内容(-r 表示递归删除)
+
+```bash
+hdfs dfs -rm -r /user/hadoop/data
+```
 
 # 问题处理
 
