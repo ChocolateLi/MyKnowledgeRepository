@@ -521,6 +521,42 @@ flowFile = session.putAttribute(flowFile, "mime.type", "text/plain")
 
 // 将FlowFile传递给下游组件
 session.transfer(flowFile, REL_SUCCESS)
+
+---------------------------------------
+//2025.3.11
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import org.apache.nifi.processor.io.OutputStreamCallback;
+
+// 获取当前日期
+LocalDate now = LocalDate.now();
+
+// 计算开始日期为上个月的第一天
+LocalDate startDate = now.withDayOfMonth(1).minusMonths(1);
+
+// 计算结束日期为本月的第一天
+LocalDate endDate = now.withDayOfMonth(1)
+
+// 日期格式
+DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+// 将日期对象转换为字符串
+String startDateStr = startDate.format(dateFormat);
+String endDateStr = endDate.format(dateFormat);
+
+// 生成SQL语句
+String sqlStatement = """select * from CDR.CIS_INHOS_ADT_RECORD WHERE OUT_DATE >= TO_DATE('${startDateStr}', 'yyyy-mm-dd') AND OUT_DATE < TO_DATE('${endDateStr}', 'yyyy-mm-dd')
+""";
+
+// 定义一个回调类，用于将生成的SQL语句写入流文件
+flowFile = session.create();
+flowFile = session.write(flowFile, { outputStream ->
+    outputStream.write(sqlStatement.getBytes());
+} as OutputStreamCallback);
+flowFile = session.putAttribute(flowFile, "mime.type", "text/plain");
+
+// 将FlowFile传递给下游组件
+session.transfer(flowFile, REL_SUCCESS);
 ```
 
 5.按yyyy-MM格式切分数据
