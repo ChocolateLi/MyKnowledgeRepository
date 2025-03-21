@@ -1039,6 +1039,28 @@ hdfs dfs -setrep -R 2 /user/hive/warehouse/test.db
 
 ```
 
+## 2.查看连接等
+
+```bash
+# 查看哪些主机连接了10000端口
+netstat -anp | grep 10000
+
+# 查看这台主机的连接数pid等
+ss -tnp | grep '199.168.66.201'
+ss -tnp | grep ':10000' | wc -l
+
+# 查看日志
+less hive.log.2025-03-19
+
+# 查看日志 error  
+grep "error" hive.log.2025-03-19
+grep "SocketException" hive.log.2025-03-19
+
+grep -i "error" /var/log/hive/hiveserver2.log
+grep -i "timeout" /var/log/hive/hiveserver2.log
+grep -i "disconnect" /var/log/hive/hiveserver2.log
+```
+
 
 
 # 报错

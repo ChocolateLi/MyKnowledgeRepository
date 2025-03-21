@@ -683,6 +683,41 @@ flowFile = session.putAttribute(flowFile, "mime.type", "text/plain");
 session.transfer(flowFile, REL_SUCCESS);
 ```
 
+7.按天取数
+
+```groovy
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import org.apache.nifi.processor.io.OutputStreamCallback;
+
+// 获取当前日期
+LocalDate now = LocalDate.now();
+
+// 计算昨天的日期
+LocalDate yesterday = now.minusDays(1);
+
+// 日期格式
+DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+// 将日期对象转换为字符串
+String yesterdayStr = yesterday.format(dateFormat);
+String todayStr = now.format(dateFormat);
+
+// 生成SQL语句
+String sqlStatement = """select a.* from transdetail a where LastEditTime >= '${yesterdayStr}' and LastEditTime < '${todayStr}'
+""";
+
+// 定义一个回调类，用于将生成的SQL语句写入流文件
+flowFile = session.create();
+flowFile = session.write(flowFile, { outputStream ->
+    outputStream.write(sqlStatement.getBytes());
+} as OutputStreamCallback);
+flowFile = session.putAttribute(flowFile, "mime.type", "text/plain");
+
+// 将FlowFile传递给下游组件
+session.transfer(flowFile, REL_SUCCESS);
+```
+
 
 
 ## SplitText
