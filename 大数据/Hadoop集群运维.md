@@ -1061,6 +1061,26 @@ grep -i "timeout" /var/log/hive/hiveserver2.log
 grep -i "disconnect" /var/log/hive/hiveserver2.log
 ```
 
+## 3.设置hive的JVM参数
+
+```bash
+cd /data/u01/app/hive/apache-hive-3.1.3/conf
+
+vim hive-env.sh
+# 设置Hive服务的内存配置
+export HIVE_HEAPSIZE=8192  # HiveServer2的堆内存：4GB
+export HADOOP_HEAPSIZE=8192  # Hive使用的Hadoop客户端内存：4GB
+export HADOOP_OPTS="-XX:+UseG1GC -XX:InitiatingHeapOccupancyPercent=35"  # 启用G1GC
+
+# 重启hive服务
+
+# 验证服务是否生效
+[hadoop@cesdb conf]$ ps -ef | grep -E 'HiveMetaStore|HiveServer2' | grep -v grep
+hadoop   221218      1  1 15:39 pts/0    00:00:38 /usr/jdk/bin/java -Dproc_jar -XX:+UseG1GC -XX:InitiatingHeapOccupancyPercent=35 -Dproc_metastore -Dlog4j2.formatMsgNoLookups=true -Dlog4j.configurationFile=hive-log4j2.properties -Djava.util.logging.config.file=/data/u01/app/hive/apache-hive-3.1.3/conf/parquet-logging.properties -Dyarn.log.dir=/data/u01/app/hadoop/hadoop-3.3.6/logs -Dyarn.log.file=hadoop.log -Dyarn.home.dir=/data/u01/app/hadoop/hadoop-3.3.6 -Dyarn.root.logger=INFO,console -Djava.library.path=/data/u01/app/hadoop/hadoop-3.3.6/lib/native -Xmx8192m -Dhadoop.log.dir=/data/u01/app/hadoop/hadoop-3.3.6/logs -Dhadoop.log.file=hadoop.log -Dhadoop.home.dir=/data/u01/app/hadoop/hadoop-3.3.6 -Dhadoop.id.str=hadoop -Dhadoop.root.logger=INFO,console -Dhadoop.policy.file=hadoop-policy.xml -Dhadoop.security.logger=INFO,NullAppender org.apache.hadoop.util.RunJar /data/u01/app/hive/apache-hive-3.1.3/lib/hive-metastore-3.1.3.jar org.apache.hadoop.hive.metastore.HiveMetaStore
+hadoop   221219      1  4 15:39 pts/0    00:01:20 /usr/jdk/bin/java -Dproc_jar -XX:+UseG1GC -XX:InitiatingHeapOccupancyPercent=35 -Dproc_hiveserver2 -Dlog4j2.formatMsgNoLookups=true -Dlog4j.configurationFile=hive-log4j2.properties -Djava.util.logging.config.file=/data/u01/app/hive/apache-hive-3.1.3/conf/parquet-logging.properties -Djline.terminal=jline.UnsupportedTerminal -Dyarn.log.dir=/data/u01/app/hadoop/hadoop-3.3.6/logs -Dyarn.log.file=hadoop.log -Dyarn.home.dir=/data/u01/app/hadoop/hadoop-3.3.6 -Dyarn.root.logger=INFO,console -Djava.library.path=/data/u01/app/hadoop/hadoop-3.3.6/lib/native -Xmx8192m -Dhadoop.log.dir=/data/u01/app/hadoop/hadoop-3.3.6/logs -Dhadoop.log.file=hadoop.log -Dhadoop.home.dir=/data/u01/app/hadoop/hadoop-3.3.6 -Dhadoop.id.str=hadoop -Dhadoop.root.logger=INFO,console -Dhadoop.policy.file=hadoop-policy.xml -Dhadoop.security.logger=INFO,NullAppender org.apache.hadoop.util.RunJar /data/u01/app/hive/apache-hive-3.1.3/lib/hive-service-3.1.3.jar org.apache.hive.service.server.HiveServer2
+[hadoop@cesdb conf]$ 
+```
+
 
 
 # 报错
@@ -1153,4 +1173,118 @@ set hive.optimize.sort.dynamic.partition=true;-- 默认false
 ```
 
 
+
+## 3.com.google.common.collect.Range.singleton(Ljava/lang/Comparable;)Lcom/google/common/collect/Range;
+
+参考链接：[guava版本冲突](https://blog.csdn.net/qq_44766883/article/details/108582781)
+
+1.查看一下hadoop guava包版本
+
+```bash
+cd /data/u01/app/hadoop/hadoop-3.3.6/share/hadoop/common/lib
+
+[hadoop@cesdb lib]$ ls | grep "guava"
+guava-27.0-jre.jar
+hadoop-shaded-guava-1.1.1.jar
+listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar
+```
+
+2.检查hive guava包版本
+
+```bash
+cd /data/u01/app/hive/apache-hive-3.1.3/lib
+
+[hadoop@cesdb lib]$ ls | grep "guava"
+guava-13.0.jar
+guava-19.0.jar.bak
+jersey-guava-2.25.1.jar
+```
+
+3.很显然，两个包的版本不一样。因为我的spark版本较低，用较低版本的guava包，将hive包拷贝到hadoop包下
+
+```bash
+[hadoop@cesdb lib]$ mv guava-27.0-jre.jar guava-27.0-jre.jar.bak 
+[hadoop@cesdb lib]$ ls | grep "guava"
+guava-27.0-jre.jar.bak
+hadoop-shaded-guava-1.1.1.jar
+listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar
+
+ cp guava-13.0.jar /data/u01/app/hadoop/hadoop-3.3.6/share/hadoop/common/lib
+```
+
+4.最后重启hive服务
+
+## 4.[42000][30041] Error while processing statement: FAILED: Execution Error, return code 30041 from org.apache.hadoop.hive.ql.exec.spark.SparkTask. Failed to create Spark client for Spark session 51484b3c-203f-452d-aafa-d225bb14c2c4
+
+参考资料：[hive on spark：return code 30041 Failed to create Spark client for Spark session原因分析及解决方案探寻](https://www.cnblogs.com/JasonCeng/p/14237803.html)
+
+先查看一下spark服务是否正常，可以没有spark master
+
+```bash
+[hadoop@cesdb hiveserver2_monitor]$ jps -l | grep -E 'Spark|spark'
+139126 org.apache.spark.deploy.history.HistoryServer
+
+[hadoop@cesdb hiveserver2_monitor]$ jps
+139126 HistoryServer
+71351 NodeManager
+49974 Jps
+188037 RunJar
+71128 ResourceManager
+29595 RunJar
+216191 DataNode
+29596 RunJar
+215932 NameNode
+```
+
+因为之前都好好的，能跑程序，说明spark和hive版本是匹配的，然后查看yarn资源也是充足的。所以都不是这些问题，先重启一下hive服务。然后查看一下又正常了
+
+```bash
+[hadoop@cesdb sbin]$ jps -l | grep -E 'Spark|spark'
+139126 org.apache.spark.deploy.history.HistoryServer
+90252 org.apache.spark.deploy.master.Master
+
+[hadoop@cesdb conf]$ jps
+218466 Jps
+168192 RunJar
+168193 RunJar
+139126 HistoryServer
+71351 NodeManager
+174612 ApplicationMaster
+71128 ResourceManager
+216191 DataNode
+215932 NameNode
+[hadoop@cesdb conf]$ 
+```
+
+## 4.com.google.common.collect.Range.atLeast(Ljava/lang/Comparable;)Lcom/google/common/collect/Range;
+
+报这个错误是因为多创建了一个hiveserver2实例。重启一下服务就行
+
+```bash
+[hadoop@cesdb hiveserver2_monitor]$ jps
+194514 RunJar
+194515 RunJar
+139126 HistoryServer
+71351 NodeManager
+150917 RunJar
+71128 ResourceManager
+216191 DataNode
+215932 NameNode
+34783 Jps
+
+# 查看RunJar是哪个服务
+ps -ef | grep 194514
+
+# 查看进程监听的端口
+[hadoop@cesdb bin]$ netstat -tulnp | grep 221219
+(Not all processes could be identified, non-owned process info
+ will not be shown, you would have to be root to see it all.)
+tcp6       0      0 :::10000                :::*                    LISTEN      221219/java         
+tcp6       0      0 :::10002                :::*                    LISTEN      221219/java         
+tcp6       0      0 :::22427                :::*                    LISTEN      221219/java         
+[hadoop@cesdb bin]$ netstat -tulnp | grep 221218
+(Not all processes could be identified, non-owned process info
+ will not be shown, you would have to be root to see it all.)
+tcp6       0      0 :::9083                 :::*                    LISTEN      221218/java   
+```
 

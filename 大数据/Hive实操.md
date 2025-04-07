@@ -521,6 +521,143 @@ hdfs dfs -rm /user/hadoop/example.txt
 hdfs dfs -rm -r /user/hadoop/data
 ```
 
+## laterval view 和 explode的用法
+
+基本概念
+
+`explode` 函数
+
+`explode` 是 Hive/Spark SQL 中的一个表生成函数(UDTF)，它能够将数组(array)或映射(map)类型的列"展开"成多行。
+
+`LATERAL VIEW` 子句
+
+`LATERAL VIEW` 用于将 `explode` 这类表生成函数的结果与原始表的其他列进行关联，类似于一种特殊的连接操作。
+
+基本语法
+
+简单用法
+
+```sql
+SELECT table.column1, exploded_data.*
+FROM table
+LATERAL VIEW explode(table.array_column) exploded_table AS exploded_data
+```
+
+带 `posexplode` 的用法
+
+```sql
+SELECT table.column1, pos, val
+FROM table
+LATERAL VIEW posexplode(table.array_column) exploded_table AS pos, val
+```
+
+实际示例
+
+示例1：展开数组
+
+```sql
+-- 原始数据
+WITH sample_data AS (
+  SELECT 1 AS id, array('A', 'B', 'C') AS letters
+  UNION ALL
+  SELECT 2 AS id, array('X', 'Y') AS letters
+)
+
+-- 使用 LATERAL VIEW explode 展开
+SELECT id, letter
+FROM sample_data
+LATERAL VIEW explode(letters) exploded_table AS letter
+```
+
+结果：
+```
+id  letter
+1   A
+1   B
+1   C
+2   X
+2   Y
+```
+
+示例2：展开映射(Map)
+
+```sql
+WITH sample_data AS (
+  SELECT 1 AS id, map('name', 'John', 'age', '30') AS attributes
+  UNION ALL
+  SELECT 2 AS id, map('name', 'Jane', 'age', '25') AS attributes
+)
+
+SELECT id, key, value
+FROM sample_data
+LATERAL VIEW explode(attributes) exploded_table AS key, value
+```
+
+结果：
+```
+id  key     value
+1   name    John
+1   age     30
+2   name    Jane
+2   age     25
+```
+
+示例3：使用 `posexplode` 获取位置
+
+```sql
+WITH sample_data AS (
+  SELECT 1 AS id, array('A', 'B', 'C') AS letters
+)
+
+SELECT id, pos, val
+FROM sample_data
+LATERAL VIEW posexplode(letters) exploded_table AS pos, val
+```
+
+结果：
+```
+id  pos  val
+1   0    A
+1   1    B
+1   2    C
+```
+
+高级用法
+
+多个 `LATERAL VIEW` 组合
+
+```sql
+WITH sample_data AS (
+  SELECT 1 AS id, array('A', 'B') AS letters, array(10, 20) AS numbers
+)
+
+SELECT id, letter, number
+FROM sample_data
+LATERAL VIEW explode(letters) letters_table AS letter
+LATERAL VIEW explode(numbers) numbers_table AS number
+```
+
+带过滤条件的 `LATERAL VIEW`
+
+```sql
+WITH sample_data AS (
+  SELECT 1 AS id, array('A', 'B', 'C') AS letters
+)
+
+SELECT id, letter
+FROM sample_data
+LATERAL VIEW explode(letters) exploded_table AS letter
+WHERE letter != 'B'
+```
+
+注意事项
+
+1. `LATERAL VIEW` 必须与表生成函数(如 `explode`)一起使用
+2. 可以为展开的表指定别名(如 `exploded_table`)
+3. 必须为展开的列指定别名(如 `AS letter`)
+4. 性能考虑：展开大数据集可能导致行数急剧增加
+5. 在Spark SQL中，较新版本推荐使用 `EXPLODE` 函数而不需要 `LATERAL VIEW`
+
 # 问题处理
 
 ## 1.插入表数据为空的情况
