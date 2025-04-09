@@ -1081,7 +1081,346 @@ hadoop   221219      1  4 15:39 pts/0    00:01:20 /usr/jdk/bin/java -Dproc_jar -
 [hadoop@cesdb conf]$ 
 ```
 
+## 4.Hive 的 JVM内存检查和优化
 
+### 1.查看JVM进程，查找`-Xmx`参数(最大堆内存)和`-Xms`参数(初始堆内存)
+
+```bash
+[hadoop@cesdb conf]$ ps -ef | grep HiveServer2
+hadoop    62338  83613  0 09:37 pts/0    00:00:00 grep --color=auto HiveServer2
+hadoop   221219      1  0 4月07 pts/0   00:10:36 /usr/jdk/bin/java -Dproc_jar -XX:+UseG1GC -XX:InitiatingHeapOccupancyPercent=35 -Dproc_hiveserver2 -Dlog4j2.formatMsgNoLookups=true -Dlog4j.configurationFile=hive-log4j2.properties -Djava.util.logging.config.file=/data/u01/app/hive/apache-hive-3.1.3/conf/parquet-logging.properties -Djline.terminal=jline.UnsupportedTerminal -Dyarn.log.dir=/data/u01/app/hadoop/hadoop-3.3.6/logs -Dyarn.log.file=hadoop.log -Dyarn.home.dir=/data/u01/app/hadoop/hadoop-3.3.6 -Dyarn.root.logger=INFO,console -Djava.library.path=/data/u01/app/hadoop/hadoop-3.3.6/lib/native -Xmx8192m -Dhadoop.log.dir=/data/u01/app/hadoop/hadoop-3.3.6/logs -Dhadoop.log.file=hadoop.log -Dhadoop.home.dir=/data/u01/app/hadoop/hadoop-3.3.6 -Dhadoop.id.str=hadoop -Dhadoop.root.logger=INFO,console -Dhadoop.policy.file=hadoop-policy.xml -Dhadoop.security.logger=INFO,NullAppender org.apache.hadoop.util.RunJar /data/u01/app/hive/apache-hive-3.1.3/lib/hive-service-3.1.3.jar org.apache.hive.service.server.HiveServer2
+```
+
+### 2.监控内存使用情况
+
+```bash
+# 内存使用概况
+jstat -gc <pid> 1000 5
+
+jstat -gc <hiveserver2_pid> 1000 5
+
+[hadoop@cesdb conf]$ jstat -gc 221219 1000 5
+ S0C    S1C    S0U    S1U      EC       EU        OC         OU       MC     MU    CCSC   CCSU   YGC     YGCT    FGC    FGCT     GCT   
+ 0.0   114688.0  0.0   114688.0 911360.0 102400.0 1034240.0   757465.9  135932.0 127605.4 17204.0 13750.1     98    2.786   0      0.000    2.786
+ 0.0   114688.0  0.0   114688.0 911360.0 102400.0 1034240.0   757465.9  135932.0 127605.4 17204.0 13750.1     98    2.786   0      0.000    2.786
+ 0.0   114688.0  0.0   114688.0 911360.0 102400.0 1034240.0   757465.9  135932.0 127605.4 17204.0 13750.1     98    2.786   0      0.000    2.786
+ 0.0   114688.0  0.0   114688.0 911360.0 102400.0 1034240.0   757465.9  135932.0 127605.4 17204.0 13750.1     98    2.786   0      0.000    2.786
+ 0.0   114688.0  0.0   114688.0 911360.0 102400.0 1034240.0   757465.9  135932.0 127605.4 17204.0 13750.1     98    2.786   0      0.000    2.786
+```
+
+| S0C  | S1C    | S0U  | S1U    | EC     | EU     | OC      | OU       | MC     | MU       | CCSC  | CCSU    | YGC  | YGCT  | FGC  | FGCT | GCT   |
+| ---- | ------ | ---- | ------ | ------ | ------ | ------- | -------- | ------ | -------- | ----- | ------- | ---- | ----- | ---- | ---- | ----- |
+| 0    | 114688 | 0    | 114688 | 911360 | 102400 | 1034240 | 757465.9 | 135932 | 127605.4 | 17204 | 13750.1 | 98   | 2.786 | 0    | 0    | 2.786 |
+| 0    | 114688 | 0    | 114688 | 911360 | 102400 | 1034240 | 757465.9 | 135932 | 127605.4 | 17204 | 13750.1 | 98   | 2.786 | 0    | 0    | 2.786 |
+| 0    | 114688 | 0    | 114688 | 911360 | 102400 | 1034240 | 757465.9 | 135932 | 127605.4 | 17204 | 13750.1 | 98   | 2.786 | 0    | 0    | 2.786 |
+| 0    | 114688 | 0    | 114688 | 911360 | 102400 | 1034240 | 757465.9 | 135932 | 127605.4 | 17204 | 13750.1 | 98   | 2.786 | 0    | 0    | 2.786 |
+| 0    | 114688 | 0    | 114688 | 911360 | 102400 | 1034240 | 757465.9 | 135932 | 127605.4 | 17204 | 13750.1 | 98   | 2.786 | 0    | 0    | 2.786 |
+
+**关键指标分析**
+
+1. 各内存区域容量（单位KB）
+
+   - `S0C/S1C`：Survivor 0/1区容量 (114,688KB ≈ 112MB)
+   - `EC`：Eden区容量 (911,360KB ≈ 890MB)
+   - `OC`：老年代容量 (1,034,240KB ≈ 1010MB)
+   - `MC`：元空间容量 (135,932KB ≈ 133MB)
+
+   从jstat数据计算实际堆内存：
+
+   - S0C + S1C + EC + OC = 114688 + 114688 + 911360 + 1034240 = 2174976KB ≈ 2124MB
+   - 这与预期的8GB(8192MB)相差甚远，说明可能有配置未生效或其他问题？
+   - G1 GC的动态内存分配：G1垃圾回收器不像传统的分代GC（如Parallel或CMS）那样固定划分新生代（Young）和老年代（Old），而是将堆划分为多个 Region（默认2MB/个），并动态调整Eden、Survivor和Old区的大小。
+   - 仅显示当前分配的区域，而非整个堆内存。剩余内存是未分配的free region，在jmap -heap里查看
+
+2. 各内存使用量（单位KB）
+
+   - `S0U/S1U`：Survivor区使用量 (0/114,688KB - 看起来所有对象都进入了S1)
+   - `EU`：Eden区使用量 (102,400KB ≈ 100MB)
+   - `OU`：老年代使用量 (757,465.9KB ≈ 740MB)
+   - `MU`：元空间使用量 (127,605.4KB ≈ 125MB)
+
+3. GC统计
+
+   - `YGC`：Young GC次数 (98次)
+   - `YGCT`：Young GC总时间 (2.786秒)
+   - `FGC`：Full GC次数 (0次)
+   - `FGCT`：Full GC总时间 (0秒)
+   - `GCT`：GC总时间 (2.786秒)
+
+**健康状况判断**
+
+1. 内存使用情况：
+   - 老年代使用率：OU/OC ≈ 740MB/1010MB ≈ 73%
+   - Eden区使用率：EU/EC ≈ 100MB/890MB ≈ 11%
+   - 元空间使用率：MU/MC ≈ 125MB/133MB ≈ 94% (这个略高)
+2. GC情况：
+   - 没有Full GC发生(FGC=0)，这是好的现象
+   - Young GC平均耗时：2.786s/98 ≈ 28ms/次，属于正常范围
+   - 对象晋升模式：所有对象都从Eden直接进入了S1(S0U=0, S1U=S1C)，说明可能配置了-XX:SurvivorRatio参数使得Survivor空间较大
+
+**潜在问题点**
+
+1. **元空间(Metaspace)使用接近上限** (94%)：
+   - 可能导致频繁的元空间GC
+   - 建议增加元空间大小：`-XX:MaxMetaspaceSize=256m`
+2. **老年代使用率较高** (73%)：
+   - 虽然目前安全，但如果有大查询可能导致OOM
+   - 建议监控OU的增长趋势
+
+### 3.查看更详细的内存分布
+
+```bash
+# 更详细的内存分布
+jmap -heap <pid>
+
+[hadoop@cesdb conf]$ jmap -heap 221219
+Attaching to process ID 221219, please wait...
+Debugger attached successfully.
+Server compiler detected.
+JVM version is 25.333-b02
+
+using thread-local object allocation.
+Garbage-First (G1) GC with 43 thread(s)
+
+Heap Configuration:
+   MinHeapFreeRatio         = 40
+   MaxHeapFreeRatio         = 70
+   MaxHeapSize              = 8589934592 (8192.0MB)
+   NewSize                  = 1363144 (1.2999954223632812MB)
+   MaxNewSize               = 5152702464 (4914.0MB)
+   OldSize                  = 5452592 (5.1999969482421875MB)
+   NewRatio                 = 2
+   SurvivorRatio            = 8
+   MetaspaceSize            = 21807104 (20.796875MB)
+   CompressedClassSpaceSize = 1073741824 (1024.0MB)
+   MaxMetaspaceSize         = 17592186044415 MB
+   G1HeapRegionSize         = 2097152 (2.0MB)
+
+Heap Usage:
+G1 Heap:
+   regions  = 4096
+   capacity = 8589934592 (8192.0MB)
+   used     = 1406967936 (1341.7891845703125MB)
+   free     = 7182966656 (6850.2108154296875MB)
+   16.379262506961823% used
+G1 Young Generation:
+Eden Space:
+   regions  = 242
+   capacity = 981467136 (936.0MB)
+   used     = 507510784 (484.0MB)
+   free     = 473956352 (452.0MB)
+   51.70940170940171% used
+Survivor Space:
+   regions  = 30
+   capacity = 62914560 (60.0MB)
+   used     = 62914560 (60.0MB)
+   free     = 0 (0.0MB)
+   100.0% used
+G1 Old Generation:
+   regions  = 401
+   capacity = 1065353216 (1016.0MB)
+   used     = 834445440 (795.7891845703125MB)
+   free     = 230907776 (220.2108154296875MB)
+   78.32570714274729% used
+
+42746 interned Strings occupying 4469936 bytes.
+```
+
+**核心关注指标**
+
+1. Heap Configuration
+   - `MaxHeapSize`: 确认实际最大堆内存(这里是8GB，符合预期)
+   - `G1HeapRegionSize`: G1 GC区域大小(2MB，标准配置)
+   - `MaxMetaspaceSize`: 元空间上限(这里显示异常大，需要关注)
+2. Heap Usage
+   - `used/capacity`: 总堆内存使用率(16.38%，很低)
+   - Old Gen使用率(78.33%，需警惕)
+   - Survivor Space使用率(100%，正常现象)
+
+**健康状况判断**
+
+✅ **良好表现**：
+
+- 总堆内存使用率仅16.38%，远低于警戒线
+- 配置的8GB堆内存已正确生效
+- 使用G1垃圾回收器(适合大内存场景)
+- 没有内存泄漏迹象(used值稳定)
+
+⚠️ **需关注点**：
+
+1. 老年代使用率78.33%：
+   - 接近G1的IHOP阈值(默认45%，您设置的是35%)
+   - 可能触发Mixed GC，但您FGC=0说明控制良好
+2. 元空间配置异常：
+   - `MaxMetaspaceSize = 17592186044415 MB`(异常值)
+   - 当前使用约20MB(健康)，但需要修复配置
+3. Survivor区满负荷：
+   - 这是正常现象(G1的特性)，但说明对象晋升频繁
+
+### 4.HiveServer2内存优化
+
+1.修改 hive-env.sh
+
+```bash
+# 设置堆内存（必须）
+export HIVE_HEAPSIZE=8192  # HiveServer2的堆内存：8GB
+export HADOOP_HEAPSIZE=8192  # Hive使用的Hadoop客户端内存：8GB
+export HADOOP_OPTS="$HADOOP_OPTS -Xms8192m -Xmx8192m"  # 强制初始堆=最大堆，避免动态调整
+
+# G1 GC优化参数
+export HADOOP_OPTS="$HADOOP_OPTS -XX:+UseG1GC"
+export HADOOP_OPTS="$HADOOP_OPTS -XX:InitiatingHeapOccupancyPercent=35"  # 老年代占用35%时启动Mixed GC
+export HADOOP_OPTS="$HADOOP_OPTS -XX:G1ReservePercent=15"  # 保留15%内存防止OOM
+
+# 元空间（Metaspace）配置（关键！）
+export HADOOP_OPTS="$HADOOP_OPTS -XX:MetaspaceSize=256m -XX:MaxMetaspaceSize=512m"  # 默认256MB，上限512MB
+
+# 其他优化
+export HADOOP_OPTS="$HADOOP_OPTS -XX:+ParallelRefProcEnabled"  # 并行处理引用对象
+export HADOOP_OPTS="$HADOOP_OPTS -XX:+HeapDumpOnOutOfMemoryError"  # OOM时生成Dump文件
+export HADOOP_OPTS="$HADOOP_OPTS -XX:HeapDumpPath=/tmp/hive_heapdump.hprof"  # Dump文件路径
+```
+
+2.重启hive服务
+
+```bash
+# 2. 启动HiveServer2（后台运行）
+nohup $HIVE_HOME/bin/hive --service metastore &> /data/u01/app/hive/apache-hive-3.1.3/logs/hive_metastore.log &
+nohup $HIVE_HOME/bin/hive --service hiveserver2 &> /data/u01/app/hive/apache-hive-3.1.3/logs/hive_hiveserver2.log &
+```
+
+3.验证配置是否生效
+
+```bash
+ps -ef | grep HiveServer2
+
+[hadoop@cesdb bin]$ ps -ef | grep HiveServer2
+hadoop   130291      1 17 14:43 pts/0    00:00:39 /usr/jdk/bin/java -Dproc_jar -Xms8192m -Xmx8192m -XX:+UseG1GC -XX:InitiatingHeapOccupancyPercent=35 -XX:G1ReservePercent=15 -XX:MetaspaceSize=256m -XX:MaxMetaspaceSize=512m -XX:+ParallelRefProcEnabled -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp/hive_heapdump.hprof -Dproc_hiveserver2 -Dlog4j2.formatMsgNoLookups=true -Dlog4j.configurationFile=hive-log4j2.properties -Djava.util.logging.config.file=/data/u01/app/hive/apache-hive-3.1.3/conf/parquet-logging.properties -Djline.terminal=jline.UnsupportedTerminal -Dyarn.log.dir=/data/u01/app/hadoop/hadoop-3.3.6/logs -Dyarn.log.file=hadoop.log -Dyarn.home.dir=/data/u01/app/hadoop/hadoop-3.3.6 -Dyarn.root.logger=INFO,console -Djava.library.path=/data/u01/app/hadoop/hadoop-3.3.6/lib/native -Dhadoop.log.dir=/data/u01/app/hadoop/hadoop-3.3.6/logs -Dhadoop.log.file=hadoop.log -Dhadoop.home.dir=/data/u01/app/hadoop/hadoop-3.3.6 -Dhadoop.id.str=hadoop -Dhadoop.root.logger=INFO,console -Dhadoop.policy.file=hadoop-policy.xml -Dhadoop.security.logger=INFO,NullAppender org.apache.hadoop.util.RunJar /data/u01/app/hive/apache-hive-3.1.3/lib/hive-service-3.1.3.jar org.apache.hive.service.server.HiveServer2
+hadoop   143142  83613  0 14:47 pts/0    00:00:00 grep --color=auto HiveServer2
+
+# 检查JVM参数
+jcmd <PID> VM.flags | grep -E "MaxHeapSize|MetaspaceSize|UseG1GC"
+
+jcmd 130291 VM.flags | grep -E "MaxHeapSize|MetaspaceSize|UseG1GC"
+[hadoop@cesdb bin]$ jcmd 130291 VM.flags | grep -E "MaxHeapSize|MetaspaceSize|UseG1GC"
+-XX:CICompilerCount=18 -XX:CompressedClassSpaceSize=528482304 -XX:ConcGCThreads=11 -XX:G1HeapRegionSize=4194304 -XX:G1ReservePercent=15 -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp/hive_heapdump.hprof -XX:InitialHeapSize=8589934592 -XX:InitiatingHeapOccupancyPercent=35 -XX:MarkStackSize=4194304 -XX:MaxHeapSize=8589934592 -XX:MaxMetaspaceSize=536870912 -XX:MaxNewSize=5150605312 -XX:MetaspaceSize=268435456 -XX:MinHeapDeltaBytes=4194304 -XX:+ParallelRefProcEnabled -XX:+UseCompressedClassPointers -XX:+UseCompressedOops -XX:+UseG1GC 
+[hadoop@cesdb bin]$ 
+
+# 查看内存分布
+jmap -heap <PID>
+jmap -heap 130291
+
+[hadoop@cesdb bin]$ jmap -heap 130291
+Attaching to process ID 130291, please wait...
+Debugger attached successfully.
+Server compiler detected.
+JVM version is 25.333-b02
+
+using thread-local object allocation.
+Garbage-First (G1) GC with 43 thread(s)
+
+Heap Configuration:
+   MinHeapFreeRatio         = 40
+   MaxHeapFreeRatio         = 70
+   MaxHeapSize              = 8589934592 (8192.0MB)
+   NewSize                  = 1363144 (1.2999954223632812MB)
+   MaxNewSize               = 5150605312 (4912.0MB)
+   OldSize                  = 5452592 (5.1999969482421875MB)
+   NewRatio                 = 2
+   SurvivorRatio            = 8
+   MetaspaceSize            = 268435456 (256.0MB)
+   CompressedClassSpaceSize = 528482304 (504.0MB)
+   MaxMetaspaceSize         = 536870912 (512.0MB)
+   G1HeapRegionSize         = 4194304 (4.0MB)
+
+Heap Usage:
+G1 Heap:
+   regions  = 2048
+   capacity = 8589934592 (8192.0MB)
+   used     = 413087744 (393.951171875MB)
+   free     = 8176846848 (7798.048828125MB)
+   4.808974266052246% used
+G1 Young Generation:
+Eden Space:
+   regions  = 55
+   capacity = 398458880 (380.0MB)
+   used     = 230686720 (220.0MB)
+   free     = 167772160 (160.0MB)
+   57.89473684210526% used
+Survivor Space:
+   regions  = 13
+   capacity = 54525952 (52.0MB)
+   used     = 54525952 (52.0MB)
+   free     = 0 (0.0MB)
+   100.0% used
+G1 Old Generation:
+   regions  = 31
+   capacity = 8136949760 (7760.0MB)
+   used     = 127875072 (121.951171875MB)
+   free     = 8009074688 (7638.048828125MB)
+   1.5715357200386597% used
+
+38216 interned Strings occupying 3893992 bytes.
+
+# 检查内存和gc
+[hadoop@cesdb bin]$ jstat -gc 130291 1000 5
+ S0C    S1C    S0U    S1U      EC       EU        OC         OU       MC     MU    CCSC   CCSU   YGC     YGCT    FGC    FGCT     GCT   
+ 0.0   53248.0  0.0   53248.0 458752.0 344064.0 7876608.0   139665.5  102784.0 101285.0 11904.0 11537.0      7    0.472   0      0.000    0.472
+ 0.0   53248.0  0.0   53248.0 458752.0 344064.0 7876608.0   139665.5  102784.0 101285.0 11904.0 11537.0      7    0.472   0      0.000    0.472
+ 0.0   53248.0  0.0   53248.0 458752.0 344064.0 7876608.0   139665.5  102784.0 101285.0 11904.0 11537.0      7    0.472   0      0.000    0.472
+ 0.0   53248.0  0.0   53248.0 458752.0 344064.0 7876608.0   139665.5  102784.0 101285.0 11904.0 11537.0      7    0.472   0      0.000    0.472
+ 0.0   53248.0  0.0   53248.0 458752.0 344064.0 7876608.0   139665.5  102784.0 101285.0 11904.0 11537.0      7    0.472   0      0.000    0.472
+```
+
+| S0C  | S1C   | S0U  | S1U   | EC     | EU     | OC      | OU       | MC     | MU     | CCSC  | CCSU  | YGC  | YGCT  | FGC  | FGCT | GCT   |
+| ---- | ----- | ---- | ----- | ------ | ------ | ------- | -------- | ------ | ------ | ----- | ----- | ---- | ----- | ---- | ---- | ----- |
+| 0    | 53248 | 0    | 53248 | 458752 | 344064 | 7876608 | 139665.5 | 102784 | 101285 | 11904 | 11537 | 7    | 0.472 | 0    | 0    | 0.472 |
+| 0    | 53248 | 0    | 53248 | 458752 | 344064 | 7876608 | 139665.5 | 102784 | 101285 | 11904 | 11537 | 7    | 0.472 | 0    | 0    | 0.472 |
+| 0    | 53248 | 0    | 53248 | 458752 | 344064 | 7876608 | 139665.5 | 102784 | 101285 | 11904 | 11537 | 7    | 0.472 | 0    | 0    | 0.472 |
+| 0    | 53248 | 0    | 53248 | 458752 | 344064 | 7876608 | 139665.5 | 102784 | 101285 | 11904 | 11537 | 7    | 0.472 | 0    | 0    | 0.472 |
+| 0    | 53248 | 0    | 53248 | 458752 | 344064 | 7876608 | 139665.5 | 102784 | 101285 | 11904 | 11537 | 7    | 0.472 | 0    | 0    | 0.472 |
+
+关键指标：
+
+| 指标                  | 健康范围 | 说明                    |
+| --------------------- | -------- | ----------------------- |
+| `OU` (Old区使用量)    | <80%     | 超过80%可能触发Full GC  |
+| `FGC` (Full GC次数)   | 0或极少  | 频繁Full GC说明内存不足 |
+| `YGCT` (Young GC时间) | <50ms/次 | 耗时过长需优化          |
+
+4.实时监控
+
+```bash
+# 实时监控命令
+watch -n 5 "jstat -gc <pid> 1000 3"
+
+# 关键指标警报阈值：
+# - Old Gen >80%
+# - MetaSpace >90%
+# - FGC >1次/小时
+```
+
+5.优化前后数据对比
+
+![](D:\Github\MyKnowledgeRepository\img\bigdata\hive\JVM内存优化数据对比.png)
+
+核心指标对比
+
+| **指标**               | **优化前**         | **优化后**         | **改善效果**                                                 |
+| ---------------------- | ------------------ | ------------------ | ------------------------------------------------------------ |
+| **老年代使用(OU)**     | 757,465KB (≈740MB) | 139,665KB (≈136MB) | ✅ **降低81.5%**，大幅减少OOM风险                             |
+| **Eden区使用(EU)**     | 102,400KB (≈100MB) | 344,064KB (≈336MB) | ➤ 使用量增加，但Eden区总容量从890MB→448MB，**利用率更合理** (75% vs 11%) |
+| **Survivor区(S1U)**    | 114,688KB (满负荷) | 53,248KB (满负荷)  | ✅ **区域缩小但更高效**，说明对象晋升策略优化                 |
+| **元空间(MU)**         | 127,605KB (≈125MB) | 101,285KB (≈99MB)  | ✅ **降低20%**，因`MaxMetaspaceSize`限制防止无限增长          |
+| **Young GC次数(YGC)**  | 98次               | 7次                | ✅ **减少92.8%**，说明内存分配更合理，减少GC压力              |
+| **Young GC耗时(YGCT)** | 2.786秒            | 0.472秒            | ✅ **降低83%**，平均每次GC耗时从28ms→67ms（因G1调整Region大小，单次GC处理更多对象）（YGCT/YGC） |
+| **Full GC次数(FGC)**   | 0次                | 0次                | ✅ 保持无Full GC                                              |
+
+优化**非常成功**，JVM内存管理从“勉强维持”变为“高效稳定”。关键改进：
+
+1. **老年代使用量降低81.5%** → OOM风险解除
+2. **GC次数减少92.8%** → 应用吞吐量提升
+3. **元空间控制有效** → 避免内存泄漏
 
 # 报错
 
