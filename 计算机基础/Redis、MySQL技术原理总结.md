@@ -115,8 +115,6 @@ zset(SortedSet)：有序集合。带分数的set
 
 
 
-
-
 **缓存击穿**
 
 是指一个key非常热点，在不停地扛着大并发，当这个key失效时，持续的大并发量穿透缓存，直接请求数据库。就像一个屏障凿开了一个洞
@@ -271,6 +269,10 @@ Redis定时去删除过期数据
 2.惰性删除
 
 当客户端发送请求查询某一个key时，检查key是否过期，如果过期了，则删除该key。将删除数据的主动权交给了客户端。
+
+
+
+
 
 
 
@@ -684,7 +686,6 @@ MVCC不能解决幻读的问题，next-key locks就是为解决这个问题而�
 两段锁协议并不要求事务必须一次将所有要使用的数据全部加锁，因此遵守两段锁协议的事务可能发生死锁。
 
 ![](https://bkimg.cdn.bcebos.com/pic/ac6eddc451da81cb4a2cd0e25266d016082431d2?x-bce-process=image/watermark,image_d2F0ZXIvYmFpa2U2MA==,g_7,xp_5,yp_5/format,f_auto)
-
 
 
 
