@@ -1059,6 +1059,32 @@ grep "SocketException" hive.log.2025-03-19
 grep -i "error" /var/log/hive/hiveserver2.log
 grep -i "timeout" /var/log/hive/hiveserver2.log
 grep -i "disconnect" /var/log/hive/hiveserver2.log
+
+# 查看进程最大允许打开文件数
+[hadoop@cesdb bin]$ cat /proc/191684/limits | grep 'open files'
+Max open files            65536                65536                files    
+
+# 查看当前已用文件描述符
+[hadoop@cesdb bin]$ ls -l /proc/191684/fd | wc -l
+3307
+
+# 查看HiveServer2端口(默认10000)的实际连接情况
+netstat -antp | grep 191684 | grep 10000
+
+# 检查是否有大量TIME_WAIT状态的连接
+netstat -ant | grep 10000 | awk '/^tcp/ {print $6}' | sort | uniq -c
+
+# 查看进程CPU/内存占用
+top -p 191684
+
+# 检查进程状态
+ps -p 191684 -o pid,state,cmd
+
+# 查看最近5分钟日志中的错误
+grep -A 10 -i "error\|exception\|warn" /var/log/hive/hiveserver2.log | tail -100
+
+# 检查是否有拒绝连接的日志
+grep -i "refused\|reject" /var/log/hive/hiveserver2.log
 ```
 
 ## 3.设置hive的JVM参数
