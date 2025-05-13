@@ -1448,6 +1448,71 @@ watch -n 5 "jstat -gc <pid> 1000 3"
 2. **GC次数减少92.8%** → 应用吞吐量提升
 3. **元空间控制有效** → 避免内存泄漏
 
+# Dolphinscheduler
+
+## 1.发现界面加载不出来
+
+1.查看一下mysql服务是否正常
+
+```bash
+systemctl status mysqld
+```
+
+2.查看zookeeper服务是否正常
+
+发现master服务节点为空
+
+```bash
+[zk: localhost:2181(CONNECTED) 1] ls /dolphinscheduler/nodes/master 
+[]
+[zk: localhost:2181(CONNECTED) 2] ls /dolphinscheduler/nodes
+[alert-server, master, worker]
+[zk: localhost:2181(CONNECTED) 3] ls /dolphinscheduler/nodes/worker
+[10.201.100.75:1234, 10.201.100.84:1234, 10.201.100.85:1234]
+```
+
+3.启动master服务发现启动不来
+
+```bash
+# 查看日志
+tail -n 100 dolphinscheduler-master.log
+
+# 报以下错误 表示 MySQL 服务器因为检测到来自该 IP 的多次连接失败而自动将其加入黑名单。
+### Cause: org.springframework.jdbc.CannotGetJdbcConnectionException: Failed to obtain JDBC Connection; nested exception is java.sql.SQLException: null,  message from server: "Host '10.201.100.75' is blocked because of many connection errors; unblock with 'mysqladmin flush-hosts'"
+```
+
+4.登录Mysql系统管理员
+
+```sql
+# 执行这个命令
+# 清除MySQL服务器中的所有主机缓存
+FLUSH HOSTS;
+```
+
+5.重新启动服务
+
+```bash
+# 启停 Master(cesdb、cesdb1分别启动)
+bash ./bin/dolphinscheduler-daemon.sh start master-server
+bash ./bin/dolphinscheduler-daemon.sh stop master-server
+
+# 启停 Worker(cesdb、cesdb1、cesdb2分别启动)
+bash ./bin/dolphinscheduler-daemon.sh start worker-server
+bash ./bin/dolphinscheduler-daemon.sh stop worker-server
+
+# 启停 Api(cesdb启动)
+bash ./bin/dolphinscheduler-daemon.sh start api-server
+bash ./bin/dolphinscheduler-daemon.sh stop api-server
+
+# 启停 Alert(cesdb2启动)
+bash ./bin/dolphinscheduler-daemon.sh start alert-server
+bash ./bin/dolphinscheduler-daemon.sh stop alert-server
+
+# 查看zookeeper的master节点服务
+[zk: localhost:2181(CONNECTED) 5] ls /dolphinscheduler/nodes/master 
+[10.201.100.75:5678, 10.201.100.84:5678]
+```
+
 # 报错
 
 ## 1.java.lang.OutOfMemoryError: GC overhead limit exceeded
