@@ -1084,7 +1084,15 @@ ps -p 191684 -o pid,state,cmd
 grep -A 10 -i "error\|exception\|warn" /var/log/hive/hiveserver2.log | tail -100
 
 # 检查是否有拒绝连接的日志
-grep -i "refused\|reject" /var/log/hive/hiveserver2.log
+grep -i "refused\|reject" /var/log/hive/hiveserver2.log 
+
+[hadoop@cesdb bin]$ watch -n 5 "jps | grep RunJar"
+[hadoop@cesdb bin]$ ps -ef | grep HiveServer2 | grep -v grep
+hadoop   138793      1  9 07:51 pts/0    00:00:31 /usr/jdk/bin/java -Dproc_jar -Xms8192m -Xmx8192m -XX:+UseG1GC -XX:InitiatingHeapOccupancyPercent=35 -XX:G1ReservePercent=15 -XX:MetaspaceSize=256m -XX:MaxMetaspaceSize=512m -XX:+ParallelRefProcEnabled -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp/hive_heapdump.hprof -Dproc_hiveserver2 -Dlog4j2.formatMsgNoLookups=true -Dlog4j.configurationFile=hive-log4j2.properties -Djava.util.logging.config.file=/data/u01/app/hive/apache-hive-3.1.3/conf/parquet-logging.properties -Djline.terminal=jline.UnsupportedTerminal -Dyarn.log.dir=/data/u01/app/hadoop/hadoop-3.3.6/logs -Dyarn.log.file=hadoop.log -Dyarn.home.dir=/data/u01/app/hadoop/hadoop-3.3.6 -Dyarn.root.logger=INFO,console -Djava.library.path=/data/u01/app/hadoop/hadoop-3.3.6/lib/native -Dhadoop.log.dir=/data/u01/app/hadoop/hadoop-3.3.6/logs -Dhadoop.log.file=hadoop.log -Dhadoop.home.dir=/data/u01/app/hadoop/hadoop-3.3.6 -Dhadoop.id.str=hadoop -Dhadoop.root.logger=INFO,console -Dhadoop.policy.file=hadoop-policy.xml -Dhadoop.security.logger=INFO,NullAppender org.apache.hadoop.util.RunJar /data/u01/app/hive/apache-hive-3.1.3/lib/hive-service-3.1.3.jar org.apache.hive.service.server.HiveServer2
+# 查看进程启动时间（精确到秒）
+[hadoop@cesdb bin]$ ps -p 138793 -o lstart
+                 STARTED
+Thu May 15 07:51:53 2025
 ```
 
 ## 3.设置hive的JVM参数
