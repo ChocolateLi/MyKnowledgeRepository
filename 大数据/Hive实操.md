@@ -189,6 +189,9 @@ ROW FORMAT DELIMITED
 FIELDS TERMINATED BY ','
 STORED AS TEXTFILE
 LOCATION '/user/hive/warehouse/ods.db/excel/ods_selform_compare1deptid_ig';
+
+
+LOAD DATA LOCAL INPATH '/user/hive/warehouse/dim.db/dim_dept_px_ig/dept_rank.csv' INTO TABLE dim.dim_dept_px_ig;
 ```
 
 ## hive授权管理
