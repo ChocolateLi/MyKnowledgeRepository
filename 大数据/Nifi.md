@@ -777,6 +777,26 @@ JoltSpecification内容
 
 Demarcator：shift + Enter进行换行，这样就可以按照一条条数据存储，hive就可以识别json条数了。
 
+## InvokeHTTP
+
+以doris steamload的方式导入数据
+
+![](D:\Github\MyKnowledgeRepository\img\bigdata\nifi\InvokeHTTP1.png)
+
+![](D:\Github\MyKnowledgeRepository\img\bigdata\nifi\InvokeHTTP2.png)
+
+![](D:\Github\MyKnowledgeRepository\img\bigdata\nifi\InvokeHTTP3.png)
+
+将oracle数据同步到doris，json格式，以stream load的方式导入数据
+
+![](D:\Github\MyKnowledgeRepository\img\bigdata\nifi\将oracle数据同步到doris的流程.png)
+
+## PutFile
+
+写入文件
+
+![](D:\Github\MyKnowledgeRepository\img\bigdata\nifi\PutFile.png)
+
 # 同步配置
 
 格式如下
