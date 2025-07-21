@@ -661,6 +661,27 @@ WHERE letter != 'B'
 4. 性能考虑：展开大数据集可能导致行数急剧增加
 5. 在Spark SQL中，较新版本推荐使用 `EXPLODE` 函数而不需要 `LATERAL VIEW`
 
+## hadoop导出hive数据到csv
+
+```sql
+-- 设置不压缩输出（可选）
+SET hive.exec.compress.output=false;
+-- 导出到HDFS
+INSERT OVERWRITE DIRECTORY '/tmp/2025_result_export'
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+STORED AS TEXTFILE
+select * from dh.2025_result_ybfj2;
+-- 将hdfs数据导出到本地
+hdfs dfs -get /tmp/2025_result_export /data/chenli/hive/
+-- 将所有文件数据合并在一起 .snappy是压缩格式
+hadoop fs -text *.snappy > combined.csv
+-- 将所有文件数据合并在一起
+for file in *.snappy; do   hadoop fs -text file://$(pwd)/$file >> combined.csv; done
+```
+
+
+
 # 问题处理
 
 ## 1.插入表数据为空的情况
