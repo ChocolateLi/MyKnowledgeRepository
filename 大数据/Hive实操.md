@@ -504,7 +504,6 @@ Hive本身不支持直接修改分区名，比如你不能直接通过一个命�
    
    -- 删除旧分区
    ALTER TABLE your_table_name DROP PARTITION (year=2024, month=06);
-   
    ```
 
 

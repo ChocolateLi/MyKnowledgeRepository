@@ -306,6 +306,7 @@ Directory:/user/hive/warehouse/test.db/surgery/med_dept_dict_2
 第一个UpdateAttribute添加以下属性
 
 ```
+currentDay = ${now():format('dd')}
 currentMonth = ${now():format('MM')}
 currentYear = ${now():format('yyyy')}
 ```
@@ -313,8 +314,16 @@ currentYear = ${now():format('yyyy')}
 第二个UpdateAttribute添加以下属性
 
 ```
+# 统计的是上个月，上一年的
 previousMonth = ${currentMonth:equals('01'):ifElse('12', ${currentMonth:minus(1)})}
 previousYear = ${currentMonth:equals('01'):ifElse(${currentYear:minus(1)}, ${currentYear})}
+
+# 统计这个月，这一年。如果是1月1号就统计上一年的12月份
+syncMonth = ${currentDay:equals('01'):ifElse(
+    ${currentMonth:equals('01'):ifElse('12', ${currentMonth:toNumber():minus(1):format('00')})},
+    ${currentMonth}
+)}
+syncYear = ${currentDay:equals('01'):and(${currentMonth:equals('01')}):ifElse(${currentYear:minus(1)}, ${currentYear})}
 ```
 
 ![](D:\Github\MyKnowledgeRepository\img\bigdata\nifi\两个UpdateAttribute组件构成分区名.png)
@@ -718,7 +727,7 @@ flowFile = session.putAttribute(flowFile, "mime.type", "text/plain");
 session.transfer(flowFile, REL_SUCCESS);
 ```
 
-
+8.本月第一天到当天
 
 ## SplitText
 
@@ -791,11 +800,21 @@ Demarcator：shift + Enter进行换行，这样就可以按照一条条数据存
 
 ![](D:\Github\MyKnowledgeRepository\img\bigdata\nifi\将oracle数据同步到doris的流程.png)
 
+以上是json格式的导入方式，配置了很多东西。如果以parquet格式导入就简单许多，只需要添加fotmat属性就可以，值为parquet。
+
+json填写那些多属性值是因为oracle的是大写，而doris是小写，所以要对应起来，不然会报错。
+
 ## PutFile
 
 写入文件
 
 ![](D:\Github\MyKnowledgeRepository\img\bigdata\nifi\PutFile.png)
+
+## LogAttribute
+
+日志记录
+
+![](D:\Github\MyKnowledgeRepository\img\bigdata\nifi\LogAttribute.png)
 
 # 同步配置
 
