@@ -727,6 +727,7 @@ ALTER TABLE ods.example_table ADD PARTITION p202501 VALUES [('2025-01-01'), ('20
 -- 3. 重新同步数据...
 ```
 **适用场景**：  
+
 - 需要修改分区范围或属性时  
 - 分区数据异常且无法通过TRUNCATE修复  
 
@@ -1123,7 +1124,7 @@ ORDER BY PARTITION_NAME;
 ```sql
 -- 查看SQL实际扫描的分区
 EXPLAIN SELECT * FROM test.test_student_day 
-WHERE createtime = '2023-01-15';
+WHERE createtime = '2025-7-21';
 ```
 输出中会显示：
 ```
