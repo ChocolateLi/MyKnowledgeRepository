@@ -603,6 +603,32 @@ PROPERTIES (
     "storage_medium" = "SSD",           -- 存储介质
     "disable_auto_compaction" = "false" -- 启用自动压缩
 );
+
+-- 按月分区，按天同步
+CREATE TABLE test.test_student_month (
+    id VARCHAR(50),
+    name VARCHAR(50),
+    age INT,
+    school VARCHAR(50),
+    class VARCHAR(50),
+    createtime DATETIME,
+    updatetime DATETIME
+)
+ENGINE=OLAP
+DUPLICATE KEY(`id`)  -- 按查询频率选择排序列
+PARTITION BY RANGE(`createtime`)()
+DISTRIBUTED BY HASH(id) BUCKETS 1 -- 按照目前的数据量，分6个桶可以
+PROPERTIES (
+    "dynamic_partition.enable" = "true",
+    "dynamic_partition.time_unit" = "MONTH",
+    "dynamic_partition.start" = "-12",  -- 保留3个月
+    "dynamic_partition.end" = "3",      -- 预建未来3个月
+    "dynamic_partition.prefix" = "p",
+    "dynamic_partition.buckets" = "1", -- 新分区桶数（扩容后可改为25）
+    "replication_num" = "1",
+    "dynamic_partition.create_history_partition" = "true" -- 确保此项为true，这样才会创建历史分区
+    -- "dynamic_partition.history_partition_num" = "12" -- 明确指定历史分区数量
+);
 ```
 
 #### **选项2：支持更新的表（`Unique`模型）**
