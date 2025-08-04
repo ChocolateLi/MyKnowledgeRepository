@@ -41,7 +41,7 @@ flowFile = session.putAttribute(flowFile, "mime.type", "text/plain");
 session.transfer(flowFile, REL_SUCCESS);
 ```
 
-## Oracle 自定义按月切分SQL同步
+## Oracle 自定义按天切分SQL同步
 
 ```groovy
 import java.time.LocalDate
@@ -49,8 +49,8 @@ import java.time.format.DateTimeFormatter
 import org.apache.nifi.processor.io.OutputStreamCallback
 
 // 定义输入参数
-String startDateStr = "2024-01-01"  // 开始日期
-String endDateStr = "2024-08-01"    // 结束日期
+String startDateStr = "2025-07-01"  // 开始日期
+String endDateStr = "2025-08-02"    // 结束日期
 
 // 日期格式
 DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd")
@@ -63,12 +63,12 @@ LocalDate endDate = LocalDate.parse(endDateStr, dateFormat)
 List<String> sqlStatements = []
 LocalDate currentDate = startDate
 while (!currentDate.isAfter(endDate.minusDays(1))) {
-    LocalDate nextMonthDate = currentDate.plusMonths(1)
+    LocalDate nextDayDate = currentDate.plusDays(1)
     String currentDateStr = currentDate.format(dateFormat)
-    String nextMonthDateStr = nextMonthDate.format(dateFormat)
-    String sqlStatement = """select * from cdr.CIS_INHOS_MEDICAL_RECORD where DISCHARGE_DATE>=to_date('${currentDateStr}','yyyy-mm-dd') and DISCHARGE_DATE<to_date('${nextMonthDateStr}','yyyy-mm-dd')"""
+    String nextDayDateStr = nextDayDate.format(dateFormat)
+    String sqlStatement = """select a.*,b.START_DATE_TIME from MED_OPERATION_NAME a inner join MED_OPERATION_MASTER b on a.patient_id=b.patient_id and a.VISIT_ID=b.VISIT_ID and a.OPER_ID=b.OPER_ID where b.START_DATE_TIME>=to_date('${currentDateStr}','yyyy-mm-dd') and b.START_DATE_TIME<to_date('${nextDayDateStr}','yyyy-mm-dd')"""
     sqlStatements.add(sqlStatement)
-    currentDate = nextMonthDate
+    currentDate = nextDayDate
 }
 
 // 将生成的SQL语句拼接成一个字符串，每个语句一行
@@ -127,16 +127,14 @@ CREATE TABLE ods.ods_med_operation_name_df (
     `reserved5` INT COMMENT '预留字段5',
     `oper_version` VARCHAR(30) COMMENT '手术版本',
     `START_DATE_TIME` DATE COMMENT '开始时间',
-    -- 以下为Doris表常用技术字段
-    `etl_date` DATE DEFAULT CURRENT_DATE() COMMENT 'ETL处理日期', -- 这个是记录是哪个时间同步的数据
-    `etl_time` DATETIME DEFAULT CURRENT_TIMESTAMP() COMMENT 'ETL处理时间'
-    -- `data_source` VARCHAR(20) DEFAULT 'med' COMMENT '数据来源' -- 我觉得这字段是多余的，因为表命名就看出来来源于哪个系统了
+    `etl_date` DATE DEFAULT CURRENT_DATE COMMENT 'ETL处理日期', -- 这个是记录是哪个时间同步的数据
+    `etl_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT 'ETL处理时间'
 )
 ENGINE=OLAP
 DUPLICATE KEY(`patient_id`, `visit_id`, `oper_id`, `operation_no`)
 COMMENT '手术名称明细表'
 PARTITION BY RANGE(`START_DATE_TIME`)()
-DISTRIBUTED BY HASH(id) BUCKETS 6 -- 按照目前的数据量，分6个桶可以
+DISTRIBUTED BY HASH(`patient_id`) BUCKETS 6 -- 按照目前的数据量，分6个桶可以
 PROPERTIES (
     "dynamic_partition.enable" = "true",
     "dynamic_partition.time_unit" = "MONTH", -- 按月分区
