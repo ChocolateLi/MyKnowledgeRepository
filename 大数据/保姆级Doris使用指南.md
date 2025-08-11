@@ -85,8 +85,6 @@ flowFile = session.putAttribute(flowFile, "mime.type", "text/plain")
 session.transfer(flowFile, REL_SUCCESS)
 ```
 
-
-
 ## SqlServer T+1同步
 
 
@@ -102,12 +100,17 @@ session.transfer(flowFile, REL_SUCCESS)
 建库
 
 ```sql
-create database ods
+create database ods;
+create database dwd;
+create database dws;
+create database ads;
+create database dim;
+create database tmp;
 ```
 
 建表
 
-`根据以下表结构帮我创建一个doris明细表 ods.ods_med_operation_name_df`
+`根据以下表结构帮我创建一个doris明细表 ods.ods_med_operation_name_df，varchar类型的字段是原先字段的3倍来设置`
 
 ```sql
 -- 明细表
@@ -145,5 +148,26 @@ PROPERTIES (
     "replication_num" = "2", -- 副本为2就行
     "dynamic_partition.create_history_partition" = "true" -- 确保此项为true，这样才会创建历史分区
 );
+```
+
+## 权限分配
+
+```sql
+# 创建角色、用户
+create user 'chenli' identified by 'chenli26';
+
+-- 撤销information_schema库的所有权限
+REVOKE SELECT_PRIV ON information_schema.* FROM 'chenli';
+grant select_priv on information_schema.* to 'chenli';
+-- 撤销mysql库的所有权限
+REVOKE SELECT_PRIV ON mysql.* FROM 'chenli';
+grant select_priv on mysql.* to 'chenli';
+
+select * from test.user;
+
+grant select_priv on test.user to 'chenli';
+revoke select_priv on test.user from 'chenli';
+grant select_priv on test.* to 'chenli';
+revoke select_priv on test.* from 'chenli';
 ```
 

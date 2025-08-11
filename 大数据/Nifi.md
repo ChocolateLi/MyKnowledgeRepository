@@ -804,6 +804,10 @@ Demarcator：shift + Enter进行换行，这样就可以按照一条条数据存
 
 json填写那些多属性值是因为oracle的是大写，而doris是小写，所以要对应起来，不然会报错。
 
+还可以添加其它属性，比如`max_filter_ratio`设为0.1，允许有10%的数据错误。
+
+doris stream load的属性都可以添加进去。
+
 ## PutFile
 
 写入文件
