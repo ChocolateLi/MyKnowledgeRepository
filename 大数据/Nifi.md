@@ -114,7 +114,8 @@ vim myid
 vim nifi.properties 
 nifi.remote.input.host=cesdb1
 nifi.web.http.host=cesdb1
-nifi.cluster.node.address=cesdb1 
+nifi.cluster.node.address=cesdb1
+nifi.cluster.load.balance.host=cesdb1
 # cesdb2
 vim myid 
 3
@@ -123,6 +124,7 @@ vim nifi.properties
 nifi.remote.input.host=cesdb2
 nifi.web.http.host=cesdb2
 nifi.cluster.node.address=cesdb2
+nifi.cluster.load.balance.host=cesdb2
 ```
 
 7.三个节点都要启动
@@ -1254,3 +1256,11 @@ nifi.security.truststorePasswd=
 这是因为超过了我数据库连接池设置的线程数，原本默认的线程数为8，但我在组件配置了10个线程，导致报错。
 
 修改数据库连接池的线程数或者组件配置的线程数，使组件配置的线程数低于数据库连接池的线程数就行。
+
+
+
+## The authentication type 10 is notsupported. 
+
+同步数据到kingbase报这个错误，这个错误的原因是因为驱动包不匹配。但其实现在我的驱动包是没问题，感觉跟zookeeper的负载有关。
+
+因为cesdb来做主节点的话，同步数据是可以的。但是重启后由cesdb1做主节点，就会出现这种问题。可能是哪方面的配置没有做好。

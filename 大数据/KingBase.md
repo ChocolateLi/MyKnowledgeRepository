@@ -1,6 +1,6 @@
 # KingBase
 
-# 安装
+# Kingbase安装
 
 参考链接：[Linux平台安装](https://docs.kingbase.com.cn/cn/KES-V9R1C10/install/iso/iso-linux-install#%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%A2%9E%E5%88%A0%E7%BB%84%E4%BB%B6)
 
@@ -154,11 +154,236 @@ tcp6       0      0 :::54321                :::*                    LISTEN      
 tcp        0      0 0.0.0.0:54321           0.0.0.0:*               LISTEN      24934/kingbase      
 tcp6       0      0 :::54321                :::*                    LISTEN      24934/kingbase      
 [kingbase@doris data]$ 
+
+#关闭数据库
+/data/u01/app/kingbase/ES/V9/Server/bin/sys_ctl -D /data/u01/app/kingbase/ES/V9/data stop
+
+# 2. 重载配置（无需重启）
+/data/u01/app/kingbase/ES/V9/Server/bin/sys_ctl reload -D /data/u01/app/kingbase/ES/V9/data
 ```
 
 登录数据
 
 ```bash
 ./ksql -U system test;
+```
+
+# KFS安装
+
+参考链接：[KFS安装部署](https://bbs.kingbase.com.cn/docHtml?recId=c3f448eede450dfbd8cadf68a991b40f&url=aHR0cHM6Ly9iYnMua2luZ2Jhc2UuY29tLmNuL2tpbmdiYXNlLWRvYy9rZnMvaW5zdGFsbC11cGRhdGUvaW5zdGFsbGF0aW9uLWd1aWRlL2luZGV4Lmh0bWw)
+
+最后界面
+
+```bash
+===============================================================================
+安装完成
+----
+
+恭喜！金仓数据同步管理平台 已成功地安装到：
+
+/data/u01/app/KFS
+
+ 如果您需要将 金仓数据同步管理平台 注册为系统服务，
+请以 root 身份运行
+
+/data/u01/app/KFS/scripts/Root.sh
+
+启动服务后访问金仓数据同步管理平台，地址:
+
+http://localhost:8089/login
+
+单击“完成”以退出安装程序。
+
+按 <ENTER> 键以退出安装程序: 
+```
+
+# SQL
+
+## 创建和管理用户
+
+创建用户并授予权限
+
+```sql
+-- 创建用户
+CREATE USER data WITH 
+  PASSWORD 'data_0753'
+  NOSUPERUSER
+  NOCREATEDB
+  NOCREATEROLE
+  INHERIT
+  NOREPLICATION
+  CONNECTION LIMIT -1;
+  
+-- 创建了 data 用户,授予了该用户对 ods 模式的所有权限，但是，模式权限不会自动延伸到该模式中已存在的表上。您需要显式地授予表权限。
+  
+-- 仅授予data用户对ods.measurement_interval表的查询权限
+GRANT SELECT ON TABLE ods.measurement_interval TO data;
+
+-- 授予data用户对ods模式中所有表的全部权限
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA ods TO data;
+
+-- 设置ods模式中未来创建的表自动授予data用户全部权限
+ALTER DEFAULT PRIVILEGES IN SCHEMA ods GRANT ALL PRIVILEGES ON TABLES TO data;
+
+-- 授予 data 角色对 dwd schema 的所有权限
+GRANT ALL PRIVILEGES ON SCHEMA dwd TO data;
+-- 授予 data 角色对 dws schema 的所有权限
+GRANT ALL PRIVILEGES ON SCHEMA dws TO data;
+-- 授予 data 角色对 ads schema 的所有权限
+GRANT ALL PRIVILEGES ON SCHEMA ads TO data;
+-- 授予 data 角色在这些 schema 中创建表的权限
+ALTER DEFAULT PRIVILEGES IN SCHEMA ods, dwd, dws, ads GRANT ALL PRIVILEGES ON TABLES TO data;
+-- 授予 data 角色在这些 schema 中创建序列的权限
+ALTER DEFAULT PRIVILEGES IN SCHEMA ods, dwd, dws, ads GRANT ALL PRIVILEGES ON SEQUENCES TO data;
+-- 授予 data 角色在这些 schema 中创建函数的权限
+ALTER DEFAULT PRIVILEGES IN SCHEMA ods, dwd, dws, ads GRANT ALL PRIVILEGES ON FUNCTIONS TO data;
+
+-- 以超级用户或system用户执行（这个后续再执行，先验证一下system用户创建的ods层表data是否有权限访问）
+ALTER DEFAULT PRIVILEGES 
+FOR ROLE system  -- 指定当system用户创建对象时
+IN SCHEMA ods    -- 在ods schema中
+GRANT ALL ON TABLES TO data;  -- 自动授予data用户所有表权限
+```
+
+查看用户权限
+
+```sql
+-- 查看用户属性
+SELECT * FROM pg_roles WHERE rolname = 'data';
+SELECT * FROM pg_user WHERE usename = 'data';
+
+-- 查看用户对数据库的权限
+SELECT datname, datacl FROM pg_database;
+
+-- 查看用户对特定模式的权限
+SELECT nspname, nspacl FROM pg_namespace WHERE nspname = 'ods';
+
+-- 查看用户对特定表的权限
+SELECT table_schema, table_name, privilege_type 
+FROM information_schema.table_privileges 
+WHERE grantee = 'data';
+
+-- 查看ods模式中所有表的权限
+SELECT grantee, table_schema, table_name, privilege_type 
+FROM information_schema.table_privileges 
+WHERE table_schema = 'ods' AND grantee = 'data';
+
+-- 查看用户对表中列的权限
+SELECT column_name, privilege_type 
+FROM information_schema.column_privileges 
+WHERE grantee = 'data' AND table_name = 'measurement_interval';
+
+-- 查看用户对函数的权限
+SELECT proname, proacl FROM pg_proc;
+```
+
+回收权限并删除用户
+
+```sql
+-- 先撤销角色的所有权限
+REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA ods, dwd, dws, ads FROM data;
+REVOKE ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA ods, dwd, dws, ads FROM data;
+REVOKE ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA ods, dwd, dws, ads FROM data;
+REVOKE ALL PRIVILEGES ON SCHEMA ods, dwd, dws, ads FROM data;
+REVOKE CONNECT ON DATABASE test FROM data;
+-- 清除表默认权限
+ALTER DEFAULT PRIVILEGES IN SCHEMA ods REVOKE ALL ON TABLES FROM data;
+ALTER DEFAULT PRIVILEGES IN SCHEMA dwd REVOKE ALL ON TABLES FROM data;
+ALTER DEFAULT PRIVILEGES IN SCHEMA dws REVOKE ALL ON TABLES FROM data;
+ALTER DEFAULT PRIVILEGES IN SCHEMA ads REVOKE ALL ON TABLES FROM data;
+-- 清除序列默认权限
+ALTER DEFAULT PRIVILEGES IN SCHEMA ods REVOKE ALL ON SEQUENCES FROM data;
+ALTER DEFAULT PRIVILEGES IN SCHEMA dwd REVOKE ALL ON SEQUENCES FROM data;
+ALTER DEFAULT PRIVILEGES IN SCHEMA dws REVOKE ALL ON SEQUENCES FROM data;
+ALTER DEFAULT PRIVILEGES IN SCHEMA ads REVOKE ALL ON SEQUENCES FROM data;
+-- 清除函数默认权限
+ALTER DEFAULT PRIVILEGES IN SCHEMA ods REVOKE ALL ON FUNCTIONS FROM data;
+ALTER DEFAULT PRIVILEGES IN SCHEMA dwd REVOKE ALL ON FUNCTIONS FROM data;
+ALTER DEFAULT PRIVILEGES IN SCHEMA dws REVOKE ALL ON FUNCTIONS FROM data;
+ALTER DEFAULT PRIVILEGES IN SCHEMA ads REVOKE ALL ON FUNCTIONS FROM data;
+-- 删除用户
+DROP USER IF EXISTS data;
+```
+
+## 创建表
+
+创建模式和表空间
+
+```sql
+-- 创建分层Schema
+CREATE SCHEMA ods;   -- 贴源层
+CREATE SCHEMA dwd;   -- 明细层
+CREATE SCHEMA dws;   -- 汇总层
+CREATE SCHEMA ads;   -- 应用层
+
+-- 表空间分配（按性能需求）
+CREATE TABLESPACE ods_ts LOCATION '/data/kingbase/ods';  -- 普通存储
+CREATE TABLESPACE dws_ts LOCATION '/data/kingbase/dws';  -- SSD存储
+
+-- 创建表时执行表空间
+CREATE TABLE dws.dept_reg_daily (
+    -- 字段定义
+) TABLESPACE dws_ts;
+
+-- 修改现有表空间结构
+ALTER TABLE ods.patient_visit SET TABLESPACE ods_ts;
+
+-- 将2020年分区移动到归档表空间
+ALTER TABLE measurement_interval_p202001 SET TABLESPACE archive_ts;
+```
+
+分区表
+
+```sql
+-- 查看所有分区物理文件位置及大小
+SELECT 
+    child.relname AS partition_name,
+    pg_relation_filepath(child.oid) AS file_path,
+    pg_get_expr(child.relpartbound, child.oid) AS partition_range,
+    pg_size_pretty(pg_total_relation_size(child.oid)) AS partition_size
+FROM pg_inherits
+JOIN pg_class parent ON pg_inherits.inhparent = parent.oid
+JOIN pg_class child ON pg_inherits.inhrelid = child.oid
+WHERE parent.relname = 'measurement_interval';
+
+-- 重命名分区
+ALTER TABLE measurement_interval_p202001 
+RENAME TO measurement_interval_202001;
+
+-- 查看分区扫描情况（实际查询过的分区）
+SELECT
+    relname AS partition_name,
+    seq_scan AS full_scans,
+    idx_scan AS index_scans,
+    n_live_tup AS live_rows
+FROM pg_stat_user_tables
+WHERE relname LIKE 'ods_med_operation_master_df_p%'
+ORDER BY relname;
+
+-- 根据以下oracle表结构，帮我生成一个一模一样的kingbase数据库的表结构，表的名称为ods.ods_med_operation_master_df，其中varchar字段长度乘以3倍，顺便帮我添加一个etl_date这个字段，它是根据系统时间自动生成的
+-- 创建分区表，以3个月为一个分区
+CREATE TABLE ods.ods_med_operation_name_df (
+    PATIENT_ID VARCHAR(60) NULL,
+    VISIT_ID NUMERIC(2,0) NULL,
+    OPER_ID NUMERIC(2,0) NULL,
+    OPERATION_NO NUMERIC(2,0) NULL,
+    OPERATION VARCHAR(600) NULL,
+    OPERATION_CODE VARCHAR(1200) NULL,
+    OPERATION_SCALE VARCHAR(150) NULL,
+    WOUND_GRADE VARCHAR(6) NULL,
+    RESERVED1 VARCHAR(60) NULL,
+    RESERVED2 VARCHAR(60) NULL,
+    RESERVED3 VARCHAR(60) NULL,
+    RESERVED4 VARCHAR(60) NULL,
+    RESERVED5 NUMERIC(6,0) NULL,
+    OPER_VERSION VARCHAR(90) NULL,
+    START_DATE_TIME TIMESTAMP NULL,
+    etl_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- etl时间
+)PARTITION BY RANGE (START_DATE_TIME) INTERVAL ('3 MONTH'::INTERVAL) (
+    PARTITION p1 VALUES LESS THAN ('2024-04-01') 
+);
+
+-- 快速清空单个分区（保留分区结构）
+TRUNCATE TABLE ods.patient_visit_202401;
 ```
 
