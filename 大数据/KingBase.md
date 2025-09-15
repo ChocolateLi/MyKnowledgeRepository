@@ -199,6 +199,19 @@ http://localhost:8089/login
 
 # SQL
 
+## 设置库属性
+
+```sql
+-- 允许包含空字符（不推荐，可能影响数据完整性）
+ALTER DATABASE test SET bytea_output = 'escape';
+-- 验证设置已恢复
+SHOW bytea_output;
+-- 恢复到默认状态
+ALTER DATABASE test RESET bytea_output;
+```
+
+
+
 ## 创建和管理用户
 
 创建用户并授予权限
@@ -385,5 +398,93 @@ CREATE TABLE ods.ods_med_operation_name_df (
 
 -- 快速清空单个分区（保留分区结构）
 TRUNCATE TABLE ods.patient_visit_202401;
+```
+
+## 查询表
+
+查询同步的时间段范围是否有为0的数据
+
+```sql
+-- 使用generate_series生成日期序列
+SELECT all_dates.visit_date, 
+       COALESCE(ccomrd.record_count, 0) as data_count
+FROM (
+    SELECT generate_series(
+        (SELECT MIN(visit_date) FROM ods.cdr_cis_op_medical_record_di),
+        (SELECT MAX(visit_date) FROM ods.cdr_cis_op_medical_record_di),
+        '1 day'::interval
+    )::date as visit_date
+) all_dates
+LEFT JOIN (
+    SELECT visit_date, COUNT(*) as record_count
+    FROM ods.cdr_cis_op_medical_record_di 
+    GROUP BY visit_date
+) ccomrd ON all_dates.visit_date = ccomrd.visit_date
+WHERE COALESCE(ccomrd.record_count, 0) = 0
+ORDER BY all_dates.visit_date;
+
+-- 知道具体的时间范围
+SELECT all_dates.visit_date, 
+       COALESCE(ccomrd.record_count, 0) as data_count
+FROM (
+    SELECT generate_series(
+        '2022-01-01'::date,  -- 开始日期
+        '2024-12-31'::date,  -- 结束日期
+        '1 day'::interval
+    )::date as visit_date
+) all_dates
+LEFT JOIN (
+    SELECT visit_date, COUNT(*) as record_count
+    FROM ods.cdr_cis_op_medical_record_di 
+    GROUP BY visit_date
+) ccomrd ON all_dates.visit_date = ccomrd.visit_date
+WHERE COALESCE(ccomrd.record_count, 0) = 0
+ORDER BY all_dates.visit_date;
+
+-- 使用EXTRACT确保日期匹配（针对有时分秒的）
+SELECT all_dates.visit_date, 
+       COALESCE(ccomrd.record_count, 0) as data_count
+FROM (
+    SELECT generate_series(
+        '2025-01-01'::date,
+        '2025-09-10'::date,
+        '1 day'::interval
+    )::date as visit_date
+) all_dates
+LEFT JOIN (
+    SELECT 
+        EXTRACT(YEAR FROM visit_date) as year,
+        EXTRACT(MONTH FROM visit_date) as month,
+        EXTRACT(DAY FROM visit_date) as day,
+        COUNT(*) as record_count
+    FROM ods.cdr_cis_op_medical_record_di 
+    GROUP BY EXTRACT(YEAR FROM visit_date), 
+             EXTRACT(MONTH FROM visit_date), 
+             EXTRACT(DAY FROM visit_date)
+) ccomrd ON EXTRACT(YEAR FROM all_dates.visit_date) = ccomrd.year
+        AND EXTRACT(MONTH FROM all_dates.visit_date) = ccomrd.month
+        AND EXTRACT(DAY FROM all_dates.visit_date) = ccomrd.day
+WHERE COALESCE(ccomrd.record_count, 0) = 0
+ORDER BY all_dates.visit_date;
+```
+
+按天统计数据
+
+```sql
+-- kingbase
+SELECT TO_CHAR(visit_date, 'yyyy-MM-dd') as visit_date_formatted, 
+       COUNT(*) as record_count
+FROM ods.cdr_cis_op_medical_record_di_p4 
+GROUP BY TO_CHAR(visit_date, 'yyyy-MM-dd')
+ORDER BY TO_CHAR(visit_date, 'yyyy-MM-dd');
+
+-- oracle
+SELECT TRUNC(VISIT_DATE) as visit_day,
+       COUNT(*) as record_count
+FROM CDR.CIS_OP_MEDICAL_RECORD
+WHERE VISIT_DATE >= to_date('2025-01-01','yyyy-mm-dd')
+  AND VISIT_DATE < to_date('2025-09-11','yyyy-mm-dd')
+GROUP BY TRUNC(VISIT_DATE)
+ORDER BY TRUNC(VISIT_DATE);
 ```
 
