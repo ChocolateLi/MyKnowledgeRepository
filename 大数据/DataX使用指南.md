@@ -256,6 +256,63 @@ datax.py -p "-Dstart_time=2025-08-01 -Dend_time=2025-08-02" oracle2kingbase.json
 读写失败总数                    :                   0
 ```
 
+### oracle2hdfs
+
+全量同步
+
+```json
+{
+    "job": {
+        "content": [
+            {
+                "reader": {
+                    "name": "oraclereader", 
+                    "parameter": {
+                        "column": ["ID", "NAME", "AGE", "SCHOOL", "CLASS", "CREATETIME", "UPDATETIME"], 
+                        "connection": [
+                            {
+                                "jdbcUrl": ["jdbc:oracle:thin:@10.201.100.75:1521:cesdb"], 
+                                "table": ["test_student"]
+                            }
+                        ], 
+                        "password": "********", 
+                        "username": "ods_user"
+                    }
+                }, 
+                "writer": {
+                    "name": "hdfswriter", 
+                    "parameter": {
+                        "column": [
+                            {"name":"id","type":"string"},
+                            {"name":"name","type":"string"},
+                            {"name":"age","type":"string"},
+                            {"name":"school","type":"string"},
+                            {"name":"class","type":"string"},
+                            {"name":"createtime","type":"string"},
+                            {"name":"updatetime","type":"string"}
+                        ], 
+                        "defaultFS": "hdfs://cesdb:8020", 
+                        "fieldDelimiter": "\t", 
+                        "fileName": "test_student", 
+                        "fileType": "orc", 
+                        "path": "/user/hive/warehouse/test.db/test_student", 
+                        "writeMode": "truncate"
+                    }
+                }
+            }
+        ], 
+        "setting": {
+            "speed": {
+                "channel": "1"
+            }
+        }
+    }
+}
+
+```
+
+
+
 # DS调度datax
 
 因为我的dolphinscheduler是分布式，所以要想保证每个节点都能够正常调度datax，需要每个节点都安装datax
