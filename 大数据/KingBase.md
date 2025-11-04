@@ -166,6 +166,7 @@ tcp6       0      0 :::54321                :::*                    LISTEN      
 
 ```bash
 ./ksql -U system test;
+./ksql -U system kingbase;
 ```
 
 # KFS安装
@@ -532,5 +533,22 @@ WHERE VISIT_DATE >= to_date('2025-01-01','yyyy-mm-dd')
   AND VISIT_DATE < to_date('2025-09-11','yyyy-mm-dd')
 GROUP BY TRUNC(VISIT_DATE)
 ORDER BY TRUNC(VISIT_DATE);
+```
+
+## 重命名数据库
+
+```sql
+-- 查询当前连接到test数据库的会话
+SELECT pid, usename, application_name, client_addr, state 
+FROM sys_stat_activity 
+WHERE datname = 'test';
+
+-- 终止所有连接到test数据库的会话
+SELECT pg_terminate_backend(pid) 
+FROM sys_stat_activity 
+WHERE datname = 'test' AND pid <> pg_backend_pid();
+
+-- 现在可以重命名数据库
+ALTER DATABASE test RENAME TO datawarehouse;
 ```
 
