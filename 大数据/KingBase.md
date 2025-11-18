@@ -319,6 +319,21 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA ads REVOKE ALL ON FUNCTIONS FROM data;
 DROP USER IF EXISTS data;
 ```
 
+创建cwm_db
+
+```sql
+CREATE SCHEMA cwm_db;
+
+-- 授予data用户对cwm_db模式中所有表的全部权限
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA cwm_db TO data;
+
+-- 设置cwm_db模式中未来创建的表自动授予data用户全部权限
+ALTER DEFAULT PRIVILEGES IN SCHEMA cwm_db GRANT ALL PRIVILEGES ON TABLES TO data;
+
+-- 授予 data 角色对 cwm_db schema 的所有权限
+GRANT ALL PRIVILEGES ON SCHEMA cwm_db TO data;
+```
+
 ## 创建表
 
 创建模式和表空间
