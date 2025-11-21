@@ -401,6 +401,15 @@ dolphinscheduler配置datax环境变量
 
 ![](D:\Github\MyKnowledgeRepository\img\bigdata\dolphinscheduler\dolphinscheduler参数设置.png)
 
+```bash
+大前天：$[yyyy-MM-dd-3] 
+前天：$[yyyy-MM-dd-2]
+昨天：$[last_day(yyyy-MM-dd)] = $[yyyy-MM-dd-1]
+当天：$[this_day(yyyy-MM-dd)]
+```
+
+
+
 # 报错及解决
 
 ## 1.The authentication type 10 is not supported
