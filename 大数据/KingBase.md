@@ -13,6 +13,23 @@
 [root@doris soft]# passwd kingbase
 ```
 
+小插曲
+
+```sql
+[kingbase@openEuler V9]$ su root
+密码： 
+su: 权限被拒绝
+
+说明Kingbase没有权限切换到root，给它添加权限
+[root@openEuler ~]# groups kingbase
+kingbase : kingbase
+[root@openEuler ~]# usermod -aG wheel kingbase
+[root@openEuler ~]# groups kingbase
+kingbase : kingbase wheel
+
+或者直接编辑/etc/sudoers，不推荐。
+```
+
 安装目录
 
 ```bash
@@ -79,6 +96,9 @@ zh_CN.UTF-8
 [root@doris KingbaseESV9]# su kingbase
 [kingbase@doris KingbaseESV9]$ sh setup.sh -i console
 
+# 输入授权地址
+/data/u01/soft/license_58791_0.dat
+
 # 输入一个绝对路径，或按ENTER键以接受缺省路径 [默认： /opt/Kingbase/ES/V9]
 /data/u01/app/kingbase/ES/V9
 
@@ -135,6 +155,8 @@ initdb: 警告: enabling "trust" authentication for local connections
 
     /data/u01/app/kingbase/ES/V9/Server/bin/sys_ctl -D /data/u01/app/kingbase/ES/V9/data -l 日志文件 start
 
+
+超级用户口令：kingbase_0753
 ```
 
 启动数据库
@@ -167,6 +189,18 @@ tcp6       0      0 :::54321                :::*                    LISTEN      
 ```bash
 ./ksql -U system test;
 ./ksql -U system kingbase;
+```
+
+重新加载授权文件（直接替换就行）
+
+```bash
+# 替换license.dat后边的软连接文件
+[root@openEuler soft]# mv license.dat /data/u01/app/kingbase/ES/V9/KESRealPro/V009R001C010/
+mv: 是否覆盖 '/data/u01/app/kingbase/ES/V9/KESRealPro/V009R001C010/license.dat'？
+
+# 记得修改授权文件的权限
+cd /data/u01/app/kingbase/ES/V9/KESRealPro/V009R001C010/
+chown kingbase:kingbase license.dat 
 ```
 
 # KFS安装
@@ -257,6 +291,47 @@ ALTER DEFAULT PRIVILEGES
 FOR ROLE system  -- 指定当system用户创建对象时
 IN SCHEMA ods    -- 在ods schema中
 GRANT ALL ON TABLES TO data;  -- 自动授予data用户所有表权限
+```
+
+迁移数据库后授权
+
+```sql
+-- 授予数据库连接权限
+GRANT CONNECT, TEMPORARY ON DATABASE datawarehouse TO data;
+
+-- 为每个模式授予权限
+GRANT USAGE ON SCHEMA ods TO data;
+GRANT USAGE ON SCHEMA dwd TO data;
+GRANT USAGE ON SCHEMA dws TO data;
+GRANT USAGE ON SCHEMA ads TO data;
+GRANT USAGE ON SCHEMA public TO data;
+
+-- 授予现有表的所有 DML 权限
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA ods TO data;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA dwd TO data;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA dws TO data;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA ads TO data;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO data;
+
+-- 授予序列权限
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA ods TO data;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA dwd TO data;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA dws TO data;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA ads TO data;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO data;
+
+-- 设置默认权限（对未来创建的对象生效）
+ALTER DEFAULT PRIVILEGES IN SCHEMA ods GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO data;
+ALTER DEFAULT PRIVILEGES IN SCHEMA dwd GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO data;
+ALTER DEFAULT PRIVILEGES IN SCHEMA dws GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO data;
+ALTER DEFAULT PRIVILEGES IN SCHEMA ads GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO data;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO data;
+
+ALTER DEFAULT PRIVILEGES IN SCHEMA ods GRANT USAGE, SELECT ON SEQUENCES TO data;
+ALTER DEFAULT PRIVILEGES IN SCHEMA dwd GRANT USAGE, SELECT ON SEQUENCES TO data;
+ALTER DEFAULT PRIVILEGES IN SCHEMA dws GRANT USAGE, SELECT ON SEQUENCES TO data;
+ALTER DEFAULT PRIVILEGES IN SCHEMA ads GRANT USAGE, SELECT ON SEQUENCES TO data;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO data;
 ```
 
 查看用户权限
@@ -565,5 +640,29 @@ WHERE datname = 'test' AND pid <> pg_backend_pid();
 
 -- 现在可以重命名数据库
 ALTER DATABASE test RENAME TO datawarehouse;
+```
+
+## 备份全库
+
+```sql
+# 新库创建数据库
+create DATABASE datawarehouse
+# 新库创建用户
+CREATE USER data WITH 
+  PASSWORD 'data_0753'
+  NOSUPERUSER
+  NOCREATEDB
+  NOCREATEROLE
+  INHERIT
+  NOREPLICATION
+  CONNECTION LIMIT -1;
+
+# 备份全库：
+cd /data/u01/app/kingbase/ES/V9/Server/bin
+# ./sys_dump -h ip -p 端口 -U 用户  -f 备份路径/xxx.sql 库名
+./sys_dump -h 192.168.200.180 -p 54321 -U system  -f /data/chenli/backup/datawarehouse.sql test
+# 还原全库：
+# ./ksql  -h ip -U用户名  -d 库名 -f  备份路径/xxx.sql
+./ksql  -h 192.168.200.181 -U system  -d datawarehouse -f  /data/chenli/backup/datawarehouse.sql
 ```
 
