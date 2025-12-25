@@ -640,6 +640,15 @@ WHERE datname = 'test' AND pid <> pg_backend_pid();
 
 -- 现在可以重命名数据库
 ALTER DATABASE test RENAME TO datawarehouse;
+
+-- 查看所有数据库大小
+SELECT datname as "数据库名", 
+       pg_size_pretty(pg_database_size(datname)) as "大小"
+FROM pg_database
+ORDER BY pg_database_size(datname) DESC;
+
+-- 查看当前数据库大小
+SELECT pg_size_pretty(pg_database_size(current_database())) as "当前数据库大小";
 ```
 
 ## 备份全库
