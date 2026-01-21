@@ -130,6 +130,147 @@ Token成本：几乎无限——脚本执行后只有输出进入上下文，代
 
 作用：提供确定性的执行能力和详细的参考资料。
 
+## Skills资源
+
+官方资源：[anthropics/skills](https://github.com/anthropics/skills)
+
+官方文档：[agentskills.io](https://code.claude.com/docs/zh-CN/overview)
+
+社区资源（包含：TDD、调试、代码审查、计划执行等）：[obra/superpowers](https://github.com/obra/superpowers)
+
+SkillsMP：[Agent Skills 市场](https://skillsmp.com)
+
+## Skills安装
+
+### 插件安装
+
+```markdown
+/plugin marketplace add anthropics/skills
+
+/plugin install document-skills@anthropic-agent-skills # 文档技能包，可以处理 Excel、Word、PPT、PDF 等文档。
+/plugin install example-skills@anthropic-agent-skills # 示例技能包 ，可以处理技能创建、MCP 构建、视觉设计、算法艺术、网页测试、Slack 动图制作、主题样式等。
+```
+
+### 自定义skills
+
+
+
+## Skills设计的5个最佳实践
+
+### 实践1：Description决定一切
+
+description是Skill最重要的字段。它决定了：
+
+- Claude什么时候会想到这个Skill
+- Claude能否准确匹配用户意图
+
+**写好description的公式**：
+
+```
+做什么（核心功能）+ 什么时候用（触发场景）+ 触发关键词
+```
+
+**好的例子**：
+
+```
+description: | Extract text and tables from PDF files, fill forms, merge documents. Use when working with PDF files or when user mentions PDFs, forms, or document extraction.
+```
+
+- 核心功能：提取文本、表格，填写表单，合并文档
+- 触发场景：处理PDF文件时
+- 触发关键词：PDF、forms、document extraction
+
+**坏的例子**：
+
+```
+description: Process PDF files
+```
+
+太简短，Claude不知道什么场景该用。
+
+### 实践2：单一职责，每个Skill只做一件事
+
+一个Skill不要做太多事情。
+
+**原因**：
+
+1. description难写。功能越多，触发越不准确
+2. Token浪费。用户只需要其中一个功能，却加载全部内容
+3. 难维护。改一个功能可能影响其他功能
+
+**我的做法**：
+
+一个Skill对应一个明确的任务：
+
+- 选题生成
+- AI味审校
+- 图片配图
+- 长文转X
+
+而不是：
+
+- 文章创作全流程（太大了）
+
+### 实践3：渐进式披露，核心内容放SKILL.md，详细内容放references/
+
+SKILL.md应该简洁，包含核心流程和最常用的指令。
+
+详细的参考资料、边界情况、深入解释，放到references/目录下。
+
+**结构示例**：
+
+```markdown
+# SKILL.md
+
+## 快速流程
+1. 第一步
+2. 第二步
+3. 第三步
+
+## 常见场景
+- 场景A：做法
+- 场景B：做法
+## 详细参考
+- 更多细节见：[DETAILED_GUIDE.md](references/DETAILED_GUIDE.md)
+- 边界情况见：[EDGE_CASES.md](references/EDGE_CASES.md)
+```
+
+这样，基础任务只加载SKILL.md（3000 tokens）。
+
+只有遇到复杂情况，才加载references/（额外5000 tokens）。
+
+### 实践4：脚本优于生成代码
+
+如果一个任务可以用脚本完成，就写成脚本。
+
+**原因**：
+
+1. 确定性：脚本是测试过的，每次执行结果一致。让Claude现场生成代码，可能有bug。
+2. Token效率：脚本代码不进入上下文，只有执行结果进入。
+3. 可复用：脚本写一次，到处可用。
+
+**我的做法**：
+
+"图片配图与上传"Skill里，上传图片到图床的逻辑写成了Python脚本。
+
+Claude只需要执行：`python scripts/upload_image.py image.png`
+
+不需要每次都生成上传代码。
+
+### 实践5：从简单开始，逐步迭代
+
+不要一开始就想着写完美的Skill。
+
+从最小可行版本开始：
+
+1. 写一个简单的SKILL.md
+2. 用几次，发现问题
+3. 添加遗漏的规则
+4. 添加常见错误的处理
+5. 逐步完善
+
+我的"AI味审校"Skill，最初只有20行。用了一个月，根据实际遇到的问题，逐步扩展到300行。
+
 # Skills vs MCP vs Subagent
 
 ## 三者关系
