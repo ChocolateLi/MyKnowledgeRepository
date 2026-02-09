@@ -1,5 +1,33 @@
 # Claude code使用指南
 
+# claude安装
+
+1.先检查基础环境
+
+```cmd
+nvm -v
+npm -v
+node -v
+```
+
+2.安装claude
+
+```cmd
+npm install -g @anthropic-ai/claude-code
+```
+
+3.安装skills技能包
+
+```cmd
+npm list -g openskills -- 查看是否有openskills
+npm install -g openskills --安装openskills
+-- 默认安装在本地
+D:\Myfile\开发项目\护士层级研发系统>openskills install anthropics/skills
+Installing from: anthropics/skills
+Location: project (.claude/skills)
+Default install is project-local (./.claude/skills). Use --global for ~/.claude/skills.
+```
+
 # Skills
 
 ## 什么是Skills？
@@ -345,3 +373,35 @@ Subagent的核心价值是**并行执行和上下文隔离**。它解决的问�
 - 审查整个代码仓库（耗时长）
 - 同时处理多个独立任务
 - 需要防止上下文污染
+
+# Cursor + Claude Code
+
+## 组合使用
+
+先使用cursor分析项目，然后叫Claude Code实现功能。
+
+```mardown
+这是我们医院自己搭建的后端项目框架护士层级管理系统，用于管理护士层级。项目基于.net框架，按“接口层 / 服务层 / 仓储层 / 模型层 / 通用工具层”分层组织，是一个.NET WebAPI多项目解决方案和前后端分离设计。
+## 分析任务指令
+请帮我深度分析这个项目，我需要为其添加相应的接口功能，请按照以下结构进行系统性分析：
+### 1.项目架构深度分析
+请详细分析一下关键架构要素：
+- 入口定位：找到项目的主启动文件和命令行接口实现
+- web服务架构：识别需要使用什么框架可以实现业务接口
+- 前后端分析模式：分析前端与后端.net 服务的通信机制
+- 路由系统：映射所有HTTP端点和API路由结构
+- 会话管理：当前是否有任何用户状态或会话处理机制
+- Docker集成：容器化部署对系统的影响
+### 2.技术栈兼容性分析评估
+重点关注以下技术组合：
+- .net后端框架识别：确定使用的具体web框架和版本
+- 依赖包分析：检查.sln相应的依赖包分析
+- 数据库使用情况：是否已有数据库集成，使用何种ORM框架
+- 前端通信协议：REST API、WebSocket或其他通信方式
+- 配置管理：appsettings.json和Program.cs使用模式
+请开始深度分析，并为后续的接口实现提供详实的技术基础。
+```
+
+## 三阶段工作流
+
+[三阶段工作流](https://github.com/geekoe/workflow3)
