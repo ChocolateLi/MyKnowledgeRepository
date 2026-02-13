@@ -315,6 +315,465 @@ Claude只需要执行：`python scripts/upload_image.py image.png`
 
 我的"AI味审校"Skill，最初只有20行。用了一个月，根据实际遇到的问题，逐步扩展到300行。
 
+## 自创skills
+
+### 分层架构skills
+
+```markdown
+---
+name: business-crud-sqlsugar
+description: 按照分层架构（Controller、IService、Service、IRepository、Repository）、Common工具类与Model实体类目录规范，基于SqlSugar为业务模块自动设计和编写CRUD相关的后端代码。适用于用户提到需要新增业务模块、接口、控制器、服务层、仓储层、公共工具类或模型实体，并且项目是.NET 6+、使用SqlSugar作为ORM框架的场景。
+---
+
+# 基于分层架构的业务CRUD代码生成（SqlSugar）
+
+## 使用场景（何时启用本技能）
+
+当用户出现以下需求时，应主动启用本技能：
+
+- **新建业务模块**：例如“护士信息管理”“病人信息管理”等，需要完整的增删改查接口。
+- **补充现有模块的接口**：需要在既有模块中新增某个CRUD接口或查询接口。
+- **调整分层结构代码**：希望统一 Controller / Service / Repository 等分层模式的写法。
+- **抽取公共工具类**：需要把通用逻辑放入 `Common` 目录的工具类中。
+- **新增/修改实体模型**：需要在 `Model` 目录下定义或调整实体类，并与 SqlSugar 映射。
+
+只要用户提到“.NET 后端、SqlSugar、CRUD、分层架构、Controller/IService/Service/IRepository/Repository、Common 工具类、Model 实体”等关键词，即可使用本技能。
+
+---
+
+## 目录与分层约定
+
+在帮助用户编写代码之前，先识别/确认项目大致结构（可根据上下文或用户项目）：
+
+- **Controller 层**
+  - 典型命名示例：`XxxController.cs`
+  - 放在 Web API 项目中，例如：`WebApi.*/Controllers/...`
+  - 主要职责：接收 HTTP 请求、模型绑定、调用应用服务/接口服务、返回标准响应（如统一Result格式）。
+
+- **Service 接口层（IService）**
+  - 接口命名示例：`IXxxSer`
+  - 放在类似 `Application` 或 `Services` 层的接口定义位置，例如：`*.IService` 或 `*.Application/Interfaces`
+  - 主要职责：定义业务用例/业务功能接口（面向Controller），不写实现细节。
+
+- **Service 实现层（Service）**
+  - 实现类命名示例：`XxxSer`
+  - 放在类似 `*.Service` 或 `*.Application/Services` 中
+  - 主要职责：编写具体业务逻辑，可聚合多个仓储（Repository），处理事务、领域逻辑及校验。
+
+- **Repository 接口层（IRepository）**
+  - 接口命名示例：`IXxxRep`
+  - 放在类似 `*.IRepository` 或 `*.Infrastructure/Repositories/Interfaces`
+  - 主要职责：定义实体的持久化接口（增删改查等）。
+
+- **Repository 实现层（Repository）**
+  - 实现类命名示例：`XxxRep`
+  - 放在类似 `*.Repository` 或 `*.Infrastructure/Repositories`
+  - 主要职责：使用 SqlSugar 具体操作数据库，完成 CRUD。
+
+- **Common 工具类目录**
+  - 目录命名示例：`WebApi.*.Common` 或 `Common`
+  - 职责：存放通用工具类（例如：`HttpClientHelper`、`ResultHelper`、`PageHelper` 等），不与具体业务强绑定。
+  - 公共逻辑尽可能抽离到此处，避免在 Controller/Service 中重复实现。
+
+- **Model 实体类目录**
+  - 目录命名示例：`WebApi.*.Model` 或 `Models`
+  - 职责：存放数据库实体、DTO、查询参数对象等。
+  - 使用 SqlSugar 的特性（如 `[SugarTable]`、`[SugarColumn]`）进行数据库映射。
+
+在生成或修改代码时，始终围绕上述分层原则进行，做到职责清晰、结构统一。
+
+---
+## 分层结构示意
+- Controller层
+namespace WebApi.NurseLevel.Controllers.NurseInfo
+{
+    [Route("[controller]")]
+    public class NurseController : BaseController
+    {
+        
+        
+    }
+}
+
+- IService层
+namespace WebApi.NurseLevel.IService.NurseInfo
+{
+    public interface INurseSer
+    {
+
+    }
+}
+
+- Service层
+namespace WebApi.NurseLevel.Service.NurseInfo
+{
+    public class NurseSer : INurseSer
+    {
+    }
+}
+
+- IRepository层
+namespace WebApi.NurseLevel.IRepository.NurseInfo
+{
+    public interface INurseRep
+    {
+
+    }
+}
+
+- Repository层
+namespace WebApi.NurseLevel.Repository.NurseInfo
+{
+    public class NurseRep : Repository<NurseInfo>, INurseRep
+    {
+        public NurseRep(ISqlSugarClient db) : base(db)
+        {
+        }
+    }
+}
+
+--- 
+
+## SqlSugar 使用约定（简要）
+
+在仓储实现（Repository）中，按以下方式使用 SqlSugar（示意）：
+
+- **注入/获取 `ISqlSugarClient`**：通过构造函数注入或其它DI方式统一管理。
+- **基本CRUD模式**（伪代码范例，仅用作写法模板参考）：
+
+// 示例：在仓储中使用SqlSugar进行基本CRUD（注意：生成真实代码时不要照搬类名，需根据业务命名）
+// 所有代码请添加中文注释，解释关键逻辑和参数含义。
+
+public class NurseRep : Repository<NurseInfo>, INurseRep
+{
+    // SqlSugar客户端，通过依赖注入获取
+    private readonly ISqlSugarClient _db;
+
+    public NurseRep(ISqlSugarClient db) : base(db)
+	{
+	}
+
+    // 新增
+    public async Task<int> InsertAsync(NurseEntity entity)
+    {
+        // 插入护士信息，返回受影响行数
+        return await base.Context.Insertable(entity).ExecuteCommandAsync();
+    }
+
+    // 更新
+    public async Task<int> UpdateAsync(NurseEntity entity)
+    {
+        // 根据主键更新护士信息
+        return await base.Context.Updateable(entity).ExecuteCommandAsync();
+    }
+
+    // 删除
+    public async Task<int> DeleteAsync(long id)
+    {
+        // 根据主键删除护士记录
+        return await base.Context.Deleteable<NurseEntity>().In(id).ExecuteCommandAsync();
+    }
+
+    // 根据主键查询
+    public async Task<NurseEntity?> GetByIdAsync(long id)
+    {
+        // 根据主键查询单条护士信息
+        return await base.Context.Queryable<NurseEntity>().InSingleAsync(id);
+    }
+
+    // 列表查询（可带条件）
+    public async Task<List<NurseEntity>> QueryListAsync(Expression<Func<NurseEntity, bool>> predicate)
+    {
+        // 根据条件表达式查询护士列表
+        return await base.Context.Queryable<NurseEntity>().Where(predicate).ToListAsync();
+    }
+}
+
+实际生成的代码需要根据用户提供的实体、字段、表名等信息进行调整，并统一加上中文注释。
+```
+
+#### 生成CRUD业务代码的标准流程
+
+当用户说明要为某个业务实体编写CRUD接口时，请按照以下步骤执行：
+
+第一步：澄清需求（在对话中完成）
+
+- 确认实体信息：
+
+- 实体名称（如 Nurse, Patient）。
+
+- 所在命名空间/目录（如 WebApi.NurseLevel.Model.Nurse）。
+
+- 关键字段：主键字段名、类型（如 Id: long），是否自增。
+
+- 其他必要业务字段（姓名、科室、状态等）。
+
+- 确认接口需求（尽量用 RESTful 风格）：
+
+- 是否需要：
+
+- GET /api/[entity]/{id}：根据主键获取单条
+
+- GET /api/[entity]/list：列表查询/分页查询
+
+- POST /api/[entity]：新增
+
+- PUT /api/[entity]：修改
+
+- DELETE /api/[entity]/{id}：删除
+
+- 是否需要分页、排序、筛选条件等。
+
+- 确认返回格式：
+
+- 项目中是否有统一的返回结果类（例如 ApiResult<T>、ResultHelper 等）。
+
+- 如果有，遵循现有格式；如果无，可以给出简单的统一返回结构建议，但尽量贴合项目现状。
+
+\> 若上下文已经给出了相关信息，可直接复用；避免重复追问。
+
+##### 第二步：设计分层接口与类名
+
+根据实体名与模块名，统一命名：
+
+- Controller 名称：[Entity]Controller
+
+- IService 接口名：I[Entity]Service
+
+- Service 实现类名：[Entity]Service
+
+- IRepository 接口名：I[Entity]Repository
+
+- Repository 实现类名：[Entity]Repository
+
+- Model 实体类名：[Entity]Entity（如果已有，则复用，不强制改名）
+
+- DTO / 查询参数类（可选）：[Entity]Dto, [Entity]QueryInput 等
+
+在生成代码前，在回答中简要列出即将创建/修改的文件与类名，便于用户理解。
+
+##### 第三步：先补全/确认 Model 实体
+
+- 在 Model 目录为该业务创建或补全实体类。
+
+- 使用 SqlSugar 特性标记表名、主键、自增等：
+
+- [SugarTable("表名")]
+
+- [SugarColumn(IsPrimaryKey = true, IsIdentity = true)] 等。
+
+- 每个属性添加中文注释，解释字段含义。
+
+- 示例（仅为模板，生成实际代码时根据用户业务生成）：
+
+// 示例：护士实体类（注意：实际生成时请根据用户真实字段调整）
+
+// 所有字段和类本身请添加中文注释。
+
+[SugarTable("Nurse")]
+
+public class NurseEntity
+
+{
+
+  /// <summary>
+
+  /// 主键Id，自增
+
+  /// </summary>
+
+  [SugarColumn(IsPrimaryKey = true, IsIdentity = true)]
+
+  public long Id { get; set; }
+
+  /// <summary>
+
+  /// 护士姓名
+
+  /// </summary>
+
+  public string Name { get; set; } = string.Empty;
+
+  /// <summary>
+
+  /// 所在科室
+
+  /// </summary>
+
+  public string Department { get; set; } = string.Empty;
+
+  /// <summary>
+
+  /// 在职状态
+
+  /// </summary>
+
+  public bool IsActive { get; set; }
+
+}
+
+##### 第四步：定义 IRepository 接口
+
+在 IRepository 层，为该实体定义仓储接口，包含标准CRUD方法：
+
+- Task<int> InsertAsync(T entity)
+
+- Task<int> UpdateAsync(T entity)
+
+- Task<int> DeleteAsync(long id)
+
+- Task<T?> GetByIdAsync(long id)
+
+- Task<List<T>> QueryListAsync(Expression<Func<T, bool>> predicate) 等。
+
+接口上添加中文XML注释，说明每个方法的功能与参数。
+
+##### 第五步：实现 Repository（SqlSugar）
+
+在 Repository 层实现刚才的接口：
+
+- 使用构造函数注入 ISqlSugarClient。
+
+- 所有方法内部使用 SqlSugar 进行数据库操作。
+
+- 加上充足的中文注释，说明每一步操作含义：
+
+- 执行的SQL类型（插入、更新、删除、查询）。
+
+- 条件表达式的作用。
+
+- 返回值含义。
+
+##### 第六步：定义 IService 接口
+
+在 IService 层，为 Controller 提供更贴合业务的接口：
+
+- 方法一般与 Controller 接口一一对应，但可以有更高层业务语义。
+
+- 例如：Task<ApiResult<NurseDto>> GetByIdAsync(long id) 等。
+
+- 顺带封装了领域校验、聚合多个仓储的逻辑。
+
+##### 第七步：实现 Service
+
+在 Service 实现类中：
+
+- 构造函数注入对应的 IRepository 接口（以及可能的其它依赖，如日志、缓存等）。
+
+- 在方法中：
+
+- 执行参数校验和业务校验（必要时）。
+
+- 调用仓储执行数据库操作。
+
+- 组装DTO/返回对象。
+
+- 尽量保证方法简单、聚焦，复杂逻辑可进一步拆分私有方法。
+
+- 为每个方法添加中文注释，说明完整业务流程。
+
+##### 第八步：实现 Controller
+
+在 Web API 层编写 Controller：
+
+- 使用 ASP.NET Core 标准写法：
+
+- [ApiController]
+
+- [Route("api/[controller]/[action]")] 或项目统一的路由约定。
+
+- 通过构造函数注入对应的 IService。
+
+- 方法上使用 [HttpGet], [HttpPost], [HttpPut], [HttpDelete] 等特性。
+
+- 使用项目统一的返回格式（例如 ApiResult<T>）：
+
+- 在内部调用 Service 方法。
+
+- 捕获异常并返回友好错误信息（若项目中有全局异常中间件，则只需抛出异常即可）。
+
+- 每个 Action 添加中文注释，说明接口用途、请求参数、返回值含义。
+
+------
+
+#### 公共工具类（Common）的处理原则
+
+当发现某些逻辑具有以下特征时，应建议或自动抽取到 Common 目录的工具类中：
+
+- 多个业务模块都会用到（如：分页封装、统一响应包装、HttpClient 请求封装、日志辅助、日期/字符串处理等）。
+
+- 与具体业务实体弱相关或无关。
+
+- 容易复用，且独立封装后能简化业务代码。
+
+抽取时的注意点：
+
+- 工具类中的方法应为 静态方法 或通过依赖注入的服务暴露。
+
+- 方法命名清晰，增加中文注释解释用途与参数。
+
+- 避免在工具类中直接持有具体业务仓储/服务，保持通用性。
+
+------
+
+#### 代码风格与注释要求
+
+使用本技能生成的所有代码，应遵循以下约定：
+
+- 语言：所有解释性文字、注释、XML注释必须使用中文。
+
+- 命名：类名、方法名仍使用规范的英文/驼峰命名；但注释解释其含义。
+
+- 注释要求：
+
+- 公有类与公有方法必须有 XML 注释（/// <summary>...</summary> 等）。
+
+- 复杂逻辑处添加行内注释，说明关键业务含义。
+
+- 异常处理：
+
+- 若项目已配置全局异常中间件，可在 Service 层抛出业务异常，让上层统一处理。
+
+- 若尚未配置，应在 Controller 或 Service 中尽量捕获并返回统一错误结果。
+
+------
+
+#### 示例：完整CRUD链路（概要示意）
+
+\> 注意：此处为结构示意，真正生成时应根据用户项目结构与命名空间调整，并添加完整中文注释与正确命名空间。
+
+- Model：NurseEntity
+
+- IRepository：INurseRepository
+
+- Repository：NurseRepository
+
+- IService：INurseService
+
+- Service：NurseService
+
+- Controller：NurseController
+
+每一层都聚焦自己职责，Controller 不直接操作 SqlSugar，统一通过 Service → Repository 下沉到数据库。
+
+------
+
+#### 使用本技能时的回答结构建议
+
+当用户请求生成某个模块的业务代码时，回答可以采用如下结构：
+
+1. 简要说明：一句话说明将按照分层原则生成代码，并基于 SqlSugar 实现CRUD。
+
+1. 文件与类清单：列出将要生成/修改的文件、类名和层次（Controller / IService / Service / IRepository / Repository / Model）。
+
+1. 分层代码片段：分小节依次给出 Model、Repository 接口与实现、Service 接口与实现、Controller 的代码，每段代码都带中文注释。
+
+1. 后续提醒：
+
+- 提醒用户在 Program.cs / Startup.cs 中注册对应的 Service / Repository / SqlSugarClient 等依赖注入。
+
+- 提醒用户根据实际数据库表结构稍作调整。
+
 # Skills vs MCP vs Subagent
 
 ## 三者关系
