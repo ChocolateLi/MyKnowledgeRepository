@@ -864,3 +864,14 @@ Subagent的核心价值是**并行执行和上下文隔离**。它解决的问�
 ## 三阶段工作流
 
 [三阶段工作流](https://github.com/geekoe/workflow3)
+
+# MCP
+
+## 数据库
+
+### PostgreSQL
+
+```
+claude mcp add --transport stdio postgres -- npx -y @modelcontextprotocol/server-postgres --dsn "postgresql://data:data_0753@192.168.200.181:54321/datawarehouse"
+```
+
