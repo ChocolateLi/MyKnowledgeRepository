@@ -424,6 +424,31 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA nurse_db GRANT ALL PRIVILEGES ON TABLES TO da
 GRANT ALL PRIVILEGES ON SCHEMA nurse_db TO data;
 ```
 
+创建只读账号权限
+
+```sql
+-- system账户权限
+-- 1. 创建用户
+CREATE USER data_readonly WITH PASSWORD 'readonly_0753';
+
+-- 2. 授权连接数据库
+GRANT CONNECT ON DATABASE datawarehouse TO data_readonly;
+
+-- 3. 切换到目标数据库
+\c datawarehouse
+
+-- 4. 授权使用模式
+GRANT USAGE ON SCHEMA nurse_db TO data_readonly;
+
+-- 5. 授权查询所有现有表
+GRANT SELECT ON ALL TABLES IN SCHEMA nurse_db TO data_readonly;
+
+-- 6. 授权查询未来新建的表
+ALTER DEFAULT PRIVILEGES IN SCHEMA nurse_db GRANT SELECT ON TABLES TO data_readonly;
+```
+
+
+
 ## 创建表
 
 创建模式和表空间
