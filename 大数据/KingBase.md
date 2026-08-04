@@ -194,6 +194,10 @@ tcp6       0      0 :::54321                :::*                    LISTEN      
 重新加载授权文件（直接替换就行）
 
 ```bash
+SELECT version();
+select get_license_validdays();
+
+
 # 替换license.dat后边的软连接文件
 [root@openEuler soft]# mv license.dat /data/u01/app/kingbase/ES/V9/KESRealPro/V009R001C010/
 mv: 是否覆盖 '/data/u01/app/kingbase/ES/V9/KESRealPro/V009R001C010/license.dat'？
@@ -201,7 +205,32 @@ mv: 是否覆盖 '/data/u01/app/kingbase/ES/V9/KESRealPro/V009R001C010/license.d
 # 记得修改授权文件的权限
 cd /data/u01/app/kingbase/ES/V9/KESRealPro/V009R001C010/
 chown kingbase:kingbase license.dat 
+chown kingbase:kingbase license.dat
+/data/u01/app/kingbase/ES/V9/Server/bin/sys_ctl -D /data/u01/app/kingbase/ES/V9/data/ reload_license -L /data/u01/app/kingbase/ES/V9/KESRealPro/V009R001C010/license.dat
 ```
+
+许可证更换步骤
+
+```bash
+1、find / -name license.dat
+2、把查找到的license.dat换成现在新的license.dat
+3、给个权限kingbase用户权限   还有775权限就行
+chown kingbase.kingbase license.dat
+chmod 775 license.dat
+4.sys_ctl reload -D data目录 举例：sys_ctl -D /opt/KingbaseES/V8/data reload
+5、ksql -Usystem -dtest -c "select get_license_validdays();"  
+```
+
+修改system用户密码
+
+```sql
+./ksql -U system test;
+ALTER USER system WITH PASSWORD '你的新强密码';
+ALTER USER system WITH PASSWORD 'kingbase_0753';
+exit;
+```
+
+
 
 # KFS安装
 

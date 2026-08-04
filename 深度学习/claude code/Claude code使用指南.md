@@ -30,6 +30,8 @@ Default install is project-local (./.claude/skills). Use --global for ~/.claude/
 
 # Skills
 
+官网：[skill.sh](https://www.skills.sh/?utm_source=sofindai.com)
+
 ## 什么是Skills？
 
 Skills是模块化的能力包，包含指令、脚本和资源，让Claude在需要时自动加载和使用。
@@ -875,3 +877,8 @@ Subagent的核心价值是**并行执行和上下文隔离**。它解决的问�
 claude mcp add --transport stdio postgres -- npx -y @modelcontextprotocol/server-postgres --dsn "postgresql://data:data_0753@192.168.200.181:54321/datawarehouse"
 ```
 
+# cluade code桌面版
+
+安装教程视频：[ClaudeCode桌面端使用DeepSeek极简入门教程 | 免登录 | 汉化 | Skill使用](https://www.bilibili.com/video/BV1HuVz62Ejz/?spm_id_from=333.1007.top_right_bar_window_history.content.click&vd_source=3a0056af3b54c8cab27d9c91ce0f5768)
+
+文字教程：[Claude Code 桌面端接入 DeepSeek 教程（CC Switch）](https://dev.codenice.cn/articles/claude-desktop-cc-switch-deepseek)
